@@ -1,0 +1,303 @@
+<title>Планёрка</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: backlog of task blocks on the left, team drop-zones on the right; dialogs for details and the employee's inbox */
+:root{
+  --bg:#EEF0EC; --surface:#FFFFFF; --sunken:#E3E6E0; --fg:#1A1D19; --muted:#666C63; --line:#D3D7CF;
+  --accent:#2B54E0; --accent-soft:#E2E8FC; --on-accent:#FFFFFF;
+  --high:#C93A2B; --high-soft:#FBE4E0; --med:#8A5600; --med-soft:#FAEFD6; --low:#24683F; --low-soft:#DEF1E5;
+  --shadow:0 1px 2px rgba(20,24,18,.06),0 4px 14px rgba(20,24,18,.06);
+  --f-display:"Unbounded","Segoe UI",system-ui,sans-serif;
+  --f-body:"Onest","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111311; --surface:#1A1D1A; --sunken:#151715; --fg:#E7EAE3; --muted:#959B91; --line:#2C302B;
+  --accent:#7D9BFF; --accent-soft:#1F2A4D; --on-accent:#0D1330;
+  --high:#FF7B6B; --high-soft:#3A1E1A; --med:#F0B44C; --med-soft:#352A14; --low:#6FD199; --low-soft:#16301F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111311; --surface:#1A1D1A; --sunken:#151715; --fg:#E7EAE3; --muted:#959B91; --line:#2C302B;
+  --accent:#7D9BFF; --accent-soft:#1F2A4D; --on-accent:#0D1330;
+  --high:#FF7B6B; --high-soft:#3A1E1A; --med:#F0B44C; --med-soft:#352A14; --low:#6FD199; --low-soft:#16301F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.45 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;display:grid;gap:20px}
+
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.logo{font:700 22px/1 var(--f-display);letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+.sprint{color:var(--muted);font-size:13px}
+.sprint b{color:var(--fg);font-weight:600}
+.spacer{flex:1}
+.theme{display:inline-flex;background:var(--sunken);border:1px solid var(--line);border-radius:999px;padding:3px}
+.theme button{border:0;background:none;padding:6px 12px;border-radius:999px;cursor:pointer;font-size:13px;color:var(--muted)}
+.theme button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+
+main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;align-items:start}
+@media (max-width:900px){main{grid-template-columns:minmax(0,1fr)}}
+
+.panel-h{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+.panel-h h2{font:500 14px/1 var(--f-display);text-transform:uppercase;letter-spacing:.06em;margin:0}
+.panel-h .count{font:500 12px var(--f-mono);color:var(--muted)}
+.hint{color:var(--muted);font-size:13px;margin-left:auto}
+
+#backlog{min-height:220px;border:1.5px dashed transparent;border-radius:14px;padding:4px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;align-content:start;transition:border-color .15s,background .15s}
+#backlog.over{border-color:var(--accent);background:var(--accent-soft)}
+.empty{grid-column:1/-1;color:var(--muted);text-align:center;padding:40px 12px;font-size:14px}
+
+.task{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);
+  cursor:grab;display:grid;gap:10px;user-select:none;transition:transform .12s,box-shadow .12s;text-align:left;width:100%}
+.task:hover{transform:translateY(-2px)}
+.task.dragging{opacity:.4}
+.task .top{display:flex;align-items:center;gap:8px}
+.id{font:500 11px var(--f-mono);color:var(--muted)}
+.task h3{margin:0;font-size:15px;font-weight:600;line-height:1.3;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;background:var(--sunken);color:var(--muted)}
+.p-high{background:var(--high-soft);color:var(--high)} .p-med{background:var(--med-soft);color:var(--med)} .p-low{background:var(--low-soft);color:var(--low)}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.top .chip{margin-left:auto}
+
+.team{display:grid;gap:12px}
+.person{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;transition:border-color .15s,background .15s,transform .15s}
+.person.over{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.015)}
+.person.flash{animation:flash .9s ease}
+@keyframes flash{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 12px transparent}}
+.p-row{display:flex;align-items:center;gap:12px}
+.ava{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:600 14px var(--f-display);color:#fff;flex:none}
+.p-name{font-weight:600}
+.p-role{font-size:12px;color:var(--muted)}
+.inbox-btn{margin-left:auto;border:1px solid var(--line);background:var(--sunken);border-radius:10px;padding:6px 10px;cursor:pointer;font-size:13px;display:inline-flex;gap:6px;align-items:center;position:relative}
+.inbox-btn:hover{border-color:var(--accent)}
+.badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--high);color:var(--bg);font:600 11px/18px var(--f-mono);text-align:center}
+.load{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.load .l-top{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:3px;background:var(--sunken);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
+.bar i.over{background:var(--high)}
+.mini{display:grid;gap:6px}
+.mini .task{padding:8px 10px;gap:4px;box-shadow:none;border-radius:9px;background:var(--sunken)}
+.mini .task h3{font-size:13px;font-weight:500}
+.mini .task:hover{transform:none;border-color:var(--accent)}
+.new-tag{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+.drop-hint{font-size:12px;color:var(--muted);text-align:center;padding:6px;border:1px dashed var(--line);border-radius:9px}
+
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--fg);padding:0;width:min(560px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(10,12,10,.45)}
+.d-head{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.d-head h2{margin:0;font:600 18px/1.25 var(--f-body);text-wrap:balance}
+.close{margin-left:auto;border:0;background:var(--sunken);width:32px;height:32px;border-radius:8px;cursor:pointer;flex:none}
+.d-body{padding:18px 20px;display:grid;gap:16px;max-height:70vh;overflow:auto}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.field{display:grid;gap:4px}
+.field label,.field .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.field select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--sunken);color:var(--fg)}
+.desc{margin:0;max-width:65ch}
+.sec-t{font:500 12px var(--f-display);text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px;color:var(--muted)}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;padding:3px 0}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:13px;color:var(--muted)}
+.log time{font-family:var(--f-mono);font-size:11px;margin-right:8px}
+
+.notif{display:grid;gap:4px;width:100%;text-align:left;border:1px solid var(--line);background:var(--sunken);border-radius:12px;padding:12px 14px;cursor:pointer}
+.notif:hover{border-color:var(--accent)}
+.notif.unread{background:var(--accent-soft);border-color:var(--accent)}
+.notif .n-top{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.notif .n-title{font-weight:600}
+.notif .n-act{font-size:12px;color:var(--accent);font-weight:500}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);
+  padding:10px 12px 10px 16px;border-radius:12px;display:flex;gap:14px;align-items:center;font-size:14px;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+.toast button{border:0;background:none;color:var(--bg);font-weight:600;text-decoration:underline;cursor:pointer}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="logo">План<span>ё</span>рка</div>
+    <div class="sprint">Спринт <b>№ 42</b> · 20–31 октября · пример данных</div>
+    <div class="spacer"></div>
+    <div class="theme" role="group" aria-label="Тема">
+      <button data-t="light" id="t-light">Светлая</button>
+      <button data-t="dark" id="t-dark">Тёмная</button>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="panel-h"><h2>Бэклог</h2><span class="count" id="bl-count"></span><span class="hint">Перетащите карточку на сотрудника →</span></div>
+      <div id="backlog" data-drop=""></div>
+    </section>
+    <section>
+      <div class="panel-h"><h2>Команда</h2><span class="count" id="team-count"></span></div>
+      <div class="team" id="team"></div>
+    </section>
+  </main>
+</div>
+
+<dialog id="d-task"></dialog>
+<dialog id="d-inbox"></dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const ME = 'Вы (руководитель)';
+const people = [
+  {id:'am', name:'Анна Морозова', role:'Фронтенд', cap:16, hue:'#2B54E0'},
+  {id:'ik', name:'Илья Ковалёв', role:'Бэкенд', cap:16, hue:'#0F8A6A'},
+  {id:'ms', name:'Марина Соколова', role:'Дизайн', cap:12, hue:'#B5476E'},
+  {id:'dp', name:'Денис Петров', role:'Тестирование', cap:12, hue:'#B0731A'},
+];
+const PRIO = {high:'Высокий', med:'Средний', low:'Низкий'};
+const tasks = [
+  {id:'PLN-101', title:'Форма оплаты падает на Safari 17', prio:'high', due:'27 окт', est:4, tag:'Баг', desc:'При нажатии «Оплатить» на iOS Safari 17 страница перезагружается и корзина очищается. Воспроизводится стабильно.', checklist:['Воспроизвести на устройстве','Найти причину','Написать тест']},
+  {id:'PLN-102', title:'API экспорта отчётов в CSV', prio:'med', due:'30 окт', est:8, tag:'Фича', desc:'Эндпоинт /reports/export отдаёт CSV по фильтрам из UI. Лимит 50 000 строк, дальше фоновая выгрузка.', checklist:['Схема эндпоинта','Пагинация','Документация']},
+  {id:'PLN-103', title:'Тёмная тема для настроек профиля', prio:'low', due:'31 окт', est:3, tag:'UI', desc:'Перевести экран настроек на токены темы. Проверить контраст полей ввода.', checklist:['Токены','Проверка контраста']},
+  {id:'PLN-104', title:'Иллюстрации для пустых состояний', prio:'med', due:'29 окт', est:6, tag:'Дизайн', desc:'Три иллюстрации: нет задач, нет результатов поиска, нет уведомлений. Стиль — как в онбординге.', checklist:['Скетчи','Финал в Figma','Экспорт SVG']},
+  {id:'PLN-105', title:'Регресс перед релизом 3.8', prio:'high', due:'28 окт', est:6, tag:'QA', desc:'Полный прогон регрессионного набора по веб-версии и Android.', checklist:['Веб','Android','Отчёт']},
+  {id:'PLN-106', title:'Индекс для поиска по задачам', prio:'med', due:'1 ноя', est:5, tag:'Бэкенд', desc:'Поиск по названию и описанию тормозит на 200k задач. Нужен полнотекстовый индекс.', checklist:['Замер до','Миграция','Замер после']},
+  {id:'PLN-107', title:'Переименовать «Проекты» в «Пространства»', prio:'low', due:'2 ноя', est:2, tag:'Тексты', desc:'Во всех экранах, письмах и подсказках.', checklist:['Интерфейс','Письма']},
+  {id:'PLN-108', title:'Анимация перетаскивания карточек', prio:'low', due:'3 ноя', est:4, tag:'UI', desc:'Плавный подъём карточки при захвате и «примагничивание» к зоне сброса.', checklist:['Прототип','Реализация']},
+];
+const assigned = {am:['PLN-090'], ik:[], ms:[], dp:[]};
+tasks.push({id:'PLN-090', title:'Адаптив шапки на планшетах', prio:'med', due:'26 окт', est:3, tag:'UI', desc:'На ширине 768–1024 меню наезжает на поиск.', checklist:['Брейкпоинты'], assignee:'am', seen:true});
+tasks.forEach(t=>{t.assignee ??= null; t.done = t.done || []; t.log = t.log || [{at:'20 окт, 10:00', text:`${ME} создал задачу`}];});
+
+const $ = s => document.querySelector(s);
+const byId = id => tasks.find(t=>t.id===id);
+const person = id => people.find(p=>p.id===id);
+const initials = n => n.split(' ').map(w=>w[0]).join('');
+const now = () => new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hoursWord = n => n%10===1&&n%100!==11?'час':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'часа':'часов');
+
+function card(t, mini){
+  return `<button class="task" draggable="true" data-id="${t.id}" aria-label="${esc(t.title)}, открыть подробности">
+    <div class="top"><span class="id">${t.id}</span>${!mini?`<span class="chip p-${t.prio}"><span class="dot"></span>${PRIO[t.prio]}</span>`:(t.seen?'':'<span class="new-tag" style="margin-left:auto">Новая</span>')}</div>
+    <h3>${esc(t.title)}</h3>
+    ${mini?'':`<div class="meta"><span class="chip">${esc(t.tag)}</span><span>до ${t.due}</span><span>· ${t.est} ч</span></div>`}
+  </button>`;
+}
+
+function render(){
+  const bl = tasks.filter(t=>!t.assignee);
+  $('#backlog').innerHTML = bl.length ? bl.map(t=>card(t)).join('') : '<div class="empty">Бэклог пуст — все задачи распределены</div>';
+  $('#bl-count').textContent = bl.length;
+  $('#team-count').textContent = people.length;
+  $('#team').innerHTML = people.map(p=>{
+    const mine = tasks.filter(t=>t.assignee===p.id);
+    const h = mine.reduce((s,t)=>s+t.est,0), unread = mine.filter(t=>!t.seen).length;
+    const pct = Math.min(100, h/p.cap*100);
+    return `<div class="person" data-drop="${p.id}" id="p-${p.id}">
+      <div class="p-row">
+        <div class="ava" style="background:${p.hue}">${initials(p.name)}</div>
+        <div><div class="p-name">${p.name}</div><div class="p-role">${p.role}</div></div>
+        <button class="inbox-btn" data-inbox="${p.id}" aria-label="Входящие ${p.name}">Входящие ${unread?`<span class="badge">${unread}</span>`:''}</button>
+      </div>
+      <div class="load"><div class="l-top"><span>Загрузка</span><span>${h} / ${p.cap} ч</span></div>
+        <div class="bar"><i class="${h>p.cap?'over':''}" style="width:${pct}%"></i></div></div>
+      <div class="mini">${mine.length?mine.map(t=>card(t,true)).join(''):'<div class="drop-hint">Перетащите сюда задачу</div>'}</div>
+    </div>`;
+  }).join('');
+}
+
+function assign(id, to){
+  const t = byId(id), from = t.assignee;
+  if (from === to) return;
+  t.assignee = to; t.seen = !to;
+  t.log.push({at:now(), text: to ? `${ME} назначил: ${person(to).name}` : `${ME} вернул в бэклог`});
+  render();
+  if (to){ const el = $('#p-'+to); el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),900); }
+  toast(to ? `${t.id} передана: ${person(to).name}` : `${t.id} возвращена в бэклог`, ()=>{ t.assignee = from; t.seen = true; t.log.pop(); render(); });
+}
+
+let tt;
+function toast(msg, undo){
+  const el = $('#toast');
+  el.innerHTML = `<span>${esc(msg)}</span><button id="undo">Отменить</button>`;
+  el.hidden = false;
+  $('#undo').onclick = ()=>{ undo(); el.hidden = true; };
+  clearTimeout(tt); tt = setTimeout(()=>el.hidden=true, 5000);
+}
+
+// drag & drop
+let dragId = null;
+document.addEventListener('dragstart', e=>{
+  const c = e.target.closest('.task'); if(!c) return;
+  dragId = c.dataset.id; c.classList.add('dragging');
+  e.dataTransfer.setData('text/plain', dragId); e.dataTransfer.effectAllowed = 'move';
+});
+document.addEventListener('dragend', ()=>{ document.querySelectorAll('.dragging,.over').forEach(x=>x.classList.remove('dragging','over')); dragId=null; });
+document.addEventListener('dragover', e=>{
+  const z = e.target.closest('[data-drop]'); if(!z || !dragId) return;
+  e.preventDefault(); document.querySelectorAll('.over').forEach(x=>x!==z&&x.classList.remove('over')); z.classList.add('over');
+});
+document.addEventListener('dragleave', e=>{ const z=e.target.closest('[data-drop]'); if(z && !z.contains(e.relatedTarget)) z.classList.remove('over'); });
+document.addEventListener('drop', e=>{
+  const z = e.target.closest('[data-drop]'); if(!z) return;
+  e.preventDefault(); z.classList.remove('over');
+  assign(e.dataTransfer.getData('text/plain'), z.dataset.drop || null);
+});
+
+// clicks
+document.addEventListener('click', e=>{
+  const ib = e.target.closest('[data-inbox]'); if (ib) return openInbox(ib.dataset.inbox);
+  const c = e.target.closest('.task'); if (c) return openTask(c.dataset.id);
+  if (e.target.closest('.close')) e.target.closest('dialog').close();
+});
+
+function openTask(id, asEmployee){
+  const t = byId(id), d = $('#d-task');
+  if (asEmployee && !t.seen){ t.seen = true; t.log.push({at:now(), text:`${person(t.assignee).name} просмотрел задачу`}); render(); }
+  d.innerHTML = `<div class="d-head"><span class="id">${t.id}</span><h2>${esc(t.title)}</h2><button class="close" aria-label="Закрыть">✕</button></div>
+  <div class="d-body">
+    <div class="fields">
+      <div class="field"><span class="k">Приоритет</span><span class="chip p-${t.prio}" style="justify-self:start"><span class="dot"></span>${PRIO[t.prio]}</span></div>
+      <div class="field"><span class="k">Срок</span><span>до ${t.due}</span></div>
+      <div class="field"><span class="k">Оценка</span><span>${t.est} ${hoursWord(t.est)}</span></div>
+      <div class="field"><label for="f-asg">Исполнитель</label>
+        <select id="f-asg"><option value="">— Бэклог —</option>${people.map(p=>`<option value="${p.id}" ${t.assignee===p.id?'selected':''}>${p.name}</option>`).join('')}</select></div>
+    </div>
+    <p class="desc">${esc(t.desc)}</p>
+    <div><h4 class="sec-t">Чек-лист</h4>${t.checklist.map((c,i)=>`<label class="check"><input type="checkbox" id="ck-${t.id}-${i}" data-i="${i}" ${t.done.includes(i)?'checked':''}> ${esc(c)}</label>`).join('')}</div>
+    <div><h4 class="sec-t">История</h4><ul class="log">${t.log.slice().reverse().map(l=>`<li><time>${l.at}</time>${esc(l.text)}</li>`).join('')}</ul></div>
+  </div>`;
+  d.querySelector('#f-asg').onchange = ev=>{ assign(t.id, ev.target.value || null); d.close(); };
+  d.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{ const i=+cb.dataset.i; t.done = cb.checked ? [...t.done,i] : t.done.filter(x=>x!==i); });
+  if (!d.open) d.showModal();
+}
+
+function openInbox(pid){
+  const p = person(pid), d = $('#d-inbox');
+  const draw = ()=>{
+    const mine = tasks.filter(t=>t.assignee===pid).sort((a,b)=>a.seen-b.seen);
+    d.innerHTML = `<div class="d-head"><div class="ava" style="background:${p.hue};width:32px;height:32px;font-size:12px">${initials(p.name)}</div>
+      <h2>Экран сотрудника: ${p.name}</h2><button class="close" aria-label="Закрыть">✕</button></div>
+      <div class="d-body">${mine.length ? mine.map(t=>`<button class="notif ${t.seen?'':'unread'}" data-open="${t.id}">
+        <span class="n-top">${t.seen?'Задача в работе':'🔔 Вам пришла новая задача'} · <span class="id">${t.id}</span><span class="chip p-${t.prio}" style="margin-left:auto">${PRIO[t.prio]}</span></span>
+        <span class="n-title">${esc(t.title)}</span>
+        <span class="n-act">${t.seen?'Открыть':'Посмотреть подробности →'}</span></button>`).join('')
+      : '<div class="empty">Задач пока нет. Перетащите карточку из бэклога на сотрудника.</div>'}</div>`;
+    d.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{ d.close(); openTask(b.dataset.open, true); });
+  };
+  draw(); d.showModal();
+}
+
+// theme
+const setTheme = t => { document.documentElement.dataset.theme = t;
+  document.querySelectorAll('.theme button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.t===t));
+  try{ localStorage.setItem('theme', t) }catch{} };
+document.querySelectorAll('.theme button').forEach(b=>b.onclick=()=>setTheme(b.dataset.t));
+let saved; try{ saved = localStorage.getItem('theme') }catch{}
+setTheme(saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
+// demo: one task already landed on Илья, unread
+assign('PLN-102','ik'); $('#toast').hidden = true;
+render();
+</script>
