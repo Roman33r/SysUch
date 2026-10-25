@@ -221,6 +221,87 @@ table.grid{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
 .dict-row .grow{flex:1;min-width:0}
 .pdot{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block}
 .muted{color:var(--muted)}
+/* tree view */
+.tree-panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.tree{padding:8px 6px 12px;overflow-x:auto}
+.trow{position:relative;display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;gap:8px;
+  padding:7px 10px 7px calc(10px + var(--d) * 24px);border-radius:10px;cursor:pointer;min-width:560px}
+.trow:hover{background:var(--sunken)}
+.trow.is-sel{background:var(--accent-soft)} /* not .sel: that class styles the header select */
+.trow.drop-in{box-shadow:inset 0 0 0 2px var(--accent)}
+.trow.drop-before::before,.trow.drop-after::after{content:"";position:absolute;left:calc(10px + var(--d) * 24px);right:10px;height:2px;background:var(--accent);border-radius:2px}
+.trow.drop-before::before{top:-1px} .trow.drop-after::after{bottom:-1px}
+.trow.dragging{opacity:.4}
+.trow .guides{position:absolute;inset:0 auto 0 0;pointer-events:none;width:calc(10px + var(--d) * 24px);
+  background:repeating-linear-gradient(90deg,transparent 0 21px,var(--line) 21px 22px,transparent 22px 24px);background-position:10px 0;background-size:calc(var(--d) * 24px) 100%;background-repeat:no-repeat}
+.trow.parent .ttl{font-weight:600}
+.trow.is-done .ttl{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.ttl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.caret{width:22px;height:22px;border:0;background:none;border-radius:6px;cursor:pointer;color:var(--muted);display:grid;place-items:center;padding:0}
+.caret:hover{background:var(--line)}
+.caret svg{transition:transform .15s}
+.caret[aria-expanded="true"] svg{transform:rotate(90deg)}
+.caret.leaf{visibility:hidden}
+.si{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted);flex:none;display:inline-grid;place-items:center;padding:0;background:none}
+.si.progress{border-color:var(--accent);background:conic-gradient(var(--accent) 0 50%,transparent 0)}
+.si.review{border-color:var(--med);background:conic-gradient(var(--med) 0 75%,transparent 0)}
+.si.done{border-color:var(--low);background:var(--low)}
+.si.done::after{content:"";width:6px;height:3px;border:solid var(--surface);border-width:0 0 2px 2px;transform:rotate(-45deg) translate(1px,-1px)}
+button.si{cursor:pointer}
+.tmeta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.prog{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.prog i{display:block;width:44px;height:5px;border-radius:3px;background:var(--sunken);overflow:hidden;position:relative}
+.prog i b{position:absolute;inset:0 auto 0 0;background:var(--low);border-radius:3px}
+.ava.none{background:var(--sunken);color:var(--muted);border:1px dashed var(--line)}
+.due-over{color:var(--high)}
+.tadd{opacity:0;border:0;background:none;color:var(--muted);cursor:pointer;border-radius:6px;padding:0 6px;font-size:16px;line-height:22px}
+.trow:hover .tadd,.trow.is-sel .tadd,.trow:focus .tadd{opacity:1}
+.tadd:hover{background:var(--line);color:var(--fg)}
+@media (pointer:coarse){.tadd{opacity:1}}
+/* project map: pannable, zoomable stage; nodes are HTML, links are one SVG under them */
+.map{position:relative;height:min(620px,70vh);overflow:hidden;cursor:grab;touch-action:none;user-select:none;
+  background-color:var(--sunken);background-image:radial-gradient(var(--line) 1px,transparent 1.2px);background-size:22px 22px}
+.map.panning{cursor:grabbing}
+.map:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.stage{position:absolute;left:0;top:0;transform-origin:0 0}
+.links{position:absolute;left:0;top:0;overflow:visible}
+.links path{fill:none;stroke:var(--muted);stroke-width:1.5;opacity:.55}
+.links path.done{stroke-dasharray:4 4;opacity:.35}
+.node{position:absolute;width:230px;min-height:74px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:9px 11px;display:grid;gap:5px;box-shadow:var(--shadow)}
+.node[data-node]{cursor:grab}
+.node[data-node]:hover{border-color:var(--muted)}
+.node.is-sel{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),var(--shadow)}
+.node.is-done{opacity:.6}
+.node.root{background:var(--fg);color:var(--bg);border-color:var(--fg);align-content:center}
+.node.root .n-sub{color:var(--bg);opacity:.75}
+.node.dragging{z-index:5;pointer-events:none;cursor:grabbing;box-shadow:0 12px 32px rgba(0,0,0,.25);opacity:.95}
+.node.ghosted{opacity:.3}
+.node.drop-in{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft),var(--shadow)}
+.node.root.drop-in{box-shadow:0 0 0 4px var(--accent)}
+.node.drop-bad{border-color:var(--high);box-shadow:0 0 0 4px var(--high-soft)}
+.node.drop-before::before,.node.drop-after::after{content:"";position:absolute;left:8px;right:8px;height:3px;border-radius:2px;background:var(--accent)}
+.node.drop-before::before{top:-11px} .node.drop-after::after{bottom:-11px}
+.n-top{display:flex;align-items:center;gap:6px}
+.n-top .ava{margin-left:auto}
+.n-ttl{font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.n-sub{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.n-sub .prog i{width:56px}
+.n-fold{position:absolute;right:-13px;top:50%;transform:translateY(-50%);min-width:24px;height:24px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font:600 11px var(--f-mono);color:var(--muted);cursor:pointer;padding:0 5px}
+.n-fold:hover{border-color:var(--accent);color:var(--fg)}
+.map-ctl{position:absolute;right:12px;bottom:12px;display:flex;gap:6px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:5px;box-shadow:var(--shadow)}
+.zoom-val{font:500 12px var(--f-mono);color:var(--muted);min-width:44px;text-align:center}
+.map-hint{position:absolute;left:12px;top:12px;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px;max-width:calc(100% - 24px);pointer-events:none;opacity:.92}
+/* subtasks in the task card and marks on board cards */
+.crumbs{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12px;color:var(--muted)}
+.crumbs button{border:0;background:none;padding:2px 4px;border-radius:6px;cursor:pointer;color:var(--accent);font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crumbs button:hover{background:var(--accent-soft)}
+.subs{display:grid;gap:2px}
+.sub{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 8px;border-radius:8px}
+.sub:hover{background:var(--sunken)}
+.sub .ttl{cursor:pointer;border:0;background:none;text-align:left;padding:0}
+.sub.is-done .ttl{color:var(--muted);text-decoration:line-through}
+.parent-of{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;min-width:0}
+.parent-of span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .attach{display:grid;gap:6px}
 .att{display:flex;gap:10px;align-items:center;background:var(--sunken);border-radius:10px;padding:8px 12px;font-size:14px}
 .att a{color:var(--accent);flex:1;min-width:0;overflow-wrap:anywhere}
@@ -306,6 +387,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
     <div class="seg" role="group" aria-label="Вид">
       <button data-view="team" id="vw-team">Распределение</button>
       <button data-view="board" id="vw-board">Канбан</button>
+      <button data-view="tree" id="vw-tree">Дерево</button>
       <button data-view="my" id="vw-my" hidden>Мои задачи</button>
       <button data-view="load" id="vw-load">Загрузка</button>
       <button data-view="log" id="vw-log">Журнал</button>
@@ -333,6 +415,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
     <select id="fl-prio" aria-label="Приоритет"><option value="">Любой приоритет</option><option value="high">Высокий</option><option value="med">Средний</option><option value="low">Низкий</option></select>
     <select id="fl-tag" aria-label="Тег"></select>
     <label class="chk"><input type="checkbox" id="fl-over"> Просроченные</label>
+    <label class="chk" title="Скрыть подзадачи, оставить крупные задачи"><input type="checkbox" id="fl-top"> Только верхний уровень</label>
     <select id="fl-sort" aria-label="Сортировка"><option value="manual">Свой порядок</option><option value="prio">По приоритету</option><option value="due">По сроку</option></select>
     <span class="count" id="fl-count"></span>
     <button class="btn small" id="fl-reset" hidden>Сбросить фильтры</button>
@@ -354,6 +437,29 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
   </main>
 
   <main id="v-board" hidden><div class="board" id="board"></div></main>
+
+  <main id="v-tree" class="stack" hidden>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Как показать"><button data-tmode="list">Список</button><button data-tmode="map">Карта</button></div>
+      <label for="tr-proj" class="k">Проект</label><select id="tr-proj"></select>
+      <label class="chk"><input type="checkbox" id="tr-hide"> Скрыть выполненные</label>
+      <span class="spacer"></span>
+      <button class="btn small" id="tr-expand">Раскрыть всё</button><button class="btn small" id="tr-collapse">Свернуть всё</button>
+      <button class="btn small primary" id="tr-new">+ Задача в проект</button>
+    </div>
+    <div class="tree-panel">
+      <div class="tree" id="tree" role="tree" aria-label="Задачи проекта"></div>
+      <div class="map" id="map" tabindex="0" role="application" aria-label="Карта проекта. Перемещение: зажмите кнопку мыши на пустом месте или стрелки, масштаб: колёсико или плюс и минус" hidden>
+        <div class="stage" id="stage"><svg class="links" id="links" aria-hidden="true"></svg><div id="nodes"></div></div>
+        <div class="map-ctl" role="group" aria-label="Масштаб">
+          <button class="btn small" data-zoom="out" aria-label="Уменьшить">−</button><span class="zoom-val" id="zoom-val">100%</span>
+          <button class="btn small" data-zoom="in" aria-label="Увеличить">+</button><button class="btn small" data-zoom="fit">Вписать</button>
+        </div>
+        <div class="map-hint">Пустое место — двигать карту · блок на середину другого — подзадача, на край — рядом, на проект — верхний уровень · колёсико — масштаб</div>
+      </div>
+    </div>
+    <p class="note" id="tree-note">Клавиши в списке: <kbd>↑</kbd><kbd>↓</kbd> выбор, <kbd>→</kbd><kbd>←</kbd> раскрыть или свернуть, <kbd>Tab</kbd> сделать подзадачей предыдущей, <kbd>Shift</kbd>+<kbd>Tab</kbd> поднять уровнем выше, <kbd>Enter</kbd> открыть. Перетаскивание строки: на середину другой — подзадача, на верх или низ — рядом.</p>
+  </main>
 
   <main id="v-my" hidden>
     <div class="panel-h"><h2 id="my-title">Мои задачи</h2><span class="count" id="my-count"></span></div>
@@ -389,6 +495,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <dialog id="d-return"></dialog>
 <dialog id="d-dict"></dialog>
 <dialog id="d-archive"></dialog>
+<dialog id="d-close"></dialog>
 <dialog id="d-act" class="sheet"></dialog>
 <dialog id="d-help" aria-labelledby="help-h">
   <div class="d-head"><h2 id="help-h">Справка</h2>
@@ -412,9 +519,10 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         <dl>
           <dt>Распределение <kbd>1</kbd></dt><dd>Бэклог (задачи без исполнителя) и команда. Сюда перетаскивают задачи на людей.</dd>
           <dt>Канбан <kbd>2</kbd></dt><dd>Колонки по статусам: Новая, В работе, На проверке, Готово.</dd>
-          <dt>Загрузка <kbd>3</kbd></dt><dd>Сколько часов у каждого сотрудника на каждой неделе.</dd>
-          <dt>Журнал <kbd>4</kbd></dt><dd>Все действия по дням.</dd>
-          <dt>Отчёты <kbd>5</kbd></dt><dd>Итоги за период, графики, выгрузка в CSV.</dd>
+          <dt>Дерево <kbd>3</kbd></dt><dd>Задачи проекта с подзадачами: списком или картой-схемой.</dd>
+          <dt>Загрузка <kbd>4</kbd></dt><dd>Сколько часов у каждого сотрудника на каждой неделе.</dd>
+          <dt>Журнал <kbd>5</kbd></dt><dd>Все действия по дням.</dd>
+          <dt>Отчёты <kbd>6</kbd></dt><dd>Итоги за период, графики, выгрузка в CSV.</dd>
           <dt>Мои задачи <kbd>M</kbd></dt><dd>Видна, когда в шапке выбран сотрудник («Я: …»). Это его входящие.</dd>
         </dl>
         <p>Выбранный вид, тема и фильтры запоминаются в этом браузере и не попадают в файл данных.</p>
@@ -448,10 +556,29 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
             <tr><td>Тег</td><td><code>#баг</code></td></tr>
             <tr><td>Исполнитель</td><td><code>@Анна</code> или <code>@мор</code>: начало имени или фамилии</td></tr>
             <tr><td>Проект</td><td><code>+сайт</code>: начало любого слова в названии проекта</td></tr>
+            <tr><td>Подзадача</td><td><code>^PLN-120</code>: новая задача станет подзадачей PLN-120 и попадёт в её проект</td></tr>
             <tr><td>Оценка</td><td><code>3ч</code> <code>1,5ч</code> <code>2 часа</code></td></tr>
             <tr><td>Срок</td><td><code>сегодня</code> <code>завтра</code> <code>послезавтра</code> <code>через 3 дня</code> <code>через 2 недели</code> <code>в пятницу</code> <code>пт</code> <code>27.10</code> <code>27.10.2026</code> <code>3 ноября</code>, можно с «до»: <code>до 27.10</code></td></tr>
           </tbody></table></div>
         <p>Если сотрудник или проект не найден, появится предупреждение, а слово останется в названии. Дата без года, которая уже прошла, означает следующий год.</p>
+      </section>
+
+      <section id="h-tree"><h3>Подзадачи, дерево и карта проекта</h3>
+        <p>Подзадача — обычная задача со своим исполнителем, сроком, статусом и комментариями, у которой есть родитель. Подзадач может быть сколько угодно, и у каждой могут быть свои подзадачи, на любую глубину.</p>
+        <p><b>Как создать.</b> В карточке задачи: раздел «Подзадачи», строка «Новая подзадача» и <kbd>Enter</kbd>. В дереве: «+» в строке задачи. В быстром вводе: <code>^PLN-120</code>. Перенести готовую задачу: поле «Входит в» в карточке или перетаскивание в дереве и на карте.</p>
+        <dl>
+          <dt>Карточка</dt><dd>Вверху путь: проект › родитель › … Длинный путь сворачивается в «… ещё N», нажатие показывает его целиком. В разделе «Подзадачи» кружок отмечает готовность, название открывает подзадачу. Чтобы не потерять несохранённые правки, перейти в другую задачу можно только после «Сохранить» или «Отмена».</dd>
+          <dt>Дерево: список</dt><dd>Задачи выбранного проекта с отступами. У родителя полоса «готово подзадач» и часы открытой работы во всей ветке. Стрелка сворачивает ветку. Строку можно перетащить: на середину другой — станет подзадачей, на верх или низ — встанет рядом. Клавиши: <kbd>↑</kbd><kbd>↓</kbd> выбор, <kbd>→</kbd><kbd>←</kbd> раскрыть или свернуть, <kbd>Tab</kbd> сделать подзадачей предыдущей, <kbd>Shift</kbd>+<kbd>Tab</kbd> поднять уровнем выше, <kbd>Enter</kbd> открыть.</dd>
+          <dt>Дерево: карта</dt><dd>Схема слева направо: проект → задачи → подзадачи, у выполненных пунктирная линия. Зажмите кнопку мыши на пустом месте и тяните, чтобы двигать карту; колёсико или кнопки меняют масштаб, «Вписать» показывает проект целиком. Блок можно перетащить: на середину другого — подзадача, на край — рядом, на тёмный блок проекта — верхний уровень. У края карта прокручивается сама. Положение и масштаб запоминаются для каждого проекта.</dd>
+          <dt>Доска</dt><dd>У подзадачи строка «↳ в PLN-120 …», у родителя полоса «подзадачи 2/5». Фильтр «Только верхний уровень» оставляет на доске только крупные задачи.</dd>
+        </dl>
+        <ul>
+          <li><b>Закрытие.</b> Если закрыть задачу с открытыми подзадачами, Планёрка спросит, закрыть ли их тоже. Когда закрыта последняя подзадача, в уведомлении появится кнопка «Закрыть PLN-…» для родителя. Сам родитель не закрывается.</li>
+          <li><b>Проект.</b> Подзадача всегда в проекте своей верхней задачи. Перенос ветки в другой проект переносит её целиком.</li>
+          <li><b>Удаление.</b> Подзадачи удалённой задачи поднимаются на уровень выше, ничего не теряется.</li>
+          <li><b>Часы.</b> В загрузке каждая задача считается по своей оценке, без двойного счёта. Сумма по ветке у родителя — для информации.</li>
+          <li>Задачу нельзя вложить в её же подзадачу.</li>
+        </ul>
       </section>
 
       <section id="h-assign"><h3>Назначение и порядок карточек</h3>
@@ -516,7 +643,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         <p>Панель над доской в видах «Распределение» и «Канбан». Клавиша <kbd>/</kbd> переходит в поиск, <kbd>Esc</kbd> очищает его.</p>
         <ul>
           <li>Поиск по названию, описанию, номеру и тегу.</li>
-          <li>Фильтры: исполнитель (или «Без исполнителя»), проект, приоритет, тег, «Просроченные».</li>
+          <li>Фильтры: исполнитель (или «Без исполнителя»), проект, приоритет, тег, «Просроченные», «Только верхний уровень».</li>
           <li>Сортировка: свой порядок, по приоритету, по сроку.</li>
           <li>При включённых фильтрах видно «Найдено N из M» и кнопку «Сбросить фильтры».</li>
         </ul>
@@ -579,7 +706,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <tr><td><kbd>N</kbd></td><td>Новая задача</td></tr>
           <tr><td><kbd>Q</kbd></td><td>Быстрый ввод</td></tr>
           <tr><td><kbd>/</kbd></td><td>Поиск</td></tr>
-          <tr><td><kbd>1</kbd>…<kbd>5</kbd></td><td>Распределение, Канбан, Загрузка, Журнал, Отчёты</td></tr>
+          <tr><td><kbd>1</kbd>…<kbd>6</kbd></td><td>Распределение, Канбан, Дерево, Загрузка, Журнал, Отчёты</td></tr>
+          <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd> <kbd>Tab</kbd></td><td>В дереве: сделать подзадачей предыдущей / поднять уровнем выше</td></tr>
           <tr><td><kbd>M</kbd></td><td>Мои задачи (если выбран сотрудник)</td></tr>
           <tr><td><kbd>Esc</kbd></td><td>Закрыть окно, очистить поиск</td></tr>
           <tr><td><kbd>Ctrl</kbd> <kbd>Enter</kbd></td><td>Отправить комментарий</td></tr>
@@ -607,7 +735,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
-const SCHEMA = 4;
+const SCHEMA = 5;
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
 const LS_KEY = 'planerka.data', LS_BACKUP = 'planerka.backup', LS_THEME = 'planerka.theme', LS_VIEW = 'planerka.view', LS_UI = 'planerka.ui', LS_ME = 'planerka.me';
@@ -657,6 +785,7 @@ function normTask(t){
     createdAt: s(t.createdAt, 40) || stamp(),
     doneAt: t.status === 'done' ? (s(t.doneAt, 40) || s(t.createdAt, 40) || stamp()) : '',
     project: t.project ? s(t.project, 40) : null,
+    parent: t.parent ? s(t.parent, 40) : null,
     repeat: normRepeat(t.repeat),
     links: (Array.isArray(t.links) ? t.links : []).map(l => ({url: safeUrl(l?.url), title: s(l?.title, 200), at: s(l?.at, 40)})).filter(l => l.url),
     files: (Array.isArray(t.files) ? t.files : []).map(f => ({id: s(f?.id, 40), name: s(f?.name, 200) || 'файл', type: s(f?.type, 100), size: Math.max(0, Number(f?.size) || 0), at: s(f?.at, 40)})).filter(f => f.id),
@@ -704,10 +833,17 @@ function migrate(raw){
     seen.add(t.id);
     if (t.assignee && !pids.has(t.assignee)) t.assignee = null;
   });
+  // v4 -> v5: parent links. Links to missing tasks are dropped and a loop (A in B in A) is cut, so walking up always ends
+  const byKey = new Map(tasks.map(t => [t.id, t]));
+  tasks.forEach(t => { if (t.parent && (t.parent === t.id || !byKey.has(t.parent))) t.parent = null; });
+  tasks.forEach(t => { const seen = new Set([t.id]); for (let p = t.parent; p; p = byKey.get(p).parent){ if (seen.has(p)){ t.parent = null; break; } seen.add(p); } });
   // v2 -> v3: projects, templates, events, repeat and doneAt; all of them get defaults in norm*
   const projects = (Array.isArray(raw.projects) ? raw.projects : []).filter(p => p && typeof p === 'object').map(normProject);
   const prids = new Set(projects.map(p => p.id));
   tasks.forEach(t => { if (t.project && !prids.has(t.project)) t.project = null; });
+  // a subtask always lives in the project of its top-level task
+  const rootOf = t => { while (t.parent) t = byKey.get(t.parent); return t; };
+  tasks.forEach(t => { if (t.parent) t.project = rootOf(t).project; });
   const templates = (Array.isArray(raw.templates) ? raw.templates : []).filter(p => p && typeof p === 'object').map(normTemplate);
   templates.forEach(p => { if (p.project && !prids.has(p.project)) p.project = null; });
   const events = (Array.isArray(raw.events) ? raw.events : []).slice(-500).map(e => ({at: String(e?.at ?? '').slice(0, 40), text: String(e?.text ?? '').slice(0, 300)}));
@@ -741,9 +877,17 @@ function demo(){
     {id:'PLN-109', title:'Пример: починить фильтр в каталоге', prio:'high', due:addDays(-8), est:3, tag:'Баг', assignee:'am', status:'done', createdAt: daysAgo(12), doneAt: daysAgo(6), log},
     {id:'PLN-110', title:'Пример: баннер для акции', prio:'med', due:addDays(-12), est:4, tag:'Дизайн', assignee:'ms', status:'done', createdAt: daysAgo(25), doneAt: daysAgo(20), log},
     {id:'PLN-111', title:'Пример: еженедельный отчёт по багам', prio:'med', due:addDays(3), est:1, tag:'QA', assignee:'dp', status:'progress', repeat:{unit:'week', n:1, from:'due'}, log},
+    {id:'PLN-120', title:'Пример: редизайн каталога', prio:'high', due:addDays(20), est:2, tag:'Дизайн', assignee:'ms', status:'progress', log},
+    {id:'PLN-121', title:'Исследование: как ищут товар', parent:'PLN-120', prio:'med', est:6, assignee:'ms', status:'done', createdAt: daysAgo(8), doneAt: daysAgo(4), log},
+    {id:'PLN-122', title:'Макеты карточки товара', parent:'PLN-120', prio:'med', due:addDays(9), est:8, assignee:'ms', status:'progress', log},
+    {id:'PLN-125', title:'Мобильная версия макетов', parent:'PLN-122', prio:'med', est:4, assignee:'ms', log},
+    {id:'PLN-126', title:'Состояния: нет в наличии, скидка', parent:'PLN-122', prio:'low', est:2, assignee:'ms', status:'done', createdAt: daysAgo(6), doneAt: daysAgo(2), log},
+    {id:'PLN-123', title:'Вёрстка каталога', parent:'PLN-120', prio:'med', due:addDays(15), est:12, assignee:'am', log},
+    {id:'PLN-124', title:'API фильтров и сортировки', parent:'PLN-120', prio:'med', est:6, assignee:'ik', status:'review', log},
   ]});
-  const proj = {'PLN-101':'web', 'PLN-102':'web', 'PLN-103':'app', 'PLN-104':'web', 'PLN-105':'app', 'PLN-106':'web', 'PLN-109':'web', 'PLN-110':'web'};
-  d.tasks.forEach(t => { t.project = proj[t.id] || null; });
+  const proj = {'PLN-101':'web', 'PLN-102':'web', 'PLN-103':'app', 'PLN-104':'web', 'PLN-105':'app', 'PLN-106':'web', 'PLN-109':'web', 'PLN-110':'web', 'PLN-120':'web'};
+  const by = new Map(d.tasks.map(t => [t.id, t])), root = t => t.parent ? root(by.get(t.parent)) : t;
+  d.tasks.forEach(t => { t.project = proj[root(t).id] || null; });
   return d;
 }
 
@@ -913,18 +1057,31 @@ const byId = id => db.tasks.find(t => t.id === id);
 const person = id => db.people.find(p => p.id === id);
 const active = () => db.people.filter(p => !p.archived);
 const project = id => db.projects.find(p => p.id === id);
+/* task tree: parent links; siblings are ordered by the same `order` field the board uses */
+const kids = id => db.tasks.filter(t => t.parent === id).sort((a, b) => a.order - b.order);
+const desc = id => kids(id).flatMap(k => [k, ...desc(k.id)]);
+const ancestors = t => { const out = []; for (let p = t.parent && byId(t.parent); p; p = p.parent && byId(p.parent)) out.unshift(p); return out; };
+const rootTask = t => ancestors(t)[0] || t;
+const openDesc = id => desc(id).filter(x => x.status !== 'done');
+function rollup(t){
+  const d = desc(t.id);
+  return {total: d.length, done: d.filter(x => x.status === 'done').length, hours: [t, ...d].filter(x => x.status !== 'done').reduce((s, x) => s + x.est, 0)};
+}
+// parent whose subtasks are now all done, so it can be offered for closing
+const readyParent = t => { const p = t.parent && byId(t.parent); return p && p.status !== 'done' && kids(p.id).every(k => k.status === 'done') ? p : null; };
 const activeProjects = () => db.projects.filter(p => !p.archived);
 const repeatLabel = r => ({day: ['каждый день', `каждые ${r.n} дн.`], week: ['каждую неделю', `каждые ${r.n} нед.`], month: ['каждый месяц', `каждые ${r.n} мес.`]}[r.unit][r.n > 1 ? 1 : 0]) + (r.from === 'done' ? ' от выполнения' : ' от срока');
 const addLog = (t, text) => t.log.push({at: stamp(), text});
 
 // snapshot before a change so the toast can undo it
 // msg may be a function, evaluated after the change (for texts that depend on the result)
-function change(fn, msg){
+function change(fn, msg, action){
   const before = JSON.stringify(db);
   if (fn() === false) return;
   commit();
   if (typeof msg === 'function') msg = msg();
-  if (msg) toast(msg, () => { db = JSON.parse(before); commit(); });
+  if (typeof action === 'function') action = action();
+  if (msg) toast(msg, () => { db = JSON.parse(before); commit(); }, action || undefined);
 }
 const addEvent = text => { db.events.push({at: stamp(), text}); if (db.events.length > 500) db.events.splice(0, db.events.length - 500); };
 
@@ -977,19 +1134,58 @@ function assign(id, to, pos = null){
   }, moved ? () => (to ? `${t.id} передана: ${person(to).name}${overloadNote(t)}` : `${t.id} возвращена в бэклог`) : null);
   if (moved && to){ const el = $('#p-' + to); el?.classList.add('flash'); setTimeout(() => el?.classList.remove('flash'), 900); }
 }
-function setStatus(id, s, who = actor(), pos = null){
+// opts.branch: 'all' closes open subtasks too, 'one' closes only this task; without it the user is asked
+function setStatus(id, s, who = actor(), pos = null, opts = {}){
   const t = byId(id); if (!t) return;
   const moved = t.status !== s;
   if (!moved && pos == null) return;
-  let next = null;
+  const open = s === 'done' && moved ? openDesc(id) : [];
+  if (open.length && !opts.branch) return askCloseBranch(t, who, pos);
+  let next = null, ready = null;
   change(() => {
     if (pos != null) t.order = pos;
-    if (moved) next = applyStatus(t, s, who);
-  }, moved ? () => `${t.id}: ${STATUS[s]}${next ? ` · следующий повтор ${next.id} на ${fmtDay(next.due)}` : ''}` : null);
+    if (moved){
+      if (opts.branch === 'all') open.forEach(x => applyStatus(x, 'done', who));
+      next = applyStatus(t, s, who);
+      if (s === 'done') ready = readyParent(t);
+    }
+  }, moved ? () => `${t.id}: ${STATUS[s]}${open.length && opts.branch === 'all' ? ` вместе с подзадачами (${open.length})` : ''}${next ? ` · следующий повтор ${next.id} на ${fmtDay(next.due)}` : ''}${ready ? ` · все подзадачи ${ready.id} готовы` : ''}` : null,
+  () => ready && byId(ready.id)?.status !== 'done' ? {label: `Закрыть ${ready.id}`, run: () => setStatus(ready.id, 'done', who)} : null);
+}
+function askCloseBranch(t, who, pos){
+  const d = $('#d-close'), n = openDesc(t.id).length;
+  d.innerHTML = `<div class="d-head"><span class="id">${esc(t.id)}</span><h2>Закрыть «${esc(t.title)}»?</h2><button class="close" aria-label="Закрыть окно">✕</button></div>
+    <div class="d-body"><p class="note">У задачи открыто подзадач: ${n}. Их можно закрыть вместе с ней или оставить в работе.</p></div>
+    <div class="d-foot"><button type="button" class="btn" id="cl-cancel">Отмена</button><span class="spacer"></span>
+      <button type="button" class="btn" id="cl-one">Только эту</button><button type="button" class="btn primary" id="cl-all">Закрыть вместе с подзадачами</button></div>`;
+  d.querySelector('#cl-cancel').onclick = () => { d.close(); render(); };
+  d.querySelector('#cl-one').onclick = () => { d.close(); setStatus(t.id, 'done', who, pos, {branch: 'one'}); };
+  d.querySelector('#cl-all').onclick = () => { d.close(); setStatus(t.id, 'done', who, pos, {branch: 'all'}); };
+  d.showModal();
+}
+// mode: 'in' = last subtask of target, 'before' / 'after' = next to target, 'top' = top level of project projId
+function moveTask(id, targetId, mode, projId = null){
+  const t = byId(id), target = targetId ? byId(targetId) : null;
+  if (!t || (mode !== 'top' && !target) || id === targetId) return;
+  if (target && desc(id).some(x => x.id === target.id)) return toast('Нельзя вложить задачу в её же подзадачу');
+  const parent = mode === 'in' ? target : mode === 'top' ? null : (target.parent ? byId(target.parent) : null);
+  const proj = parent ? rootTask(parent).project : target ? target.project : projId;
+  const sibs = (parent ? kids(parent.id) : db.tasks.filter(x => !x.parent && x.project === proj).sort((a, b) => a.order - b.order)).filter(x => x.id !== id);
+  let order;
+  if (mode === 'in' || mode === 'top') order = (sibs.length ? Math.max(...sibs.map(x => x.order)) : 0) + 1;
+  else { const i = sibs.indexOf(target), nb = sibs[mode === 'before' ? i - 1 : i + 1]; order = nb ? (target.order + nb.order) / 2 : target.order + (mode === 'before' ? -1 : 1); }
+  change(() => {
+    const was = t.parent;
+    t.parent = parent ? parent.id : null; t.order = order;
+    [t, ...desc(id)].forEach(x => x.project = proj); // the whole branch follows
+    if (was !== t.parent) addLog(t, `${actor()} ${t.parent ? `сделал подзадачей ${t.parent}` : 'поднял на верхний уровень'}`);
+  }, mode === 'in' ? `${id} теперь подзадача ${parent.id}` : `${id} ${parent ? `перенесена в ${parent.id}` : 'на верхнем уровне'}`);
 }
 function addNewTask(t){
   t.id = 'PLN-' + db.nextId++; t.createdAt = stamp(); t.seen = !t.assignee;
-  t.order = Math.min(0, ...db.tasks.map(x => x.order)) - 1;
+  // a subtask goes to the end of its siblings, a new top-level task to the top of the board
+  t.order = t.parent ? Math.max(0, ...kids(t.parent).map(x => x.order)) + 1 : Math.min(0, ...db.tasks.map(x => x.order)) - 1;
+  if (t.parent && byId(t.parent)) t.project = rootTask(byId(t.parent)).project;
   t.log = [{at: stamp(), text: `${actor()} создал задачу`}];
   if (t.assignee) t.log.push({at: stamp(), text: `${actor()} назначил: ${person(t.assignee).name}`});
   change(() => { db.tasks.push(t); }, () => `${t.id} создана${t.assignee ? ': ' + person(t.assignee).name : ''}${overloadNote(t)}`);
@@ -1020,8 +1216,12 @@ function card(t, kind){
   const pr = t.project && project(t.project);
   const meta = kind === 'mini' ? '' : `<div class="meta">${pr ? `<span class="chip"><span class="pdot" style="background:${pr.hue}"></span>${esc(pr.name)}</span>` : ''}${t.repeat ? `<span title="Повторяется: ${esc(repeatLabel(t.repeat))}">↻</span>` : ''}${t.tag ? `<span class="chip">${esc(t.tag)}</span>` : ''}${dueChip(t)}${t.est ? `<span>· ${t.est} ч</span>` : ''}${checkProgress(t)}${t.comments.length ? `<span title="Комментарии">💬 ${t.comments.length}</span>` : ''}${t.links.length + t.files.length ? `<span title="Вложения">📎 ${t.links.length + t.files.length}</span>` : ''}</div>`;
   const who = kind === 'board' ? `<div class="meta"><span class="who">${t.assignee ? ava(person(t.assignee), true) + esc(person(t.assignee)?.name) : 'Без исполнителя'}</span></div>` : '';
+  // tree marks: a subtask names its parent, a parent shows how many subtasks are done
+  const par = t.parent && byId(t.parent), sub = kids(t.id).length ? rollup(t) : null;
+  const tree = (par ? `<div class="parent-of" title="Входит в ${esc(par.id)}">↳ <span>в ${esc(par.id)} · ${esc(par.title)}</span></div>` : '') +
+    (sub && kind !== 'mini' ? `<div class="meta"><span class="prog" title="Готово подзадач"><i><b style="width:${sub.done / sub.total * 100}%"></b></i>подзадачи ${sub.done}/${sub.total}</span></div>` : '');
   return `<button class="task" draggable="true" data-id="${esc(t.id)}" aria-label="${esc(t.title)}, открыть">
-    <div class="top"><span class="id">${esc(t.id)}</span>${head}</div><h3>${esc(t.title)}</h3>${meta}${who}</button>`;
+    <div class="top"><span class="id">${esc(t.id)}</span>${head}</div><h3>${esc(t.title)}</h3>${tree}${meta}${who}</button>`;
 }
 const byPrio = (a, b) => ({high:0, med:1, low:2}[a.prio] - {high:0, med:1, low:2}[b.prio]) || (a.due || '9').localeCompare(b.due || '9');
 const SORTS = {manual: (a, b) => a.order - b.order, prio: byPrio, due: (a, b) => (a.due || '9').localeCompare(b.due || '9') || byPrio(a, b)};
@@ -1065,6 +1265,8 @@ function render(){
   if (view === 'load') renderLoad();
   if (view === 'log') renderLog();
   if (view === 'report') renderReport();
+  if (view === 'tree') renderTreeView();
+  if ($('#d-task').open) refreshTaskDialog?.();
   if ($('#d-inbox').open && inboxPid) $('#inbox-body').innerHTML = inboxHtml(inboxPid);
   renderStore();
 }
@@ -1088,6 +1290,207 @@ function openActions(id){
   };
   d.showModal();
 }
+
+/* ---------- tree view: list and project map ---------- */
+let treeSel = null, refreshTaskDialog = null;
+const treeProj = () => ui.treeProj === '-' ? null : ui.treeProj;
+const isOpen = id => !ui.treeClosed.includes(id);
+const setOpen = (id, on) => { ui.treeClosed = ui.treeClosed.filter(x => x !== id); if (!on) ui.treeClosed.push(id); saveUi(); };
+// «Скрыть выполненные» keeps a done task while something under it is still open
+const shownInTree = t => !(ui.treeHide && t.status === 'done' && !openDesc(t.id).length);
+const treeRoots = () => db.tasks.filter(t => !t.parent && t.project === treeProj() && shownInTree(t)).sort((a, b) => a.order - b.order);
+const siAttr = t => `class="si ${t.status}" title="${STATUS[t.status]}"`;
+
+function renderTreeView(){
+  if (ui.treeProj !== '-' && !project(ui.treeProj)) ui.treeProj = activeProjects()[0]?.id || '-';
+  $('#tr-proj').innerHTML = [...db.projects.filter(p => !p.archived || p.id === ui.treeProj), {id: '-', name: 'Без проекта'}]
+    .map(p => `<option value="${esc(p.id)}" ${p.id === ui.treeProj ? 'selected' : ''}>${esc(p.name)} · ${db.tasks.filter(t => (t.project || '-') === p.id).length}</option>`).join('');
+  $('#tr-hide').checked = ui.treeHide;
+  document.querySelectorAll('[data-tmode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tmode === ui.treeMode));
+  $('#tree').hidden = ui.treeMode !== 'list'; $('#map').hidden = ui.treeMode !== 'map'; $('#tree-note').hidden = ui.treeMode !== 'list';
+  ui.treeMode === 'map' ? renderMap() : renderTreeList();
+}
+function treeMeta(t, has){
+  const r = rollup(t), over = t.due && t.due < addDays(0) && t.status !== 'done';
+  return `${has ? `<span class="prog" title="Готово подзадач: ${r.done} из ${r.total}"><i><b style="width:${r.done / r.total * 100}%"></b></i>${r.done}/${r.total}</span>` : ''}
+    ${r.hours ? `<span title="${has ? 'Открытая работа во всей ветке' : 'Оценка'}">${r.hours} ч</span>` : ''}
+    ${t.due ? `<span class="${over ? 'due-over' : ''}">${over ? 'просрочено' : 'до ' + fmtDay(t.due)}</span>` : ''}`;
+}
+function renderTreeList(){
+  const rows = [], walk = (list, d) => list.forEach(t => { rows.push({t, d}); if (isOpen(t.id)) walk(kids(t.id).filter(shownInTree), d + 1); });
+  walk(treeRoots(), 0);
+  if (!rows.some(r => r.t.id === treeSel)) treeSel = rows[0]?.t.id || null;
+  $('#tree').innerHTML = rows.map(({t, d}) => {
+    const has = kids(t.id).length, ind = d <= 4 ? d : 4 + (d - 4) / 2; // half steps deeper than four levels
+    return `<div class="trow${t.id === treeSel ? ' is-sel' : ''}${has ? ' parent' : ''}${t.status === 'done' ? ' is-done' : ''}" style="--d:${ind}" draggable="true" data-trow="${esc(t.id)}"
+      tabindex="${t.id === treeSel ? 0 : -1}" role="treeitem" aria-level="${d + 1}" aria-selected="${t.id === treeSel}" ${has ? `aria-expanded="${isOpen(t.id)}"` : ''}>
+      <span class="guides"></span>
+      <button class="caret${has ? '' : ' leaf'}" data-tfold="${esc(t.id)}" tabindex="-1" aria-label="${isOpen(t.id) ? 'Свернуть' : 'Раскрыть'}" aria-expanded="${isOpen(t.id)}"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2.5 7.5 6 4 9.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <span ${siAttr(t)}></span>
+      <span class="ttl"><span class="id">${esc(t.id)}</span> ${esc(t.title)}</span>
+      <span class="tmeta">${treeMeta(t, has)}${t.assignee ? ava(person(t.assignee), true) : '<span class="ava sm none" title="Без исполнителя">?</span>'}
+        <button class="tadd" data-tadd="${esc(t.id)}" tabindex="-1" title="Добавить подзадачу" aria-label="Добавить подзадачу в ${esc(t.id)}">+</button></span></div>`;
+  }).join('') || `<div class="empty">В проекте пока нет задач. Нажмите «+ Задача в проект».</div>`;
+}
+const treeFocus = id => { treeSel = id; renderTreeList(); document.querySelector(`[data-trow="${CSS.escape(id)}"]`)?.focus(); };
+function treeIndent(t){
+  const sibs = (t.parent ? kids(t.parent) : treeRoots()), i = sibs.findIndex(x => x.id === t.id);
+  if (i <= 0) return toast('Сделать подзадачей можно, если выше есть задача того же уровня');
+  setOpen(sibs[i - 1].id, true); moveTask(t.id, sibs[i - 1].id, 'in');
+}
+function treeOutdent(t){ if (!t.parent) return toast('Задача уже на верхнем уровне'); moveTask(t.id, t.parent, 'after'); }
+
+$('#v-tree').addEventListener('click', e => {
+  const q = s => e.target.closest(s); let el;
+  if ((el = q('[data-tmode]'))){ ui.treeMode = el.dataset.tmode; saveUi(); return renderTreeView(); }
+  if ((el = q('[data-tfold]'))){ setOpen(el.dataset.tfold, !isOpen(el.dataset.tfold)); return renderTreeView(); }
+  if ((el = q('[data-tadd]'))){ setOpen(el.dataset.tadd, true); return openTask(null, {parent: el.dataset.tadd}); }
+  if ((el = q('[data-trow]'))){ treeSel = el.dataset.trow; renderTreeList(); return openTask(treeSel); }
+});
+$('#tr-proj').onchange = e => { ui.treeProj = e.target.value; saveUi(); renderTreeView(); };
+$('#tr-hide').onchange = e => { ui.treeHide = e.target.checked; saveUi(); renderTreeView(); };
+$('#tr-expand').onclick = () => { ui.treeClosed = []; saveUi(); renderTreeView(); if (ui.treeMode === 'map') fitMap(); };
+$('#tr-collapse').onclick = () => { ui.treeClosed = db.tasks.filter(t => kids(t.id).length).map(t => t.id); saveUi(); renderTreeView(); if (ui.treeMode === 'map') fitMap(); };
+$('#tr-new').onclick = () => openTask(null, {project: treeProj()});
+$('#tree').addEventListener('keydown', e => {
+  const row = e.target.closest('[data-trow]'); if (!row) return;
+  const t = byId(row.dataset.trow), rows = [...document.querySelectorAll('#tree [data-trow]')], i = rows.indexOf(row), ks = kids(t.id).filter(shownInTree);
+  if (e.key === 'ArrowDown' && rows[i + 1]){ e.preventDefault(); treeFocus(rows[i + 1].dataset.trow); }
+  else if (e.key === 'ArrowUp' && rows[i - 1]){ e.preventDefault(); treeFocus(rows[i - 1].dataset.trow); }
+  else if (e.key === 'ArrowRight' && ks.length){ e.preventDefault(); if (!isOpen(t.id)){ setOpen(t.id, true); treeFocus(t.id); } else treeFocus(ks[0].id); }
+  else if (e.key === 'ArrowLeft'){ e.preventDefault(); if (ks.length && isOpen(t.id)){ setOpen(t.id, false); treeFocus(t.id); } else if (t.parent) treeFocus(t.parent); }
+  else if (e.key === 'Tab'){ e.preventDefault(); treeSel = t.id; e.shiftKey ? treeOutdent(t) : treeIndent(t); document.querySelector(`[data-trow="${CSS.escape(t.id)}"]`)?.focus(); }
+  else if (e.key === 'Enter'){ e.preventDefault(); openTask(t.id); }
+});
+// list drag: top quarter = before, bottom quarter = after, middle = inside
+(() => {
+  let dragT = null;
+  const zone = (row, y) => { const r = row.getBoundingClientRect(), f = (y - r.top) / r.height; return f < .25 ? 'before' : f > .75 ? 'after' : 'in'; };
+  const clear = () => document.querySelectorAll('#tree .drop-in,#tree .drop-before,#tree .drop-after').forEach(x => x.classList.remove('drop-in', 'drop-before', 'drop-after'));
+  const tree = $('#tree');
+  tree.addEventListener('dragstart', e => { const r = e.target.closest('[data-trow]'); if (!r) return; dragT = r.dataset.trow; r.classList.add('dragging'); e.dataTransfer.setData('text/plain', dragT); e.dataTransfer.effectAllowed = 'move'; });
+  tree.addEventListener('dragend', () => { clear(); tree.querySelector('.dragging')?.classList.remove('dragging'); dragT = null; });
+  tree.addEventListener('dragover', e => { const r = e.target.closest('[data-trow]'); if (!r || !dragT || r.dataset.trow === dragT) return; e.preventDefault(); clear(); r.classList.add('drop-' + zone(r, e.clientY)); });
+  tree.addEventListener('drop', e => { const r = e.target.closest('[data-trow]'); if (!r || !dragT) return; e.preventDefault(); const m = zone(r, e.clientY); clear(); if (m === 'in') setOpen(r.dataset.trow, true); moveTask(dragT, r.dataset.trow, m); });
+})();
+
+/* project map: tidy tree left to right; leaves take rows in order, a parent sits in the middle of its children */
+const NW = 230, NH = 74, GX = 70, GY = 18, MIN_K = .15;
+let mapNodes = {}, mapSize = {w: 0, h: 0}, saveViewTimer;
+const mapKey = () => ui.treeProj;
+const mapView = () => ui.mapViews[mapKey()] ||= {x: 24, y: 60, k: 1, fresh: true};
+function layoutMap(){
+  const nodes = []; let row = 0, maxD = 0;
+  const place = (t, d) => {
+    maxD = Math.max(maxD, d);
+    const ch = isOpen(t.id) ? kids(t.id).filter(shownInTree) : [];
+    let y;
+    if (!ch.length){ y = row * (NH + GY); row++; }
+    else { const ys = ch.map(c => place(c, d + 1)); y = (ys[0] + ys.at(-1)) / 2; }
+    nodes.push({t, x: d * (NW + GX), y});
+    return y;
+  };
+  const ys = treeRoots().map(r => place(r, 1));
+  return {nodes, rootY: ys.length ? (ys[0] + ys.at(-1)) / 2 : 0, w: (maxD + 1) * (NW + GX) - GX, h: Math.max(1, row) * (NH + GY) - GY};
+}
+function renderMap(){
+  const p = project(treeProj()), L = layoutMap();
+  mapSize = {w: L.w, h: L.h}; mapNodes = Object.fromEntries(L.nodes.map(n => [n.t.id, n]));
+  const link = (x1, y1, x2, y2, done) => { const m = (x1 + x2) / 2; return `<path class="${done ? 'done' : ''}" d="M${x1} ${y1} C${m} ${y1} ${m} ${y2} ${x2} ${y2}"/>`; };
+  $('#links').setAttribute('width', Math.max(1, L.w)); $('#links').setAttribute('height', Math.max(1, L.h));
+  $('#links').innerHTML = L.nodes.map(n => { const par = n.t.parent ? mapNodes[n.t.parent] : {x: 0, y: L.rootY}; return link(par.x + NW, par.y + NH / 2, n.x, n.y + NH / 2, n.t.status === 'done'); }).join('');
+  const all = db.tasks.filter(t => t.project === treeProj());
+  $('#nodes').innerHTML = `<div class="node root" data-root="1" style="left:0;top:${L.rootY}px"><div class="n-top">${p ? `<span class="pdot" style="background:${p.hue}"></span>` : ''}<b>${esc(p ? p.name : 'Без проекта')}</b></div>
+      <div class="n-sub">${all.length} задач · ${all.filter(t => t.status === 'done').length} готово</div></div>` +
+    L.nodes.map(({t, x, y}) => { const has = kids(t.id).length;
+      return `<div class="node${t.id === treeSel ? ' is-sel' : ''}${t.status === 'done' ? ' is-done' : ''}" style="left:${x}px;top:${y}px" data-node="${esc(t.id)}">
+        <div class="n-top"><span ${siAttr(t)}></span><span class="id">${esc(t.id)}</span>${t.assignee ? ava(person(t.assignee), true) : ''}</div>
+        <div class="n-ttl">${esc(t.title)}</div><div class="n-sub">${treeMeta(t, has)}</div>
+        ${has ? `<button class="n-fold" data-tfold="${esc(t.id)}" title="${isOpen(t.id) ? 'Свернуть ветку' : `Раскрыть: ${desc(t.id).length} подзадач`}" aria-label="${isOpen(t.id) ? 'Свернуть ветку' : 'Раскрыть ветку'}">${isOpen(t.id) ? '−' : '+' + desc(t.id).length}</button>` : ''}</div>`;
+    }).join('');
+  if (mapView().fresh) fitMap(); else applyView();
+}
+function applyView(){
+  const v = mapView();
+  $('#stage').style.transform = `translate(${v.x}px,${v.y}px) scale(${v.k})`;
+  $('#zoom-val').textContent = Math.round(v.k * 100) + '%';
+  clearTimeout(saveViewTimer); saveViewTimer = setTimeout(saveUi, 400); // position and zoom are remembered per project
+}
+function zoomAt(k, px, py){
+  const v = mapView(); k = Math.min(1.6, Math.max(MIN_K, k));
+  v.x = px - (px - v.x) * (k / v.k); v.y = py - (py - v.y) * (k / v.k); v.k = k;
+  applyView();
+}
+function fitMap(){
+  const m = $('#map'), v = mapView(), W = m.clientWidth, H = m.clientHeight - 56;
+  if (!W) return;
+  delete v.fresh;
+  v.k = Math.min(1, Math.max(MIN_K, Math.min((W - 48) / mapSize.w, (H - 24) / mapSize.h)));
+  v.x = (W - mapSize.w * v.k) / 2; v.y = 56 + (H - mapSize.h * v.k) / 2;
+  applyView();
+}
+(() => {
+  const m = $('#map');
+  let start = null, drop = null;
+  const clearDrop = () => document.querySelectorAll('#nodes .drop-in,#nodes .drop-before,#nodes .drop-after,#nodes .drop-bad').forEach(x => x.classList.remove('drop-in', 'drop-before', 'drop-after', 'drop-bad'));
+  // pressing on empty space pans the map; pressing on a block drags that block
+  m.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || e.target.closest('button')) return;
+    const el = e.target.closest('[data-node]'), v = mapView();
+    start = {x: e.clientX, y: e.clientY, vx: v.x, vy: v.y, moved: false, node: el?.dataset.node, el};
+    m.setPointerCapture(e.pointerId);
+  });
+  m.addEventListener('pointermove', e => {
+    if (!start) return;
+    const v = mapView(), dx = e.clientX - start.x, dy = e.clientY - start.y;
+    if (!start.moved && Math.hypot(dx, dy) < 4) return; // a tiny wobble is still a click
+    if (!start.moved){
+      start.moved = true; m.classList.add('panning');
+      if (start.node){ start.el.classList.add('dragging'); desc(start.node).forEach(x => document.querySelector(`[data-node="${CSS.escape(x.id)}"]`)?.classList.add('ghosted')); }
+    }
+    if (!start.node){ v.x = start.vx + dx; v.y = start.vy + dy; return applyView(); }
+    const r = m.getBoundingClientRect(), E = 40, S = 12; // near an edge the map scrolls under the dragged block
+    if (e.clientX < r.left + E) v.x += S; else if (e.clientX > r.right - E) v.x -= S;
+    if (e.clientY < r.top + E) v.y += S; else if (e.clientY > r.bottom - E) v.y -= S;
+    applyView();
+    start.el.style.transform = `translate(${(dx - (v.x - start.vx)) / v.k}px,${(dy - (v.y - start.vy)) / v.k}px)`;
+    clearDrop(); drop = null;
+    const over = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-node],[data-root]');
+    if (!over) return;
+    if (over.dataset.root){ drop = {mode: 'top'}; over.classList.add('drop-in'); return; }
+    const id = over.dataset.node, bad = desc(start.node).some(x => x.id === id);
+    const b = over.getBoundingClientRect(), f = (e.clientY - b.top) / b.height, mode = f < .25 ? 'before' : f > .75 ? 'after' : 'in';
+    over.classList.add(bad ? 'drop-bad' : 'drop-' + mode);
+    drop = bad ? {bad: true} : {id, mode};
+  });
+  const end = () => {
+    if (!start) return;
+    const s = start, d = drop; start = null; drop = null;
+    m.classList.remove('panning'); clearDrop();
+    if (!s.moved){ if (s.node){ treeSel = s.node; renderMap(); openTask(s.node); } return; }
+    if (!s.node) return;
+    if (d?.bad) toast('Нельзя вложить задачу в её же подзадачу');
+    else if (d?.mode === 'top') moveTask(s.node, null, 'top', treeProj());
+    else if (d?.id){ if (d.mode === 'in') setOpen(d.id, true); moveTask(s.node, d.id, d.mode); }
+    renderMap(); // also puts the block back when it was dropped on empty space
+  };
+  m.addEventListener('pointerup', end);
+  m.addEventListener('pointercancel', () => { if (start){ start = null; drop = null; m.classList.remove('panning'); clearDrop(); renderMap(); } });
+  m.addEventListener('wheel', e => { e.preventDefault(); const r = m.getBoundingClientRect(); zoomAt(mapView().k * Math.exp(-e.deltaY * .0015), e.clientX - r.left, e.clientY - r.top); }, {passive: false});
+  m.addEventListener('keydown', e => {
+    const v = mapView(), c = [m.clientWidth / 2, m.clientHeight / 2];
+    const act = {ArrowLeft: () => v.x += 60, ArrowRight: () => v.x -= 60, ArrowUp: () => v.y += 60, ArrowDown: () => v.y -= 60,
+      '+': () => zoomAt(v.k * 1.2, ...c), '=': () => zoomAt(v.k * 1.2, ...c), '-': () => zoomAt(v.k / 1.2, ...c), '0': fitMap}[e.key];
+    if (!act) return;
+    e.preventDefault(); act(); applyView();
+  });
+  m.querySelector('.map-ctl').addEventListener('click', e => {
+    const z = e.target.closest('[data-zoom]')?.dataset.zoom, c = [m.clientWidth / 2, m.clientHeight / 2];
+    if (z === 'in') zoomAt(mapView().k * 1.25, ...c);
+    if (z === 'out') zoomAt(mapView().k / 1.25, ...c);
+    if (z === 'fit') fitMap();
+  });
+})();
 
 /* ---------- archive of done tasks ---------- */
 const isArchived = t => t.status === 'done' && t.doneAt < daysAgo(ARCHIVE_DAYS);
@@ -1320,7 +1723,15 @@ function openTask(id, opts = {}){
   if (existing && asEmployee && !existing.seen){ existing.seen = true; addLog(existing, `${person(existing.assignee)?.name} просмотрел задачу`); commit(); }
   const t = existing ? structuredClone(existing) : normTask({id: '', title: '', log: []});
   if (!existing){ t.title = ''; const tp = db.templates.find(x => x.id === opts.template); if (tp) fromTemplate(t, tp); }
+  // new subtask: project from the branch, assignee from the parent (both can be changed)
+  if (!existing && opts.parent && byId(opts.parent)){ const p = byId(opts.parent); Object.assign(t, {parent: p.id, project: rootTask(p).project, assignee: p.assignee}); }
+  else if (!existing && 'project' in opts) t.project = opts.project;
   const d = $('#d-task');
+  const banned = new Set(existing ? [existing.id, ...desc(existing.id).map(x => x.id)] : []);
+  const parentOpts = [...db.projects, {id: null, name: 'Без проекта'}].map(p => {
+    const list = db.tasks.filter(x => x.project === p.id && !banned.has(x.id) && (!isArchived(x) || x.id === t.parent));
+    return list.length ? `<optgroup label="${esc(p.name)}">${list.map(x => `<option value="${esc(x.id)}" ${t.parent === x.id ? 'selected' : ''}>${esc(x.id)} · ${esc(x.title.slice(0, 60))}</option>`).join('')}</optgroup>` : '';
+  }).join('');
   const peopleOpts = [...active(), ...(t.assignee && person(t.assignee)?.archived ? [person(t.assignee)] : [])]
     .map(p => `<option value="${esc(p.id)}" ${t.assignee === p.id ? 'selected' : ''}>${esc(p.name)}${p.archived ? ' (архив)' : ''}</option>`).join('');
   const projOpts = [...activeProjects(), ...(t.project && project(t.project)?.archived ? [project(t.project)] : [])]
@@ -1333,11 +1744,13 @@ function openTask(id, opts = {}){
   <div class="d-head">${existing ? `<span class="id">${esc(t.id)}</span>` : ''}<h2>${existing ? 'Задача' : 'Новая задача'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
   <div class="d-body">
     ${!existing && db.templates.length ? `<div class="field"><label for="f-tpl">Шаблон</label><select id="f-tpl"><option value="">Без шаблона</option>${db.templates.map(x => `<option value="${esc(x.id)}" ${opts.template === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : ''}
+    ${t.parent && byId(t.parent) ? `<div class="crumbs" id="f-crumbs"></div>` : ''}
     <div class="field"><label for="f-title">Название</label><input id="f-title" class="title-input" maxlength="200" value="${esc(t.title)}" placeholder="Что нужно сделать"><span class="err" id="f-title-err" hidden>Введите название задачи</span></div>
     <div class="fields">
       <div class="field"><label for="f-status">Статус</label><select id="f-status">${opts2(STATUS, t.status)}</select></div>
       <div class="field"><label for="f-prio">Приоритет</label><select id="f-prio">${opts2(PRIO, t.prio)}</select></div>
-      <div class="field"><label for="f-proj">Проект</label><select id="f-proj"><option value="">Без проекта</option>${projOpts}</select></div>
+      <div class="field"><label for="f-proj">Проект</label><select id="f-proj" ${t.parent ? 'disabled title="Подзадача всегда в проекте родителя"' : ''}><option value="">Без проекта</option>${projOpts}</select></div>
+      <div class="field"><label for="f-parent">Входит в</label><select id="f-parent"><option value="">Верхний уровень</option>${parentOpts}</select></div>
       <div class="field"><label for="f-asg">Исполнитель</label><select id="f-asg"><option value="">Бэклог</option>${peopleOpts}</select></div>
       <div class="field"><label for="f-due">Срок</label><input id="f-due" type="date" value="${esc(t.due)}"></div>
       <div class="field"><label for="f-est">Оценка, ч</label><input id="f-est" type="number" min="0" step="0.5" value="${t.est || ''}"></div>
@@ -1345,10 +1758,14 @@ function openTask(id, opts = {}){
       <div class="field"><label for="f-rep">Повтор</label><select id="f-rep">${opts2(REPEATS, repKey)}</select></div>
       <div class="field"><label for="f-rep-from">Следующий считать</label><select id="f-rep-from"><option value="due" ${t.repeat?.from !== 'done' ? 'selected' : ''}>от срока</option><option value="done" ${t.repeat?.from === 'done' ? 'selected' : ''}>от даты выполнения</option></select></div>
     </div>
+    <label class="chk" id="f-close-kids-row" hidden><input type="checkbox" id="f-close-kids" checked> <span id="f-close-kids-text"></span></label>
     <p class="note" id="f-rep-note" ${t.repeat ? '' : 'hidden'}>Когда задача станет «Готово», появится следующая с новым сроком, тем же исполнителем и чистым чек-листом.</p>
     <div class="field"><label for="f-desc">Описание</label><textarea id="f-desc" maxlength="5000">${esc(t.desc)}</textarea></div>
     <div><h4 class="sec-t">Чек-лист</h4><div id="f-checks"></div>
       <div class="add-row"><input id="f-check-new" maxlength="300" placeholder="Новый пункт" aria-label="Новый пункт чек-листа"><button type="button" class="btn small" id="f-check-add">Добавить</button></div></div>
+    ${existing ? `<div><h4 class="sec-t">Подзадачи <span class="count" id="f-sub-count"></span></h4><div class="subs" id="f-subs"></div>
+      <div class="add-row"><input id="f-sub-new" maxlength="200" placeholder="Новая подзадача и Enter" aria-label="Новая подзадача"><button type="button" class="btn small" id="f-sub-add">Добавить</button></div>
+      <p class="note" style="margin-top:6px">Подзадача — отдельная задача со своим исполнителем и сроком. Для мелких шагов без исполнителя есть чек-лист.</p></div>` : ''}
     ${existing ? `<div><h4 class="sec-t">Вложения</h4><div class="attach" id="f-attach"></div>
       <div class="add-row"><input id="f-link" maxlength="2000" placeholder="Ссылка: https://…" aria-label="Адрес ссылки"><input id="f-link-title" maxlength="200" placeholder="Подпись (необязательно)" aria-label="Подпись ссылки"><button type="button" class="btn small" id="f-link-add">Добавить ссылку</button></div>
       <span class="err" id="f-link-err" hidden>Нужна ссылка, начинающаяся с http:// или https://</span>
@@ -1454,37 +1871,105 @@ function openTask(id, opts = {}){
   d.querySelector('#f-cmt-send')?.addEventListener('click', sendComment);
   d.querySelector('#f-cmt')?.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); sendComment(); } });
   d.querySelector('#f-cancel').onclick = () => d.close();
+  // deleting a parent lifts its subtasks one level up, nothing is lost
   d.querySelector('#f-del')?.addEventListener('click', () => {
     d.close();
-    change(() => { db.tasks = db.tasks.filter(x => x.id !== t.id); }, `${t.id} удалена`);
+    const up = kids(t.id).length;
+    change(() => { const gone = byId(t.id); db.tasks.forEach(x => { if (x.parent === t.id) x.parent = gone?.parent || null; }); db.tasks = db.tasks.filter(x => x.id !== t.id); },
+      `${t.id} удалена${up ? `, подзадачи (${up}) подняты на уровень выше` : ''}`);
+  });
+
+  /* path and subtasks */
+  const formSig = () => [...d.querySelectorAll('#task-form input:not(#f-sub-new):not(#f-check-new):not(#f-cmt):not(#f-link):not(#f-link-title), #task-form select, #task-form textarea:not(#f-cmt)')].map(x => x.type === 'checkbox' ? x.checked : x.value).join('\u0001') + JSON.stringify(t.checklist);
+  const sig0 = formSig();
+  // jumping to another task would drop unsaved edits, so it is refused until the user saves or cancels
+  const goTask = id => { if (formSig() !== sig0) return toast('Сначала сохраните или отмените изменения в этой задаче'); d.close(); openTask(id); };
+  let crumbsFull = false;
+  const drawCrumbs = () => {
+    const box = d.querySelector('#f-crumbs'); if (!box) return;
+    const live = byId(t.id) || t, a = ancestors(live), pr = project(live.project), link = x => `<span>›</span><button type="button" data-crumb="${esc(x.id)}" title="${esc(x.id)} ${esc(x.title)}">${esc(x.id)} ${esc(x.title)}</button>`;
+    box.innerHTML = `${pr ? `<span class="pdot" style="background:${pr.hue}"></span><span>${esc(pr.name)}</span>` : '<span>Без проекта</span>'}` +
+      (a.length <= 3 || crumbsFull ? a.map(link).join('') : link(a[0]) + `<span>›</span><button type="button" data-crumb-more title="Показать весь путь">… ещё ${a.length - 3}</button>` + a.slice(-2).map(link).join(''));
+  };
+  d.querySelector('#f-crumbs')?.addEventListener('click', e => {
+    if (e.target.closest('[data-crumb-more]')){ crumbsFull = true; return drawCrumbs(); }
+    const b = e.target.closest('[data-crumb]'); if (b) goTask(b.dataset.crumb);
+  });
+  const drawSubs = () => {
+    drawCrumbs();
+    const box = d.querySelector('#f-subs'); if (!box) return;
+    const ks = kids(t.id), r = rollup(byId(t.id) || t);
+    d.querySelector('#f-sub-count').textContent = ks.length ? `${ks.filter(k => k.status === 'done').length} из ${ks.length}${r.total > ks.length ? ` · всего в ветке ${r.total}` : ''}` : '';
+    box.innerHTML = ks.map(k => `<div class="sub${k.status === 'done' ? ' is-done' : ''}">
+        <button type="button" ${siAttr(k)} data-sub-flip="${esc(k.id)}" aria-label="${k.status === 'done' ? 'Вернуть в работу' : 'Отметить готовой'}: ${esc(k.title)}"></button>
+        <span class="id">${esc(k.id)}</span><button type="button" class="ttl" data-sub-open="${esc(k.id)}">${esc(k.title)}${kids(k.id).length ? ` <span class="id">· ${rollup(k).done}/${rollup(k).total}</span>` : ''}</button>
+        ${k.assignee ? ava(person(k.assignee), true) : '<span class="ava sm none" title="Без исполнителя">?</span>'}</div>`).join('') || '<p class="note">Подзадач нет.</p>';
+  };
+  refreshTaskDialog = existing ? drawSubs : drawCrumbs;
+  drawSubs();
+  d.querySelector('#f-subs')?.addEventListener('click', e => {
+    let b;
+    if ((b = e.target.closest('[data-sub-flip]'))){ const k = byId(b.dataset.subFlip); if (k) setStatus(k.id, k.status === 'done' ? 'progress' : 'done'); }
+    else if ((b = e.target.closest('[data-sub-open]'))) goTask(b.dataset.subOpen);
+  });
+  const addSub = () => {
+    const inp = d.querySelector('#f-sub-new'), v = inp.value.trim(); if (!v) return inp.focus();
+    const live = byId(t.id); if (!live) return toast('Задача уже удалена');
+    addNewTask(normTask({title: v, parent: live.id, assignee: live.assignee}));
+    inp.value = ''; inp.focus();
+  };
+  d.querySelector('#f-sub-add')?.addEventListener('click', addSub);
+  d.querySelector('#f-sub-new')?.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); addSub(); } });
+  // closing a task that still has open subtasks: offer to close them too
+  const syncCloseKids = () => {
+    const n = existing ? openDesc(t.id).length : 0, on = val('#f-status') === 'done' && existing?.status !== 'done' && n > 0;
+    d.querySelector('#f-close-kids-row').hidden = !on;
+    d.querySelector('#f-close-kids-text').textContent = `Закрыть вместе с ней открытые подзадачи (${n})`;
+  };
+  d.querySelector('#f-status').addEventListener('change', syncCloseKids);
+  d.querySelector('#f-parent').addEventListener('change', e => {
+    const p = byId(e.target.value), sel = d.querySelector('#f-proj');
+    sel.disabled = !!p;
+    if (p) sel.value = rootTask(p).project || '';
   });
   d.querySelector('#task-form').onsubmit = e => {
     e.preventDefault();
     const [unit, n] = val('#f-rep').split(':');
     const status = val('#f-status');
     // status goes through applyStatus below so doneAt and repeats are handled in one place
+    const parentT = byId(val('#f-parent'));
     const next = normTask({...t, title: val('#f-title'), status: existing ? existing.status : status, prio: val('#f-prio'), assignee: val('#f-asg') || null,
-      due: val('#f-due'), est: val('#f-est'), tag: val('#f-tag').trim(), desc: val('#f-desc'), project: val('#f-proj') || null,
+      due: val('#f-due'), est: val('#f-est'), tag: val('#f-tag').trim(), desc: val('#f-desc'),
+      parent: parentT ? parentT.id : null, project: parentT ? rootTask(parentT).project : (val('#f-proj') || null),
       repeat: unit ? {unit, n, from: val('#f-rep-from')} : null, doneAt: existing?.doneAt});
+    const closeKids = !d.querySelector('#f-close-kids-row').hidden && d.querySelector('#f-close-kids').checked;
     if (!val('#f-title').trim()){ d.querySelector('#f-title-err').hidden = false; d.querySelector('#f-title').focus(); return; }
     d.close();
     if (!existing){ if (status === 'done') next.doneAt = stamp(); return addNewTask(next); }
     const statusChanged = status !== existing.status;
-    const names = {title:'название', prio:'приоритет', due:'срок', est:'оценку', tag:'тег', desc:'описание', checklist:'чек-лист', project:'проект', repeat:'повтор'};
+    const names = {title:'название', prio:'приоритет', due:'срок', est:'оценку', tag:'тег', desc:'описание', checklist:'чек-лист', project:'проект', parent:'родительскую задачу', repeat:'повтор'};
     const changed = Object.keys(names).filter(k => JSON.stringify(next[k]) !== JSON.stringify(existing[k]));
     const reassigned = next.assignee !== existing.assignee;
     if (!changed.length && !reassigned && !statusChanged) return;
     if (changed.length) next.log.push({at: stamp(), text: `${actor()} изменил: ${changed.map(k => names[k]).join(', ')}`});
     if (reassigned){ next.seen = !next.assignee; next.log.push({at: stamp(), text: next.assignee ? `${actor()} назначил: ${person(next.assignee).name}` : `${actor()} вернул в бэклог`}); }
     // look up by id: an undo while the dialog was open replaces the task objects
-    let spawned = null;
+    let spawned = null, ready = null, closed = 0;
     change(() => {
       const i = db.tasks.findIndex(x => x.id === next.id);
       if (i < 0){ toast('Задача уже удалена, изменения не сохранены'); return false; }
+      if (next.parent && !byId(next.parent)) next.parent = null; // the chosen parent was deleted meanwhile
       Object.assign(next, {comments: db.tasks[i].comments, links: db.tasks[i].links, files: db.tasks[i].files});
+      if (next.parent !== existing.parent) next.order = Math.max(0, ...(next.parent ? kids(next.parent) : []).map(x => x.order)) + 1;
       db.tasks[i] = next;
-      if (statusChanged) spawned = applyStatus(next, status, actor());
-    }, () => `${next.id} сохранена${spawned ? ` · следующий повтор ${spawned.id} на ${fmtDay(spawned.due)}` : ''}${reassigned ? overloadNote(next) : ''}`);
+      desc(next.id).forEach(x => x.project = next.project); // the branch follows its top task
+      if (statusChanged){
+        if (status === 'done' && closeKids){ const open = openDesc(next.id); closed = open.length; open.forEach(x => applyStatus(x, 'done', actor())); }
+        spawned = applyStatus(next, status, actor());
+        if (status === 'done') ready = readyParent(next);
+      }
+    }, () => `${next.id} сохранена${closed ? ` и закрыта с подзадачами (${closed})` : ''}${spawned ? ` · следующий повтор ${spawned.id} на ${fmtDay(spawned.due)}` : ''}${reassigned ? overloadNote(next) : ''}${ready ? ` · все подзадачи ${ready.id} готовы` : ''}`,
+    () => ready && byId(ready.id)?.status !== 'done' ? {label: `Закрыть ${ready.id}`, run: () => setStatus(ready.id, 'done')} : null);
   };
   if (!d.open) d.showModal();
   if (!existing) d.querySelector('#f-title').focus();
@@ -1609,14 +2094,18 @@ function archivePerson(id){
 }
 
 /* ---------- filters (per browser, not part of the data) ---------- */
-const UI_DEFAULT = {q: '', who: '', proj: '', prio: '', tag: '', overdue: false, sort: 'manual', repPeriod: '30'};
+const UI_DEFAULT = {q: '', who: '', proj: '', prio: '', tag: '', overdue: false, top: false, sort: 'manual', repPeriod: '30',
+  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}};
 const ui = (() => { try { return {...UI_DEFAULT, ...JSON.parse(localStorage.getItem(LS_UI) || '{}')}; } catch { return {...UI_DEFAULT}; } })();
+if (!Array.isArray(ui.treeClosed)) ui.treeClosed = [];
+if (!ui.mapViews || typeof ui.mapViews !== 'object') ui.mapViews = {};
 const saveUi = () => { try { localStorage.setItem(LS_UI, JSON.stringify(ui)); } catch {} };
-const filtersOn = () => !!(ui.q || ui.who || ui.proj || ui.prio || ui.tag || ui.overdue);
+const filtersOn = () => !!(ui.q || ui.who || ui.proj || ui.prio || ui.tag || ui.overdue || ui.top);
 function visible(t){
   if (ui.q && !`${t.title} ${t.desc} ${t.id} ${t.tag}`.toLowerCase().includes(ui.q.toLowerCase())) return false;
   if (ui.who === '-' ? t.assignee : ui.who && t.assignee !== ui.who) return false;
   if (ui.proj === '-' ? t.project : ui.proj && t.project !== ui.proj) return false;
+  if (ui.top && t.parent) return false;
   if (ui.prio && t.prio !== ui.prio) return false;
   if (ui.tag && t.tag !== ui.tag) return false;
   if (ui.overdue && !(t.due && t.due < addDays(0) && t.status !== 'done')) return false;
@@ -1633,20 +2122,21 @@ function renderFilters(){
   $('#fl-count').textContent = filtersOn() ? `Найдено ${db.tasks.filter(visible).length} из ${db.tasks.length}` : '';
 }
 function initFilters(){
-  $('#q').value = ui.q; $('#fl-prio').value = ui.prio; $('#fl-over').checked = ui.overdue; $('#fl-sort').value = ui.sort; $('#rep-period').value = ui.repPeriod;
+  $('#q').value = ui.q; $('#fl-prio').value = ui.prio; $('#fl-over').checked = ui.overdue; $('#fl-top').checked = ui.top; $('#fl-sort').value = ui.sort; $('#rep-period').value = ui.repPeriod;
 }
 $('#q').oninput = e => { ui.q = e.target.value.trim(); saveUi(); render(); };
 $('#q').onkeydown = e => { if (e.key === 'Escape' && e.target.value){ e.preventDefault(); e.target.value = ''; ui.q = ''; saveUi(); render(); } else if (e.key === 'Escape') e.target.blur(); };
 for (const [sel, key] of [['#fl-who', 'who'], ['#fl-proj', 'proj'], ['#fl-prio', 'prio'], ['#fl-tag', 'tag'], ['#fl-sort', 'sort']]) $(sel).onchange = e => { ui[key] = e.target.value; saveUi(); render(); };
 $('#fl-over').onchange = e => { ui.overdue = e.target.checked; saveUi(); render(); };
-function resetFilters(){ Object.assign(ui, {q: '', who: '', proj: '', prio: '', tag: '', overdue: false}); saveUi(); initFilters(); render(); }
+$('#fl-top').onchange = e => { ui.top = e.target.checked; saveUi(); render(); };
+function resetFilters(){ Object.assign(ui, {q: '', who: '', proj: '', prio: '', tag: '', overdue: false, top: false}); saveUi(); initFilters(); render(); }
 $('#fl-reset').onclick = resetFilters;
 
 /* ---------- quick entry: «Починить логин завтра !высокий #баг @Анна 3ч» ---------- */
 const PRIO_WORDS = {high: ['высокий', 'выс', 'в', '1', 'high'], med: ['средний', 'ср', 'с', '2', 'med'], low: ['низкий', 'низ', 'н', '3', 'low']};
 const WEEKDAYS = [['воскресенье', 'вс'], ['понедельник', 'пн'], ['вторник', 'вт'], ['сред', 'ср'], ['четверг', 'чт'], ['пятниц', 'пт'], ['суббот', 'сб']];
 const MONTHS = ['янв', 'фев', 'мар', 'апр', 'ма', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-function parseQuick(text, people, now = new Date(), projects = []){
+function parseQuick(text, people, now = new Date(), projects = [], tasks = []){
   let s = ` ${text} `;
   const r = {title: '', prio: '', tag: '', assignee: null, unknown: '', project: null, unknownProject: '', est: 0, due: ''};
   // cut the first match out of the text if fn accepts it (fn returning false keeps the words in the title)
@@ -1662,6 +2152,12 @@ function parseQuick(text, people, now = new Date(), projects = []){
     const p = people.find(p => p.name.toLowerCase().split(/\s+/).some(x => x.startsWith(w.toLowerCase())));
     if (!p){ r.unknown = w; return false; }
     r.assignee = p.id;
+  });
+  // ^PLN-120: the new task becomes a subtask of PLN-120 (and takes its project)
+  take(/\s\^([\p{L}]+-\d+)(?=\s)/u, (_, w) => {
+    const p = tasks.find(x => x.id.toLowerCase() === w.toLowerCase());
+    if (!p){ r.unknownParent = w; return false; }
+    r.parent = p.id;
   });
   take(/\s\+([\p{L}\p{N}_-]+)(?=\s)/u, (_, w) => {
     const p = projects.find(p => p.name.toLowerCase().split(/\s+/).some(x => x.startsWith(w.toLowerCase())));
@@ -1686,8 +2182,10 @@ function parseQuick(text, people, now = new Date(), projects = []){
 function quickPreview(){
   const v = $('#quick-in').value, box = $('#quick-prev');
   if (!v.trim()){ box.innerHTML = ''; return; }
-  const r = parseQuick(v, active(), new Date(), activeProjects());
+  const r = parseQuick(v, active(), new Date(), activeProjects(), db.tasks);
   box.innerHTML = [
+    r.parent && `<span class="chip">↳ в ${esc(r.parent)} · ${esc(byId(r.parent).title.slice(0, 40))}</span>`,
+    r.unknownParent && `<span class="chip warn">^${esc(r.unknownParent)}: такой задачи нет</span>`,
     !r.title && '<span class="chip warn">Добавьте название</span>',
     r.project && `<span class="chip"><span class="pdot" style="background:${project(r.project).hue}"></span>${esc(project(r.project).name)}</span>`,
     r.unknownProject && `<span class="chip warn">+${esc(r.unknownProject)}: такого проекта нет</span>`,
@@ -1703,9 +2201,9 @@ $('#quick-in').oninput = quickPreview;
 $('#quick-in').onkeydown = e => { if (e.key === 'Escape'){ e.target.value = ''; quickPreview(); e.target.blur(); } };
 $('#quick').onsubmit = e => {
   e.preventDefault();
-  const r = parseQuick($('#quick-in').value, active(), new Date(), activeProjects());
+  const r = parseQuick($('#quick-in').value, active(), new Date(), activeProjects(), db.tasks);
   if (!r.title) return quickPreview();
-  addNewTask(normTask({title: r.title, prio: r.prio || 'med', tag: r.tag, due: r.due, est: r.est, assignee: r.assignee, project: r.project}));
+  addNewTask(normTask({title: r.title, prio: r.prio || 'med', tag: r.tag, due: r.due, est: r.est, assignee: r.assignee, project: r.project, parent: r.parent}));
   $('#quick-in').value = ''; quickPreview();
 };
 
@@ -1722,9 +2220,12 @@ const COMMANDS = [
   ['Поиск задач', '/', focusSearch],
   ['Вид: Распределение', '1', () => setView('team')],
   ['Вид: Канбан', '2', () => setView('board')],
-  ['Вид: Загрузка по неделям', '3', () => setView('load')],
-  ['Вид: Журнал', '4', () => setView('log')],
-  ['Вид: Отчёты', '5', () => setView('report')],
+  ['Вид: Дерево проекта', '3', () => setView('tree')],
+  ['Вид: Карта проекта', '', () => { ui.treeMode = 'map'; saveUi(); setView('tree'); }],
+  ['Вид: Загрузка по неделям', '4', () => setView('load')],
+  ['Вид: Журнал', '5', () => setView('log')],
+  ['Вид: Отчёты', '6', () => setView('report')],
+  ['Фильтр: только верхний уровень', '', () => { ui.top = true; saveUi(); initFilters(); render(); }],
   ['Вид: Мои задачи', 'M', () => meId ? setView('my') : toast('Сначала выберите себя в списке «Я: …» в шапке')],
   ['Новый сотрудник', '', () => openPerson(null)],
   ['Проекты и шаблоны', '', openDict],
@@ -1814,18 +2315,20 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.target.closest('input,textarea,select,[contenteditable]') || document.querySelector('dialog[open]')) return;
   const f = {KeyN: () => openTask(null), KeyQ: focusQuick, Slash: focusSearch, Digit1: () => setView('team'), Digit2: () => setView('board'),
-    Digit3: () => setView('load'), Digit4: () => setView('log'), Digit5: () => setView('report'), KeyM: () => meId && setView('my')}[e.code];
+    Digit3: () => setView('tree'), Digit4: () => setView('load'), Digit5: () => setView('log'), Digit6: () => setView('report'), KeyM: () => meId && setView('my')}[e.code];
   if (f){ e.preventDefault(); f(); }
 });
 
 /* ---------- toast ---------- */
 let tt;
-function toast(msg, undo){
+// action: optional second button {label, run}, e.g. «Закрыть PLN-120» when its last subtask is done
+function toast(msg, undo, action){
   const el = $('#toast');
-  el.innerHTML = `<span>${esc(msg)}</span>${undo ? '<button id="undo">Отменить</button>' : ''}`;
+  el.innerHTML = `<span>${esc(msg)}</span>${action ? `<button id="toast-act">${esc(action.label)}</button>` : ''}${undo ? '<button id="undo">Отменить</button>' : ''}`;
   el.hidden = false;
   if (undo) $('#undo').onclick = () => { undo(); el.hidden = true; };
-  clearTimeout(tt); tt = setTimeout(() => el.hidden = true, undo ? 6000 : 5000);
+  if (action) $('#toast-act').onclick = () => { el.hidden = true; action.run(); };
+  clearTimeout(tt); tt = setTimeout(() => el.hidden = true, undo || action ? 7000 : 5000);
 }
 
 /* ---------- drag & drop ---------- */
@@ -1885,7 +2388,7 @@ $('#new-person').onclick = () => openPerson(null);
 $('#store-btn').onclick = openStore;
 
 /* ---------- view & theme (per browser, not part of the data) ---------- */
-const VIEWS = ['team', 'board', 'my', 'load', 'log', 'report'];
+const VIEWS = ['team', 'board', 'tree', 'my', 'load', 'log', 'report'];
 let view = 'team';
 function setView(v){
   if (!VIEWS.includes(v) || (v === 'my' && !meId)) v = 'team';
@@ -1935,6 +2438,15 @@ addEventListener('storage', e => {
   console.assert(q('Купить 31.02').due === '' && q('Купить 31.02').title === 'Купить 31.02', 'quick: invalid date ignored');
   r = parseQuick('Обновить баннер +моб', ppl, now, [{id: 'app', name: 'Мобильное приложение'}]);
   console.assert(r.project === 'app' && r.title === 'Обновить баннер', 'quick: +project');
+})();
+(function selfTestTree(){
+  const m = migrate({version: 4, people: [], projects: [{id: 'p1', name: 'P'}, {id: 'p2', name: 'Q'}], tasks: [
+    {id: 'PLN-1', title: 'root', project: 'p1'}, {id: 'PLN-2', title: 'kid', parent: 'PLN-1', project: 'p2'}, {id: 'PLN-3', title: 'grandkid', parent: 'PLN-2'},
+    {id: 'PLN-4', title: 'orphan', parent: 'PLN-99'}, {id: 'PLN-5', title: 'loop a', parent: 'PLN-6'}, {id: 'PLN-6', title: 'loop b', parent: 'PLN-5'}, {id: 'PLN-7', title: 'self', parent: 'PLN-7'}]});
+  const t = id => m.tasks.find(x => x.id === id);
+  console.assert(t('PLN-2').project === 'p1' && t('PLN-3').project === 'p1', 'subtasks take the project of their top task');
+  console.assert(t('PLN-4').parent === null && t('PLN-7').parent === null, 'missing and self parents dropped');
+  console.assert(t('PLN-5').parent === null || t('PLN-6').parent === null, 'a loop is cut');
 })();
 (function selfTestStage4(){
   console.assert(safeUrl('javascript:alert(1)') === '' && safeUrl('example.com/a') === 'https://example.com/a' && safeUrl('http://x.ru') === 'http://x.ru/', 'safeUrl');
