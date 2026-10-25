@@ -221,6 +221,53 @@ table.grid{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
 .dict-row .grow{flex:1;min-width:0}
 .pdot{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block}
 .muted{color:var(--muted)}
+.attach{display:grid;gap:6px}
+.att{display:flex;gap:10px;align-items:center;background:var(--sunken);border-radius:10px;padding:8px 12px;font-size:14px}
+.att a{color:var(--accent);flex:1;min-width:0;overflow-wrap:anywhere}
+.att .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.att-ic{flex:none}
+.att-img{width:40px;height:40px;object-fit:cover;border-radius:6px;flex:none}
+.att-rm{border:0;background:none;color:var(--muted);cursor:pointer;padding:2px 6px;flex:none}
+label.btn{display:inline-flex;align-items:center}
+.add-row input{min-width:0}
+.print-only{display:none}
+
+/* phones and tablets: no hover, no drag; tap opens an action sheet instead */
+@media (pointer:coarse){
+  .hint,.drop-hint,header kbd,#pal-btn kbd,#help-btn kbd{display:none}
+  .task{cursor:pointer}
+}
+dialog.sheet{width:min(460px,calc(100vw - 16px))}
+.sheet .d-body{gap:12px}
+.sheet .row{display:flex;flex-wrap:wrap;gap:8px}
+.sheet .row .btn{flex:1 1 auto}
+.sheet .btn[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+@media (max-width:600px){
+  body{padding-block:12px 32px}
+  header{gap:8px}
+  .logo{font-size:19px}
+  header .seg:first-of-type{order:10;width:100%;overflow-x:auto;scrollbar-width:none}
+  header .seg button{white-space:nowrap}
+  #dict-btn,#help-btn,#pal-btn{padding:6px 10px;font-size:13px}
+  dialog{width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}
+  dialog.sheet{margin:auto auto 8px}
+  .d-body{max-height:calc(100dvh - 170px)}
+  .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .add-row{flex-wrap:wrap}
+  .add-row input,.add-row textarea{flex:1 1 100%}
+}
+
+@media print{
+  :root,:root[data-theme="dark"],:root:not([data-theme="light"]){
+    --bg:#fff; --surface:#fff; --sunken:#f2f2f2; --fg:#000; --muted:#444; --line:#ccc; --accent:#1f45c8; --accent-soft:#e8edfb;
+    --high:#b0261a; --high-soft:#fbe4e0; --med:#7a4c00; --med-soft:#faefd6; --low:#1e5c37; --low-soft:#def1e5; color-scheme:light}
+  body{padding:0}
+  header,.banner,.filters,.toolbar,.toast,main:not(#v-report),dialog{display:none!important}
+  #v-report{display:grid!important}
+  .print-only{display:block}
+  .tile,.table-wrap,.bars{break-inside:avoid;box-shadow:none}
+  .bars .b i{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
 #d-help{width:min(980px,calc(100vw - 32px));overflow:hidden}
 .help-q{margin-left:auto;flex:0 1 260px;min-width:0;padding:7px 10px;border-radius:10px;border:1px solid var(--line);background:var(--sunken)}
 #d-help .close{margin-left:0}
@@ -327,7 +374,7 @@ table.grid{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
     <div class="toolbar">
       <label for="rep-period" class="k">Период</label>
       <select id="rep-period"><option value="7">7 дней</option><option value="30">30 дней</option><option value="90">90 дней</option><option value="365">Год</option><option value="0">Всё время</option></select>
-      <span class="spacer"></span><button class="btn" id="rep-csv">Скачать CSV задач</button>
+      <span class="spacer"></span><button class="btn" id="rep-print">Печать / PDF</button><button class="btn" id="rep-csv">Скачать CSV задач</button>
     </div>
     <div id="rep-body" class="stack"></div>
   </main>
@@ -341,6 +388,8 @@ table.grid{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
 <dialog id="d-pal" aria-label="Команды"></dialog>
 <dialog id="d-return"></dialog>
 <dialog id="d-dict"></dialog>
+<dialog id="d-archive"></dialog>
+<dialog id="d-act" class="sheet"></dialog>
 <dialog id="d-help" aria-labelledby="help-h">
   <div class="d-head"><h2 id="help-h">Справка</h2>
     <input type="search" id="help-q" class="help-q" placeholder="Поиск по справке" aria-label="Поиск по справке" autocomplete="off">
@@ -381,6 +430,7 @@ table.grid{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
           <dt>Тег</dt><dd>Короткая метка: Баг, UI, Дизайн. По тегу можно фильтровать.</dd>
           <dt>Повтор</dt><dd>См. раздел «Повторяющиеся задачи».</dd>
           <dt>Чек-лист</dt><dd>Пункт добавляется кнопкой «Добавить» или клавишей <kbd>Enter</kbd>. Прогресс «☑ 2/5» виден на карточке.</dd>
+          <dt>Вложения</dt><dd>См. раздел «Вложения». Число вложений видно на карточке (📎).</dd>
           <dt>Комментарии</dt><dd>Отправляются сразу, кнопкой или <kbd>Ctrl</kbd>+<kbd>Enter</kbd>, без кнопки «Сохранить». Подписываются тем, кто выбран в «Я: …». Число комментариев видно на карточке (💬).</dd>
           <dt>История</dt><dd>Кто, когда и что менял в задаче.</dd>
         </dl>
@@ -416,7 +466,18 @@ table.grid{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
 
       <section id="h-status"><h3>Статусы и канбан</h3>
         <p>Статусы: <b>Новая → В работе → На проверке → Готово</b>. На канбане статус меняется перетаскиванием между колонками, в карточке задачи — через поле «Статус».</p>
-        <p>Выполненные задачи пропадают из бэклога и списков сотрудников, но остаются в колонке «Готово», в журнале и в отчётах. Дата выполнения запоминается для отчётов.</p>
+        <p>Выполненные задачи пропадают из бэклога и списков сотрудников. Дата выполнения запоминается для отчётов.</p>
+        <p><b>Архив выполненных.</b> В колонке «Готово» видны задачи, закрытые за последние 14 дней. Более старые уходят в архив: кнопка «Архив выполненных» внизу колонки, команда в палитре. В архиве есть поиск. Архивные задачи учитываются в журнале и отчётах. Чтобы вернуть задачу в работу, откройте её и смените статус.</p>
+      </section>
+
+      <section id="h-attach"><h3>Вложения</h3>
+        <p>Раздел «Вложения» в карточке задачи. Изменения применяются сразу, кнопка «Сохранить» не нужна.</p>
+        <ul>
+          <li><b>Ссылки</b> можно добавлять всегда: адрес и, по желанию, подпись. Адрес без <code>https://</code> дополняется сам. Принимаются только ссылки http и https.</li>
+          <li><b>Файлы</b> — только когда подключён JSON-файл: в браузере для них около 5 МБ на всё. Файл до 5 МБ сохраняется внутри JSON-файла. Картинки показываются миниатюрой, любой файл можно скачать кнопкой «Скачать».</li>
+          <li>Если файл задачи отмечен «недоступен», значит, JSON-файл ещё не подключён в этом браузере или к нему не разрешён доступ. Разрешите доступ, и вложение появится.</li>
+          <li>Убранную ссылку или файл можно вернуть кнопкой «Отменить» в уведомлении.</li>
+        </ul>
       </section>
 
       <section id="h-people"><h3>Сотрудники и режим «Я»</h3>
@@ -483,7 +544,18 @@ table.grid{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
           <li>График закрытых задач по неделям за последние 8 недель, он не зависит от выбранного периода.</li>
           <li>Таблицы по сотрудникам и по проектам.</li>
           <li><b>Скачать CSV задач</b>: все задачи в таблицу. Разделитель — точка с запятой, файл открывается в Excel с русскими настройками.</li>
+          <li><b>Печать / PDF</b>: печатает только отчёт, в светлых цветах, с заголовком и датой. Чтобы получить PDF, выберите в окне печати «Сохранить как PDF».</li>
         </ul>
+      </section>
+
+      <section id="h-mobile"><h3>Телефон и планшет</h3>
+        <p>На сенсорном экране перетаскивание не работает, поэтому нажатие на карточку открывает меню действий:</p>
+        <ul>
+          <li><b>Открыть подробности</b>: полная карточка задачи;</li>
+          <li><b>Исполнитель</b>: назначить одним нажатием или вернуть в бэклог;</li>
+          <li><b>Статус</b>: сменить одним нажатием.</li>
+        </ul>
+        <p>На узком экране колонки встают друг под другом, переключатель видов прокручивается вбок, окна раскрываются почти на весь экран. Подсказки горячих клавиш на сенсорных экранах скрыты.</p>
       </section>
 
       <section id="h-storage"><h3>Хранение данных</h3>
@@ -493,7 +565,7 @@ table.grid{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
           <dt>JSON-файл (Chrome, Edge)</dt><dd>«Сохранять в новый файл» или «Открыть файл»: после этого каждое изменение записывается в файл. Файл можно положить в облачную папку. После перезапуска браузера появится плашка «Разрешить доступ» — так браузер защищает файлы.</dd>
           <dt>Расхождение данных</dt><dd>Если файл изменили снаружи или в браузере есть правки новее файла, Планёрка спросит, какую версию оставить. Другая версия сохранится в резервную копию.</dd>
           <dt>Экспорт и импорт</dt><dd>«Скачать JSON» и «Импортировать JSON». Работает в любом браузере.</dd>
-          <dt>Резервная копия</dt><dd>Перед импортом, открытием файла и сбросом прежние данные сохраняются. «Восстановить резервную копию» возвращает их.</dd>
+          <dt>Резервные копии</dt><dd>Последние 15 копий хранятся в этом браузере. Копия создаётся раз в день при запуске, при каждом открытии JSON-файла, а также перед импортом, сбросом, восстановлением и выбором версии при расхождении. В меню хранения у каждой копии есть «Скачать» и «Восстановить» (второе требует двух нажатий). Восстановление тоже можно откатить: текущие данные перед ним попадают в копии.</dd>
           <dt>Сброс</dt><dd>«Начать с нуля» и «Загрузить пример» требуют двух нажатий.</dd>
         </dl>
         <p>Файлы от старых версий Планёрки обновляются автоматически. Файл от более новой версии не откроется, появится сообщение с просьбой обновить <code>index.html</code>.</p>
@@ -522,6 +594,8 @@ table.grid{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
           <li>В Firefox перетаскивание карточек может не работать. Назначайте через поле «Исполнитель».</li>
           <li>Подключение JSON-файла есть только в Chrome и Edge. В остальных браузерах используйте экспорт и импорт.</li>
           <li>Браузер выделяет на сайт около 5 МБ. Для тысяч задач с длинными описаниями подключите файл.</li>
+          <li>Резервные копии лежат в том же браузере. При очистке данных сайта они пропадут вместе с основной копией, поэтому для надёжности держите данные в JSON-файле в облачной папке.</li>
+          <li>Каждое вложение увеличивает JSON-файл примерно на треть больше своего размера.</li>
         </ul>
       </section>
 
@@ -533,7 +607,9 @@ table.grid{border-collapse:collapse;width:100%;font-size:14px;font-variant-numer
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
-const SCHEMA = 3;
+const SCHEMA = 4;
+const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
+const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
 const LS_KEY = 'planerka.data', LS_BACKUP = 'planerka.backup', LS_THEME = 'planerka.theme', LS_VIEW = 'planerka.view', LS_UI = 'planerka.ui', LS_ME = 'planerka.me';
 const STATUS = {new:'Новая', progress:'В работе', review:'На проверке', done:'Готово'};
 const PRIO = {high:'Высокий', med:'Средний', low:'Низкий'};
@@ -552,7 +628,8 @@ const stamp = () => new Date().toISOString();
 const daysAgo = n => new Date(Date.now() - n * 864e5).toISOString();
 const fmtStamp = s => { const d = new Date(s); return isNaN(d) ? s : d.toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}); };
 const initials = n => n.trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
-const hoursWord = n => n%10===1 && n%100!==11 ? 'час' : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 'часа' : 'часов');
+const fmtSize = n => n < 1024 ? `${n} Б` : n < 1048576 ? `${Math.round(n / 1024)} КБ` : `${(n / 1048576).toLocaleString('ru-RU', {maximumFractionDigits: 1})} МБ`;
+const hoursWord =n => n%10===1 && n%100!==11 ? 'час' : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 'часа' : 'часов');
 
 /* ---------- schema ---------- */
 function normPerson(p){
@@ -581,7 +658,15 @@ function normTask(t){
     doneAt: t.status === 'done' ? (s(t.doneAt, 40) || s(t.createdAt, 40) || stamp()) : '',
     project: t.project ? s(t.project, 40) : null,
     repeat: normRepeat(t.repeat),
+    links: (Array.isArray(t.links) ? t.links : []).map(l => ({url: safeUrl(l?.url), title: s(l?.title, 200), at: s(l?.at, 40)})).filter(l => l.url),
+    files: (Array.isArray(t.files) ? t.files : []).map(f => ({id: s(f?.id, 40), name: s(f?.name, 200) || 'файл', type: s(f?.type, 100), size: Math.max(0, Number(f?.size) || 0), at: s(f?.at, 40)})).filter(f => f.id),
   };
+}
+// only http(s) links: a javascript: or data: href in a shared file would run on click
+function safeUrl(v){
+  let s = String(v ?? '').trim().slice(0, 2000);
+  if (s && !/^[a-z][a-z0-9+.-]*:/i.test(s)) s = 'https://' + s;
+  try { const u = new URL(s); return /^https?:$/.test(u.protocol) ? u.href : ''; } catch { return ''; }
 }
 function normRepeat(r){
   if (!r || typeof r !== 'object' || !REPEAT_UNITS[r.unit]) return null;
@@ -626,7 +711,12 @@ function migrate(raw){
   const templates = (Array.isArray(raw.templates) ? raw.templates : []).filter(p => p && typeof p === 'object').map(normTemplate);
   templates.forEach(p => { if (p.project && !prids.has(p.project)) p.project = null; });
   const events = (Array.isArray(raw.events) ? raw.events : []).slice(-500).map(e => ({at: String(e?.at ?? '').slice(0, 40), text: String(e?.text ?? '').slice(0, 300)}));
-  return {version: SCHEMA, nextId, people, tasks, projects, templates, events, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null};
+  // v3 -> v4: links/files on tasks, file contents in blobs; blobs nobody refers to are dropped
+  const used = new Set(tasks.flatMap(t => t.files.map(f => f.id)));
+  const blobs = {};
+  for (const [id, b] of Object.entries(raw.blobs && typeof raw.blobs === 'object' ? raw.blobs : {}))
+    if (used.has(id) && typeof b?.data === 'string' && b.data.startsWith('data:')) blobs[id] = {data: b.data};
+  return {version: SCHEMA, nextId, people, tasks, projects, templates, events, blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null};
 }
 
 function demo(){
@@ -643,13 +733,13 @@ function demo(){
     {id:'PLN-101', title:'Пример: форма оплаты падает на Safari 17', prio:'high', due:addDays(2), est:4, tag:'Баг', desc:'При нажатии «Оплатить» на iOS Safari 17 страница перезагружается и корзина очищается.', checklist:[{text:'Воспроизвести на устройстве'},{text:'Найти причину'},{text:'Написать тест'}], log},
     {id:'PLN-102', title:'Пример: API экспорта отчётов в CSV', prio:'med', due:addDays(5), est:8, tag:'Фича', assignee:'ik', seen:false, desc:'Эндпоинт /reports/export отдаёт CSV по фильтрам из интерфейса.', checklist:[{text:'Схема эндпоинта'},{text:'Пагинация'}], log},
     {id:'PLN-103', title:'Пример: тёмная тема для настроек профиля', prio:'low', due:addDays(6), est:3, tag:'UI', desc:'Перевести экран настроек на токены темы.', log},
-    {id:'PLN-104', title:'Пример: иллюстрации для пустых состояний', prio:'med', due:addDays(4), est:6, tag:'Дизайн', assignee:'ms', status:'progress', checklist:[{text:'Скетчи', done:true},{text:'Финал'}], log, comments:[{at: stamp(), author:'Марина Соколова', text:'Скетчи готовы, посмотрите до четверга.'}]},
+    {id:'PLN-104', title:'Пример: иллюстрации для пустых состояний', prio:'med', due:addDays(4), est:6, tag:'Дизайн', assignee:'ms', status:'progress', checklist:[{text:'Скетчи', done:true},{text:'Финал'}], links:[{url:'https://www.figma.com/', title:'Макеты в Figma (пример)'}], log, comments:[{at: stamp(), author:'Марина Соколова', text:'Скетчи готовы, посмотрите до четверга.'}]},
     {id:'PLN-105', title:'Пример: регресс перед релизом 3.8', prio:'high', due:addDays(-1), est:6, tag:'QA', assignee:'dp', status:'progress', log},
     {id:'PLN-106', title:'Пример: адаптив шапки на планшетах', prio:'med', due:addDays(0), est:3, tag:'UI', assignee:'am', status:'review', log},
     {id:'PLN-107', title:'Пример: переименовать «Проекты» в «Пространства»', prio:'low', due:addDays(8), est:2, tag:'Тексты', log},
     {id:'PLN-108', title:'Пример: обновить зависимости сборки', prio:'low', est:2, tag:'Бэкенд', assignee:'ik', status:'done', createdAt: daysAgo(9), doneAt: daysAgo(3), log},
     {id:'PLN-109', title:'Пример: починить фильтр в каталоге', prio:'high', due:addDays(-8), est:3, tag:'Баг', assignee:'am', status:'done', createdAt: daysAgo(12), doneAt: daysAgo(6), log},
-    {id:'PLN-110', title:'Пример: баннер для акции', prio:'med', due:addDays(-12), est:4, tag:'Дизайн', assignee:'ms', status:'done', createdAt: daysAgo(16), doneAt: daysAgo(11), log},
+    {id:'PLN-110', title:'Пример: баннер для акции', prio:'med', due:addDays(-12), est:4, tag:'Дизайн', assignee:'ms', status:'done', createdAt: daysAgo(25), doneAt: daysAgo(20), log},
     {id:'PLN-111', title:'Пример: еженедельный отчёт по багам', prio:'med', due:addDays(3), est:1, tag:'QA', assignee:'dp', status:'progress', repeat:{unit:'week', n:1, from:'due'}, log},
   ]});
   const proj = {'PLN-101':'web', 'PLN-102':'web', 'PLN-103':'app', 'PLN-104':'web', 'PLN-105':'app', 'PLN-106':'web', 'PLN-109':'web', 'PLN-110':'web'};
@@ -660,6 +750,7 @@ function demo(){
 /* ---------- storage: localStorage always, JSON file optionally ---------- */
 const FS_OK = 'showSaveFilePicker' in window;
 const file = {handle: null, name: '', mtime: 0, needsPermission: false, error: ''};
+const canAttach = () => !!file.handle && !file.needsPermission;
 let db, saveTimer, writing = Promise.resolve();
 
 function idb(mode, fn){
@@ -674,11 +765,31 @@ const idbGet = k => idb('readonly', s => s.get(k)).catch(() => null);
 const idbSet = (k, v) => idb('readwrite', s => s.put(v, k)).catch(() => {});
 const idbDel = k => idb('readwrite', s => s.delete(k)).catch(() => {});
 
+// attachment contents never go to localStorage (about 5 MB per site): they live in the JSON file only
 function saveLocal(){
-  try { localStorage.setItem(LS_KEY, JSON.stringify(db)); return true; }
+  try { localStorage.setItem(LS_KEY, JSON.stringify({...db, blobs: {}})); return true; }
   catch { toast('Браузер не дал сохранить данные: место закончилось или хранилище заблокировано. Сохраните экспорт в файл.'); return false; }
 }
-function backupLocal(){ try { localStorage.setItem(LS_BACKUP, JSON.stringify(db)); } catch {} }
+const sameData = (a, b) => JSON.stringify({...a, savedAt: 0, blobs: 0}) === JSON.stringify({...b, savedAt: 0, blobs: 0});
+
+/* backups: the last SNAP_MAX copies in IndexedDB (much more room than localStorage) */
+const SNAP_MAX = 15;
+const snapshots = async () => { const l = await idbGet('snapshots'); return Array.isArray(l) ? l : []; };
+async function snapshot(data, reason){
+  try {
+    const list = await snapshots();
+    list.push({at: stamp(), reason, tasks: data.tasks.length, json: JSON.stringify(data)});
+    await idbSet('snapshots', list.slice(-SNAP_MAX));
+  } catch {}
+}
+const backupLocal = reason => snapshot(db, reason);
+// one copy per day on start, so a bad day can always be rolled back
+async function dailySnapshot(){
+  const list = await snapshots();
+  if (!list.some(s => s.at.startsWith(new Date().toISOString().slice(0, 10)))) await snapshot(db, 'Ежедневная копия');
+  // the single localStorage backup of earlier versions moves into the list once
+  try { const old = localStorage.getItem(LS_BACKUP); if (old){ await snapshot(migrate(JSON.parse(old)), 'Копия из прежней версии'); localStorage.removeItem(LS_BACKUP); } } catch {}
+}
 function loadLocal(){
   let raw;
   try { raw = localStorage.getItem(LS_KEY); } catch {}
@@ -719,9 +830,10 @@ async function loadFromHandle(){
   const f = await file.handle.getFile();
   const data = await parseFile(f);
   // local edits made while the file was unreachable must not vanish silently
-  if (db.savedAt && data.savedAt && db.savedAt > data.savedAt && JSON.stringify({...db, savedAt:0}) !== JSON.stringify({...data, savedAt:0}))
+  if (db.savedAt && data.savedAt && db.savedAt > data.savedAt && !sameData(db, data))
     return conflict(data, f.lastModified, 'В браузере есть изменения новее, чем в файле.');
   db = data; file.mtime = f.lastModified; saveLocal(); render();
+  snapshot(data, `При открытии ${file.name}`);
 }
 async function createFile(){
   try {
@@ -735,7 +847,8 @@ async function openFile(){
   try {
     const [h] = await showOpenFilePicker({types: [{description: 'Данные Планёрки', accept: {'application/json': ['.json']}}]});
     const f = await h.getFile(), data = await parseFile(f);
-    backupLocal(); db = data; await useHandle(h); file.mtime = f.lastModified; saveLocal();
+    backupLocal('Перед открытием файла'); db = data; await useHandle(h); file.mtime = f.lastModified; saveLocal();
+    snapshot(data, `При открытии ${h.name}`);
     toast(`Открыт ${h.name}. Прежние данные браузера сохранены в резервную копию.`);
   } catch (e) { if (e.name !== 'AbortError') toast('Не удалось открыть файл: ' + e.message); }
   render();
@@ -748,8 +861,11 @@ async function grantAccess(){
   render();
 }
 async function detachFile(){
+  const hadFiles = Object.keys(db.blobs).length;
   file.handle = null; file.name = ''; file.mtime = 0; file.needsPermission = false; file.error = '';
-  await idbDel('handle'); toast('Файл отключён. Данные хранятся в браузере.'); render();
+  await idbDel('handle');
+  toast(hadFiles ? 'Файл отключён. Вложенные файлы остались в нём, в браузере они будут недоступны после перезагрузки.' : 'Файл отключён. Данные хранятся в браузере.');
+  render();
 }
 
 let pending = null;
@@ -760,8 +876,12 @@ function conflict(data, mtime, reason){
     <div class="d-body"><p class="note">${esc(reason)}</p>
     <p class="note">Файл сохранён: ${data.savedAt ? fmtStamp(data.savedAt) : 'неизвестно'} · в браузере: ${db.savedAt ? fmtStamp(db.savedAt) : 'неизвестно'}. Вторую версию сохраню в резервную копию, её можно будет восстановить в меню хранения.</p></div>
     <div class="d-foot"><button class="btn" id="cf-file">Взять данные из файла</button><span class="spacer"></span><button class="btn primary" id="cf-local">Записать в файл данные браузера</button></div>`;
-  d.querySelector('#cf-file').onclick = () => { backupLocal(); db = pending.data; file.mtime = pending.mtime; saveLocal(); d.close(); render(); };
-  d.querySelector('#cf-local').onclick = async () => { try { localStorage.setItem(LS_BACKUP, JSON.stringify(pending.data)); } catch {} d.close(); await writeFile(true); };
+  d.querySelector('#cf-file').onclick = () => { backupLocal('Версия браузера при расхождении'); db = pending.data; file.mtime = pending.mtime; saveLocal(); d.close(); render(); };
+  d.querySelector('#cf-local').onclick = async () => {
+    snapshot(pending.data, 'Версия файла при расхождении');
+    db.blobs = {...pending.data.blobs, ...db.blobs}; // the browser copy has no attachment contents; keep the file's
+    d.close(); await writeFile(true);
+  };
   if (!d.open) d.showModal();
 }
 
@@ -774,14 +894,19 @@ const exportJson = () => download(`planerka-${addDays(0)}.json`, new Blob([JSON.
 $('#import-input').onchange = async e => {
   const f = e.target.files[0]; e.target.value = '';
   if (!f) return;
-  try { const data = await parseFile(f); backupLocal(); db = data; commit(); toast(`Импортировано из ${f.name}: задач ${db.tasks.length}. Прежние данные в резервной копии.`); $('#d-store').close(); }
+  try {
+    const data = await parseFile(f); backupLocal('Перед импортом'); db = data; commit();
+    const lost = Object.keys(db.blobs).length && !file.handle;
+    toast(`Импортировано из ${f.name}: задач ${db.tasks.length}. Прежние данные в резервной копии.${lost ? ' В файле есть вложения: подключите JSON-файл, иначе они пропадут после перезагрузки.' : ''}`);
+    $('#d-store').close();
+  }
   catch (err) { toast('Не удалось импортировать: ' + err.message); }
 };
-function restoreBackup(){
-  try { const b = migrate(JSON.parse(localStorage.getItem(LS_BACKUP))); const cur = JSON.stringify(db); db = b; localStorage.setItem(LS_BACKUP, cur); commit(); toast('Восстановлена резервная копия. Текущие данные стали новой резервной копией.'); }
-  catch { toast('Резервной копии нет или она повреждена.'); }
+async function restoreSnapshot(i){
+  const s = (await snapshots())[i]; if (!s) return toast('Копия не найдена');
+  try { const data = migrate(JSON.parse(s.json)); await backupLocal('Перед восстановлением'); db = data; commit(); toast(`Восстановлена копия от ${fmtStamp(s.at)}. Данные до восстановления тоже сохранены в копиях.`); drawStore(); }
+  catch (e) { toast('Копия повреждена: ' + e.message); }
 }
-const hasBackup = () => { try { return !!localStorage.getItem(LS_BACKUP); } catch { return false; } };
 
 /* ---------- mutations ---------- */
 const byId = id => db.tasks.find(t => t.id === id);
@@ -893,7 +1018,7 @@ function card(t, kind){
     ? (t.seen ? stChip(t) : '<span class="new-tag">Новая</span>')
     : `<span class="chip p-${t.prio}"><span class="dot"></span>${PRIO[t.prio]}</span>`;
   const pr = t.project && project(t.project);
-  const meta = kind === 'mini' ? '' : `<div class="meta">${pr ? `<span class="chip"><span class="pdot" style="background:${pr.hue}"></span>${esc(pr.name)}</span>` : ''}${t.repeat ? `<span title="Повторяется: ${esc(repeatLabel(t.repeat))}">↻</span>` : ''}${t.tag ? `<span class="chip">${esc(t.tag)}</span>` : ''}${dueChip(t)}${t.est ? `<span>· ${t.est} ч</span>` : ''}${checkProgress(t)}${t.comments.length ? `<span title="Комментарии">💬 ${t.comments.length}</span>` : ''}</div>`;
+  const meta = kind === 'mini' ? '' : `<div class="meta">${pr ? `<span class="chip"><span class="pdot" style="background:${pr.hue}"></span>${esc(pr.name)}</span>` : ''}${t.repeat ? `<span title="Повторяется: ${esc(repeatLabel(t.repeat))}">↻</span>` : ''}${t.tag ? `<span class="chip">${esc(t.tag)}</span>` : ''}${dueChip(t)}${t.est ? `<span>· ${t.est} ч</span>` : ''}${checkProgress(t)}${t.comments.length ? `<span title="Комментарии">💬 ${t.comments.length}</span>` : ''}${t.links.length + t.files.length ? `<span title="Вложения">📎 ${t.links.length + t.files.length}</span>` : ''}</div>`;
   const who = kind === 'board' ? `<div class="meta"><span class="who">${t.assignee ? ava(person(t.assignee), true) + esc(person(t.assignee)?.name) : 'Без исполнителя'}</span></div>` : '';
   return `<button class="task" draggable="true" data-id="${esc(t.id)}" aria-label="${esc(t.title)}, открыть">
     <div class="top"><span class="id">${esc(t.id)}</span>${head}</div><h3>${esc(t.title)}</h3>${meta}${who}</button>`;
@@ -930,8 +1055,10 @@ function render(){
   + (archived.length ? `<details class="archive"><summary>Архив сотрудников (${archived.length})</summary>${archived.map(p => `<div class="arch-row">${ava(p, true)}<span>${esc(p.name)}</span><button class="btn small" data-restore="${esc(p.id)}" style="margin-left:auto">Вернуть</button></div>`).join('')}</details>` : '');
 
   $('#board').innerHTML = Object.entries(STATUS).map(([k, label]) => {
-    const list = db.tasks.filter(t => t.status === k && visible(t)).sort(sorter());
-    return `<section class="col zone" data-status="${k}"><h2>${label} <span class="count">${list.length}</span></h2>${list.map(t => card(t, 'board')).join('')}</section>`;
+    let list = db.tasks.filter(t => t.status === k && visible(t)).sort(sorter()), archived = 0;
+    if (k === 'done'){ const n = list.length; list = list.filter(t => !isArchived(t)); archived = n - list.length; }
+    return `<section class="col zone" data-status="${k}"><h2>${label} <span class="count">${list.length}</span></h2>${list.map(t => card(t, 'board')).join('')}
+      ${k === 'done' ? `<button class="btn small" id="open-archive">Архив выполненных${archived ? ` · ${archived}` : ''}</button>` : ''}</section>`;
   }).join('');
   renderMe();
   if (view === 'my') renderMy();
@@ -940,6 +1067,45 @@ function render(){
   if (view === 'report') renderReport();
   if ($('#d-inbox').open && inboxPid) $('#inbox-body').innerHTML = inboxHtml(inboxPid);
   renderStore();
+}
+
+/* ---------- action sheet for touch screens, where drag and drop does not work ---------- */
+const coarse = matchMedia('(pointer: coarse)');
+function openActions(id){
+  const t = byId(id), d = $('#d-act'); if (!t) return;
+  const btn = (attr, val, label, cur) => `<button type="button" class="btn" ${attr}="${esc(val)}" aria-current="${cur}">${label}</button>`;
+  d.innerHTML = `<div class="d-head"><span class="id">${esc(t.id)}</span><h2>${esc(t.title)}</h2><button class="close" aria-label="Закрыть">✕</button></div>
+    <div class="d-body">
+      <button type="button" class="btn primary" data-act-open>Открыть подробности</button>
+      <div><h4 class="sec-t">Исполнитель</h4><div class="row">${btn('data-act-asg', '', 'Бэклог', !t.assignee)}${active().map(p => btn('data-act-asg', p.id, esc(p.name), t.assignee === p.id)).join('')}</div></div>
+      <div><h4 class="sec-t">Статус</h4><div class="row">${Object.entries(STATUS).map(([k, v]) => btn('data-act-st', k, v, t.status === k)).join('')}</div></div>
+    </div>`;
+  d.onclick = e => {
+    let b;
+    if (e.target.closest('[data-act-open]')){ d.close(); return openTask(id); }
+    if ((b = e.target.closest('[data-act-asg]'))){ d.close(); return assign(id, b.dataset.actAsg || null); }
+    if ((b = e.target.closest('[data-act-st]'))){ d.close(); return setStatus(id, b.dataset.actSt); }
+  };
+  d.showModal();
+}
+
+/* ---------- archive of done tasks ---------- */
+const isArchived = t => t.status === 'done' && t.doneAt < daysAgo(ARCHIVE_DAYS);
+function openArchive(){
+  const d = $('#d-archive');
+  d.innerHTML = `<div class="d-head"><h2>Архив выполненных</h2><button class="close" aria-label="Закрыть">✕</button></div>
+    <div class="d-body"><p class="note">Задачи, закрытые больше ${ARCHIVE_DAYS} дней назад. Они не видны на доске, но учитываются в отчётах и журнале. Чтобы вернуть задачу в работу, откройте её и смените статус.</p>
+      <input type="search" class="help-q" id="arch-q" placeholder="Поиск по архиву" aria-label="Поиск по архиву" autocomplete="off" style="margin:0;flex:none">
+      <div id="arch-list"></div></div>`;
+  const draw = () => {
+    const q = d.querySelector('#arch-q').value.trim().toLowerCase();
+    const list = db.tasks.filter(t => isArchived(t) && (!q || `${t.id} ${t.title} ${t.tag} ${person(t.assignee)?.name || ''}`.toLowerCase().includes(q))).sort((a, b) => b.doneAt.localeCompare(a.doneAt));
+    d.querySelector('#arch-list').innerHTML = list.map(t => `<div class="dict-row"><button class="link" data-task-link="${esc(t.id)}">${esc(t.id)}</button>
+      <span class="grow">${esc(t.title)} <span class="muted">· ${esc(person(t.assignee)?.name || 'без исполнителя')} · закрыта ${fmtDay(isoDay(new Date(t.doneAt)))}</span></span></div>`).join('')
+      || `<p class="note">${q ? 'Ничего не найдено.' : 'В архиве пока пусто.'}</p>`;
+  };
+  d.querySelector('#arch-q').oninput = draw;
+  draw(); d.showModal();
 }
 
 /* ---------- current user ---------- */
@@ -1044,7 +1210,9 @@ function renderReport(){
     if (!d.length && !o.length) return '';
     return `<tr><td><span class="who"><span class="pdot" style="background:${p.hue}"></span> ${esc(p.name)}</span></td><td class="num">${d.length}</td><td class="num">${f1(hours(d))}</td><td class="num">${o.length}</td><td class="num">${r.overdue.filter(t => t.project === p.id).length || '—'}</td></tr>`;
   }).join('');
-  $('#rep-body').innerHTML = `<div class="tiles">
+  const periodName = $('#rep-period').selectedOptions[0]?.textContent || '';
+  $('#rep-body').innerHTML = `<h1 class="print-only" style="font:600 20px var(--f-display);margin:0">Планёрка · отчёт за период «${esc(periodName)}» · ${new Date().toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', year: 'numeric'})}</h1>
+    <div class="tiles">
       <div class="tile"><span class="k2">Закрыто задач</span><span class="v">${r.done.length}</span><span class="k2">${f1(hours(r.done))} ч по оценке</span></div>
       <div class="tile"><span class="k2">Создано задач</span><span class="v">${r.created}</span></div>
       <div class="tile"><span class="k2">Среднее время выполнения</span><span class="v">${f1(r.avg(r.done))}</span><span class="k2">дней от создания до «Готово»</span></div>
@@ -1060,7 +1228,9 @@ function renderReport(){
       <thead><tr><th>Проект</th><th class="num">Закрыто</th><th class="num">Часов</th><th class="num">Открыто</th><th class="num">Просрочено</th></tr></thead>
       <tbody>${projRows || '<tr><td colspan="5" class="muted">Задач нет</td></tr>'}</tbody></table></div></div>`;
 }
-$('#rep-period').onchange = e => { ui.repPeriod = e.target.value; saveUi(); renderReport(); };
+// window.print is a no-op inside sandboxed viewers; on GitHub Pages or from disk it opens the print dialog (Save as PDF)
+$('#rep-print').onclick = () => { renderReport(); window.print(); };
+$('#rep-period').onchange =e => { ui.repPeriod = e.target.value; saveUi(); renderReport(); };
 
 // ';' and BOM so Excel with Russian settings opens it as columns; leading = + - @ is neutralised against formula injection
 function csvCell(v){
@@ -1115,16 +1285,29 @@ function drawStore(){
     <div><h4 class="sec-t">Экспорт и импорт</h4><div class="row">
       <button class="btn" id="st-export">Скачать JSON</button>
       <button class="btn" id="st-import">Импортировать JSON…</button></div></div>
+    <div><h4 class="sec-t">Резервные копии</h4>
+      <p class="note">Хранятся в этом браузере, последние ${SNAP_MAX}: раз в день, при открытии файла и перед импортом, сбросом и восстановлением.</p>
+      <div id="st-snaps"><p class="note">Загружаю список…</p></div></div>
     <div><h4 class="sec-t">Сброс</h4><div class="row">
-      ${hasBackup() ? '<button class="btn" id="st-restore">Восстановить резервную копию</button>' : ''}
       <button class="btn danger" id="st-reset">Начать с нуля</button>
       <button class="btn" id="st-demo">Загрузить пример</button></div></div>
   </div>`;
   const on = (id, fn) => { const b = d.querySelector(id); if (b) b.onclick = fn; };
   on('#st-grant', grantAccess); on('#st-create', createFile); on('#st-open', openFile); on('#st-detach', detachFile);
-  on('#st-export', exportJson); on('#st-import', () => $('#import-input').click()); on('#st-restore', restoreBackup);
+  on('#st-export', exportJson); on('#st-import', () => $('#import-input').click());
   // two-step confirm: confirm() is unreliable inside embedded viewers
-  const twoStep = (id, text, fn) => on(id, e => { const b = e.currentTarget; if (b.dataset.armed) { backupLocal(); fn(); commit(); toast('Готово. Прежние данные в резервной копии.'); } else { b.dataset.armed = 1; b.textContent = text; } });
+  const twoStep = (id, text, fn) => on(id, async e => { const b = e.currentTarget; if (b.dataset.armed) { await backupLocal('Перед сбросом'); fn(); commit(); toast('Готово. Прежние данные в резервной копии.'); drawStore(); } else { b.dataset.armed = 1; b.textContent = text; } });
+  snapshots().then(list => {
+    const box = d.querySelector('#st-snaps'); if (!box) return;
+    box.innerHTML = list.length ? list.map((s, i) => ({s, i})).reverse().map(({s, i}) => `<div class="dict-row"><span class="grow">${esc(fmtStamp(s.at))} <span class="muted">· ${esc(s.reason)} · задач ${s.tasks} · ${fmtSize(s.json.length)}</span></span>
+      <button type="button" class="btn small" data-snap-dl="${i}">Скачать</button><button type="button" class="btn small" data-snap="${i}">Восстановить</button></div>`).join('')
+      : '<p class="note">Копий пока нет.</p>';
+    box.querySelectorAll('[data-snap]').forEach(b => b.onclick = () => {
+      if (!b.dataset.armed){ b.dataset.armed = 1; b.textContent = 'Заменить текущие данные?'; return; }
+      restoreSnapshot(+b.dataset.snap);
+    });
+    box.querySelectorAll('[data-snap-dl]').forEach(b => b.onclick = () => { const s = list[+b.dataset.snapDl]; download(`planerka-copy-${s.at.slice(0, 16).replace(/[:T]/g, '-')}.json`, new Blob([s.json], {type: 'application/json'})); });
+  });
   twoStep('#st-reset', 'Точно удалить всё? Нажмите ещё раз', () => db = migrate({version: SCHEMA, people: [], tasks: []}));
   twoStep('#st-demo', 'Заменить данные примером? Нажмите ещё раз', () => db = demo());
 }
@@ -1166,6 +1349,11 @@ function openTask(id, opts = {}){
     <div class="field"><label for="f-desc">Описание</label><textarea id="f-desc" maxlength="5000">${esc(t.desc)}</textarea></div>
     <div><h4 class="sec-t">Чек-лист</h4><div id="f-checks"></div>
       <div class="add-row"><input id="f-check-new" maxlength="300" placeholder="Новый пункт" aria-label="Новый пункт чек-листа"><button type="button" class="btn small" id="f-check-add">Добавить</button></div></div>
+    ${existing ? `<div><h4 class="sec-t">Вложения</h4><div class="attach" id="f-attach"></div>
+      <div class="add-row"><input id="f-link" maxlength="2000" placeholder="Ссылка: https://…" aria-label="Адрес ссылки"><input id="f-link-title" maxlength="200" placeholder="Подпись (необязательно)" aria-label="Подпись ссылки"><button type="button" class="btn small" id="f-link-add">Добавить ссылку</button></div>
+      <span class="err" id="f-link-err" hidden>Нужна ссылка, начинающаяся с http:// или https://</span>
+      <div class="add-row">${canAttach() ? `<label class="btn small" for="f-file">Прикрепить файлы…</label><input type="file" id="f-file" multiple hidden><span class="note">до ${fmtSize(FILE_MAX)} каждый, хранятся в ${esc(file.name)}</span>`
+        : `<span class="note">Файлы можно прикреплять, когда подключён JSON-файл: в браузере для них мало места. Подключите его через кнопку хранения в шапке.</span>`}</div></div>` : ''}
     ${existing ? `<div><h4 class="sec-t">Комментарии</h4><div class="comments" id="f-comments"></div>
       <div class="add-row"><textarea id="f-cmt" maxlength="3000" rows="2" aria-label="Новый комментарий" placeholder="Комментарий… Ctrl+Enter отправит"></textarea><button type="button" class="btn small" id="f-cmt-send">Отправить</button></div></div>` : ''}
     ${existing ? `<div><h4 class="sec-t">История</h4><ul class="log">${t.log.slice().reverse().map(l => `<li><time>${esc(fmtStamp(l.at))}</time>${esc(l.text)}</li>`).join('')}</ul></div>` : ''}
@@ -1200,6 +1388,62 @@ function openTask(id, opts = {}){
     box.innerHTML = t.comments.map(c => `<div class="cmt"><div class="c-top"><b>${esc(c.author)}</b><time>${esc(fmtStamp(c.at))}</time></div><p>${esc(c.text)}</p></div>`).join('') || '<p class="note">Комментариев пока нет</p>';
   };
   drawComments();
+  // attachments, like comments, apply at once to the live task and to the draft
+  const drawAttach = () => {
+    const box = d.querySelector('#f-attach'); if (!box) return;
+    box.innerHTML = [
+      ...t.links.map((l, i) => `<div class="att"><span class="att-ic">🔗</span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title || l.url)}</a>
+        <button type="button" class="att-rm" data-rm-link="${i}" aria-label="Убрать ссылку">✕</button></div>`),
+      ...t.files.map((f, i) => { const b = db.blobs[f.id];
+        return `<div class="att">${b && /^image\/(png|jpeg|gif|webp)$/.test(f.type) ? `<img class="att-img" src="${esc(b.data)}" alt="">` : '<span class="att-ic">📄</span>'}
+          <span class="grow">${esc(f.name)} <span class="muted">· ${fmtSize(f.size)}${b ? '' : ' · недоступен: разрешите доступ к JSON-файлу'}</span></span>
+          ${b ? `<button type="button" class="btn small" data-dl-file="${i}">Скачать</button>` : ''}<button type="button" class="att-rm" data-rm-file="${i}" aria-label="Убрать файл">✕</button></div>`; }),
+    ].join('') || '<p class="note">Вложений нет</p>';
+  };
+  const liveTask = () => { const live = byId(t.id); if (!live) toast('Задача уже удалена'); return live; };
+  drawAttach();
+  const addLink = () => {
+    const url = safeUrl(d.querySelector('#f-link').value), title = d.querySelector('#f-link-title').value.trim();
+    d.querySelector('#f-link-err').hidden = !!url;
+    if (!url) return d.querySelector('#f-link').focus();
+    const live = liveTask(); if (!live) return;
+    const l = {url, title, at: stamp()};
+    live.links.push(l); t.links.push({...l}); addLog(live, `${actor()} добавил ссылку ${title || url}`);
+    d.querySelector('#f-link').value = ''; d.querySelector('#f-link-title').value = '';
+    commit(); drawAttach();
+  };
+  d.querySelector('#f-link-add')?.addEventListener('click', addLink);
+  d.querySelector('#f-link')?.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); addLink(); } });
+  d.querySelector('#f-file')?.addEventListener('change', async e => {
+    const live = liveTask(); if (!live) return;
+    const big = [...e.target.files].filter(f => f.size > FILE_MAX).map(f => f.name);
+    for (const f of [...e.target.files].filter(f => f.size <= FILE_MAX)){
+      const data = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(f); });
+      const meta = {id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: f.name.slice(0, 200), type: f.type.slice(0, 100), size: f.size, at: stamp()};
+      db.blobs[meta.id] = {data}; live.files.push(meta); t.files.push({...meta});
+      addLog(live, `${actor()} прикрепил файл ${meta.name}`);
+    }
+    e.target.value = '';
+    commit(); drawAttach();
+    if (big.length) toast(`Не прикреплены, больше ${fmtSize(FILE_MAX)}: ${big.join(', ')}`);
+  });
+  d.querySelector('#f-attach')?.addEventListener('click', async e => {
+    const live = liveTask(); if (!live) return;
+    let b;
+    if ((b = e.target.closest('[data-rm-link]'))){
+      const l = t.links[+b.dataset.rmLink], same = x => x.url === l.url && x.at === l.at;
+      change(() => { live.links = live.links.filter(x => !same(x)); addLog(live, `${actor()} убрал ссылку ${l.title || l.url}`); }, 'Ссылка убрана');
+      t.links = t.links.filter(x => !same(x));
+    } else if ((b = e.target.closest('[data-rm-file]'))){
+      const f = t.files[+b.dataset.rmFile];
+      change(() => { live.files = live.files.filter(x => x.id !== f.id); delete db.blobs[f.id]; addLog(live, `${actor()} убрал файл ${f.name}`); }, `Файл ${f.name} убран`);
+      t.files = t.files.filter(x => x.id !== f.id);
+    } else if ((b = e.target.closest('[data-dl-file]'))){
+      const f = t.files[+b.dataset.dlFile];
+      return download(f.name, await (await fetch(db.blobs[f.id].data)).blob());
+    } else return;
+    drawAttach();
+  });
   const sendComment = () => {
     const ta = d.querySelector('#f-cmt'), v = ta.value.trim(); if (!v) return;
     const live = byId(t.id); if (!live) return toast('Задача уже удалена');
@@ -1237,7 +1481,7 @@ function openTask(id, opts = {}){
     change(() => {
       const i = db.tasks.findIndex(x => x.id === next.id);
       if (i < 0){ toast('Задача уже удалена, изменения не сохранены'); return false; }
-      next.comments = db.tasks[i].comments;
+      Object.assign(next, {comments: db.tasks[i].comments, links: db.tasks[i].links, files: db.tasks[i].files});
       db.tasks[i] = next;
       if (statusChanged) spawned = applyStatus(next, status, actor());
     }, () => `${next.id} сохранена${spawned ? ` · следующий повтор ${spawned.id} на ${fmtDay(spawned.due)}` : ''}${reassigned ? overloadNote(next) : ''}`);
@@ -1484,6 +1728,8 @@ const COMMANDS = [
   ['Вид: Мои задачи', 'M', () => meId ? setView('my') : toast('Сначала выберите себя в списке «Я: …» в шапке')],
   ['Новый сотрудник', '', () => openPerson(null)],
   ['Проекты и шаблоны', '', openDict],
+  ['Архив выполненных', '', openArchive],
+  ['Печать отчёта / PDF', '', () => { setView('report'); $('#rep-print').click(); }],
   ['Скачать CSV задач', '', () => $('#rep-csv').click()],
   ['Сбросить фильтры', '', resetFilters],
   ['Только просроченные', '', () => { ui.overdue = true; saveUi(); initFilters(); render(); }],
@@ -1631,7 +1877,8 @@ document.addEventListener('click', e => {
   if ((el = q('[data-cell]'))) { Object.assign(ui, {who: el.dataset.cell, q: '', proj: '', prio: '', tag: '', overdue: false}); saveUi(); initFilters(); return setView('team'); }
   if ((el = q('[data-view]'))) return setView(el.dataset.view);
   if ((el = q('[data-t]'))) return setTheme(el.dataset.t);
-  if ((el = q('.task')) && !q('dialog')) return openTask(el.dataset.id);
+  if (q('#open-archive')) return openArchive();
+  if ((el = q('.task')) && !q('dialog')) return coarse.matches ? openActions(el.dataset.id) : openTask(el.dataset.id);
 });
 $('#new-task').onclick = () => openTask(null);
 $('#new-person').onclick = () => openPerson(null);
@@ -1689,6 +1936,13 @@ addEventListener('storage', e => {
   r = parseQuick('Обновить баннер +моб', ppl, now, [{id: 'app', name: 'Мобильное приложение'}]);
   console.assert(r.project === 'app' && r.title === 'Обновить баннер', 'quick: +project');
 })();
+(function selfTestStage4(){
+  console.assert(safeUrl('javascript:alert(1)') === '' && safeUrl('example.com/a') === 'https://example.com/a' && safeUrl('http://x.ru') === 'http://x.ru/', 'safeUrl');
+  const m = migrate({version: 3, people: [], tasks: [{id: 'PLN-1', title: 'x', files: [{id: 'f1', name: 'a.txt', size: 3}], links: [{url: 'javascript:void(0)'}, {url: 'https://ok.ru'}]}],
+    blobs: {f1: {data: 'data:text/plain;base64,YWJj'}, orphan: {data: 'data:text/plain;base64,eA=='}, bad: {data: 'javascript:1'}}});
+  console.assert(m.version === SCHEMA && m.tasks[0].links.length === 1 && m.tasks[0].files.length === 1 && Object.keys(m.blobs).join() === 'f1', 'v3 -> v4: links filtered, orphan blobs dropped');
+  console.assert(sameData({...m, blobs: {}}, m) && !sameData(m, {...m, nextId: 99}), 'sameData ignores blobs');
+})();
 (function selfTestStage3(){
   console.assert(addInterval('2026-01-31', {unit: 'month', n: 1}) === '2026-02-28', 'month end clamps');
   console.assert(addInterval('2026-10-30', {unit: 'week', n: 2}) === '2026-11-13', 'two weeks');
@@ -1707,6 +1961,7 @@ addEventListener('storage', e => {
   const me = pref(LS_ME);
   meId = me && person(me) && !person(me).archived ? me : null;
   setView(pref(LS_VIEW) || 'team'); // renders
+  dailySnapshot();
   if (!FS_OK) return;
   const h = await idbGet('handle');
   if (!h) return;
