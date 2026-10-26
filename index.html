@@ -270,7 +270,7 @@ button.si{cursor:pointer}
 .links{position:absolute;left:0;top:0;overflow:visible}
 .links path{fill:none;stroke:var(--muted);stroke-width:1.5;opacity:.55}
 .links path.done{stroke-dasharray:4 4;opacity:.35}
-.node{position:absolute;width:230px;min-height:74px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:9px 11px;display:grid;gap:5px;box-shadow:var(--shadow)}
+.node{position:absolute;width:230px;height:104px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:9px 11px;display:grid;grid-template-rows:auto 1fr auto;gap:5px;box-shadow:var(--shadow)}
 .node[data-node]{cursor:grab}
 .node[data-node]:hover{border-color:var(--muted)}
 .node.is-sel{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),var(--shadow)}
@@ -287,10 +287,28 @@ button.si{cursor:pointer}
 .n-top{display:flex;align-items:center;gap:6px}
 .n-top .ava{margin-left:auto}
 .n-ttl{font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.n-sub{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.n-sub{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;min-height:16px}
+.n-ttl{align-self:start}
 .n-sub .prog i{width:56px}
 .n-fold{position:absolute;right:-13px;top:50%;transform:translateY(-50%);min-width:24px;height:24px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font:600 11px var(--f-mono);color:var(--muted);cursor:pointer;padding:0 5px}
 .n-fold:hover{border-color:var(--accent);color:var(--fg)}
+/* «+» on the right edge adds a subtask; on a parent it sits below the fold button */
+.n-add{position:absolute;right:-13px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);
+  color:var(--muted);cursor:pointer;padding:0;font:600 15px/1 var(--f-body);display:grid;place-items:center;opacity:.55;transition:opacity .12s}
+.node:hover .n-add,.node.is-sel .n-add,.n-add:focus-visible{opacity:1}
+.n-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.node.has-kids .n-fold{top:30%} .node.has-kids .n-add{top:70%}
+@media (pointer:coarse){.n-add{opacity:1}}
+/* context menu (right click on the map or a tree row) */
+.ctx{position:fixed;z-index:30;min-width:230px;max-width:min(300px,calc(100vw - 16px));max-height:calc(100vh - 16px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 12px 32px rgba(0,0,0,.22);padding:6px;display:grid;gap:1px}
+.ctx button{display:flex;gap:10px;align-items:center;border:0;background:none;text-align:left;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:14px;width:100%}
+.ctx button:hover,.ctx button:focus-visible{background:var(--sunken);outline:none}
+.ctx button.danger{color:var(--high)}
+.ctx button[aria-checked="true"]::after{content:"✓";margin-left:auto;color:var(--accent);font-weight:600}
+.ctx .ctx-h{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px 10px 3px}
+.ctx hr{border:0;border-top:1px solid var(--line);margin:4px 2px}
+.ctx kbd{margin-left:auto}
 .map-ctl{position:absolute;right:12px;bottom:12px;display:flex;gap:6px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:5px;box-shadow:var(--shadow)}
 .zoom-val{font:500 12px var(--f-mono);color:var(--muted);min-width:44px;text-align:center}
 .map-hint{position:absolute;left:12px;top:12px;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px;max-width:calc(100% - 24px);pointer-events:none;opacity:.92}
@@ -572,7 +590,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         <dl>
           <dt>Карточка</dt><dd>Вверху путь: проект › родитель › … Длинный путь сворачивается в «… ещё N», нажатие показывает его целиком. В разделе «Подзадачи» кружок отмечает готовность, название открывает подзадачу. Чтобы не потерять несохранённые правки, перейти в другую задачу можно только после «Сохранить» или «Отмена».</dd>
           <dt>Дерево: список</dt><dd>Задачи выбранного проекта с отступами. У родителя полоса «готово подзадач» и часы открытой работы во всей ветке. Стрелка сворачивает ветку. Строку можно перетащить: на середину другой — станет подзадачей, на верх или низ — встанет рядом. Клавиши: <kbd>↑</kbd><kbd>↓</kbd> выбор, <kbd>→</kbd><kbd>←</kbd> раскрыть или свернуть, <kbd>Tab</kbd> сделать подзадачей предыдущей, <kbd>Shift</kbd>+<kbd>Tab</kbd> поднять уровнем выше, <kbd>Enter</kbd> открыть.</dd>
-          <dt>Дерево: карта</dt><dd>Схема слева направо: проект → задачи → подзадачи, у выполненных пунктирная линия. Зажмите кнопку мыши на пустом месте и тяните, чтобы двигать карту; колёсико или кнопки меняют масштаб, «Вписать» показывает проект целиком. Блок можно перетащить: на середину другого — подзадача, на край — рядом, на тёмный блок проекта — верхний уровень. У края карта прокручивается сама. Положение и масштаб запоминаются для каждого проекта.</dd>
+          <dt>Дерево: карта</dt><dd>Схема слева направо: проект → задачи → подзадачи, у выполненных пунктирная линия. Зажмите кнопку мыши на пустом месте и тяните, чтобы двигать карту; колёсико или кнопки меняют масштаб, «Вписать» показывает проект целиком. Блок можно перетащить: на середину другого — подзадача, на край — рядом, на тёмный блок проекта — верхний уровень. У края карта прокручивается сама. Кружок «+» на правом краю блока создаёт подзадачу, кружок «−» над ним сворачивает ветку. Положение и масштаб запоминаются для каждого проекта.</dd>
+          <dt>Контекстное меню</dt><dd>Правая кнопка мыши на блоке карты или строке списка (на телефоне — долгое нажатие, с клавиатуры — <kbd>Shift</kbd>+<kbd>F10</kbd>): открыть, добавить подзадачу, сменить статус или исполнителя, свернуть ветку, поднять уровнем выше, удалить. На пустом месте: новая задача, вписать проект, раскрыть или свернуть всё, скрыть выполненные.</dd>
           <dt>Доска</dt><dd>У подзадачи строка «↳ в PLN-120 …», у родителя полоса «подзадачи 2/5». Фильтр «Только верхний уровень» оставляет на доске только крупные задачи.</dd>
         </dl>
         <ul>
@@ -736,6 +755,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 </dialog>
 <input type="file" id="import-input" accept=".json,application/json" hidden>
 <div class="toast" id="toast" role="status" hidden></div>
+<div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
 const SCHEMA = 5;
@@ -1184,6 +1204,13 @@ function moveTask(id, targetId, mode, projId = null){
     if (was !== t.parent) addLog(t, `${actor()} ${t.parent ? `сделал подзадачей ${t.parent}` : 'поднял на верхний уровень'}`);
   }, mode === 'in' ? `${id} теперь подзадача ${parent.id}` : `${id} ${parent ? `перенесена в ${parent.id}` : 'на верхнем уровне'}`);
 }
+// deleting a parent lifts its subtasks one level up, nothing is lost; the toast can undo it
+function deleteTask(id){
+  const t = byId(id); if (!t) return;
+  const up = kids(id).length;
+  change(() => { db.tasks.forEach(x => { if (x.parent === id) x.parent = t.parent || null; }); db.tasks = db.tasks.filter(x => x.id !== id); },
+    `${id} удалена${up ? `, подзадачи (${up}) подняты на уровень выше` : ''}`);
+}
 function addNewTask(t){
   t.id = 'PLN-' + db.nextId++; t.createdAt = stamp(); t.seen = !t.assignee;
   // a subtask goes to the end of its siblings, a new top-level task to the top of the board
@@ -1377,8 +1404,75 @@ $('#tree').addEventListener('keydown', e => {
   tree.addEventListener('drop', e => { const r = e.target.closest('[data-trow]'); if (!r || !dragT) return; e.preventDefault(); const m = zone(r, e.clientY); clear(); if (m === 'in') setOpen(r.dataset.trow, true); moveTask(dragT, r.dataset.trow, m); });
 })();
 
+/* context menu: right click (long press on touch) on a block, a tree row or empty map space */
+function openCtx(x, y, items){
+  const m = $('#ctx');
+  m.innerHTML = items.map(it => it === '-' ? '<hr>' : it.head ? `<div class="ctx-h">${esc(it.head)}</div>`
+    : `<button type="button" role="${it.checked != null ? 'menuitemradio' : 'menuitem'}" ${it.checked != null ? `aria-checked="${it.checked}"` : ''} class="${it.danger ? 'danger' : ''}">${it.icon || ''}<span>${esc(it.label)}</span>${it.key ? `<kbd>${esc(it.key)}</kbd>` : ''}</button>`).join('');
+  const acts = items.filter(it => it.run);
+  m.querySelectorAll('button').forEach((b, i) => b.onclick = () => { closeCtx(); acts[i].run(); });
+  m.hidden = false;
+  // keep the menu inside the window
+  const r = m.getBoundingClientRect();
+  m.style.left = Math.max(8, Math.min(x, innerWidth - r.width - 8)) + 'px';
+  m.style.top = Math.max(8, Math.min(y, innerHeight - r.height - 8)) + 'px';
+  m.querySelector('button')?.focus();
+}
+function closeCtx(){ $('#ctx').hidden = true; }
+document.addEventListener('pointerdown', e => { if (!$('#ctx').hidden && !e.target.closest('#ctx')) closeCtx(); }, true);
+addEventListener('blur', closeCtx);
+addEventListener('resize', closeCtx);
+$('#ctx').addEventListener('keydown', e => {
+  const bs = [...$('#ctx').querySelectorAll('button')], i = bs.indexOf(document.activeElement);
+  if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); closeCtx(); }
+  else if (e.key === 'ArrowDown'){ e.preventDefault(); bs[(i + 1) % bs.length].focus(); }
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); bs[(i - 1 + bs.length) % bs.length].focus(); }
+});
+function taskCtx(t, x, y){
+  treeSel = t.id; renderTreeView();
+  const has = kids(t.id).length, who = person(t.assignee);
+  openCtx(x, y, [
+    {label: 'Открыть карточку', key: 'Enter', run: () => openTask(t.id)},
+    {label: 'Добавить подзадачу', icon: '<b aria-hidden="true">+</b>', run: () => { setOpen(t.id, true); openTask(null, {parent: t.id}); }},
+    '-', {head: 'Статус'},
+    ...Object.entries(STATUS).map(([k, v]) => ({label: v, icon: `<span class="si ${k}"></span>`, checked: t.status === k, run: () => setStatus(t.id, k)})),
+    '-', {head: 'Исполнитель'},
+    {label: 'Без исполнителя', checked: !t.assignee, run: () => assign(t.id, null)},
+    ...active().map(p => ({label: p.name, icon: ava(p, true), checked: t.assignee === p.id, run: () => assign(t.id, p.id)})),
+    ...(who?.archived ? [{label: `${who.name} (архив)`, checked: true, run: () => {}}] : []),
+    '-',
+    ...(has ? [{label: isOpen(t.id) ? 'Свернуть ветку' : 'Раскрыть ветку', run: () => { setOpen(t.id, !isOpen(t.id)); renderTreeView(); }}] : []),
+    ...(t.parent ? [{label: 'Поднять на уровень выше', run: () => moveTask(t.id, t.parent, 'after')}, {label: 'На верхний уровень проекта', run: () => moveTask(t.id, null, 'top', t.project)}] : []),
+    {label: has ? 'Удалить (подзадачи останутся)' : 'Удалить задачу', danger: true, run: () => deleteTask(t.id)},
+  ]);
+}
+function emptyCtx(x, y){
+  openCtx(x, y, [
+    {label: 'Новая задача в проекте', icon: '<b aria-hidden="true">+</b>', run: () => openTask(null, {project: treeProj()})},
+    '-',
+    ...(ui.treeMode === 'map' ? [{label: 'Вписать проект', key: '0', run: fitMap}] : []),
+    {label: 'Раскрыть всё', run: () => $('#tr-expand').click()},
+    {label: 'Свернуть всё', run: () => $('#tr-collapse').click()},
+    {label: ui.treeHide ? 'Показать выполненные' : 'Скрыть выполненные', run: () => { ui.treeHide = !ui.treeHide; saveUi(); renderTreeView(); }},
+  ]);
+}
+$('#v-tree').addEventListener('contextmenu', e => {
+  const el = e.target.closest('[data-node],[data-trow]');
+  if (!el && !e.target.closest('#map,#tree')) return; // toolbar keeps the browser menu
+  e.preventDefault();
+  const t = el && byId(el.dataset.node || el.dataset.trow);
+  t ? taskCtx(t, e.clientX, e.clientY) : emptyCtx(e.clientX, e.clientY);
+});
+// keyboard: the context-menu key or Shift+F10 on a selected tree row
+$('#tree').addEventListener('keydown', e => {
+  if (!(e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10'))) return;
+  const row = e.target.closest('[data-trow]'); if (!row) return;
+  e.preventDefault(); const r = row.getBoundingClientRect(); taskCtx(byId(row.dataset.trow), r.left + 40, r.bottom);
+});
+
 /* project map: tidy tree left to right; leaves take rows in order, a parent sits in the middle of its children */
-const NW = 230, NH = 74, GX = 70, GY = 18, MIN_K = .15;
+// NH is also the block's CSS height: the layout and the drawn block must agree, or blocks overlap
+const NW = 230, NH = 104, GX = 80, GY = 22, MIN_K = .15;
 let mapNodes = {}, mapSize = {w: 0, h: 0}, saveViewTimer;
 const mapKey = () => ui.treeProj;
 const mapView = () => ui.mapViews[mapKey()] ||= {x: 24, y: 60, k: 1, fresh: true};
@@ -1406,10 +1500,11 @@ function renderMap(){
   $('#nodes').innerHTML = `<div class="node root" data-root="1" style="left:0;top:${L.rootY}px"><div class="n-top">${p ? `<span class="pdot" style="background:${p.hue}"></span>` : ''}<b>${esc(p ? p.name : 'Без проекта')}</b></div>
       <div class="n-sub">${all.length} задач · ${all.filter(t => t.status === 'done').length} готово</div></div>` +
     L.nodes.map(({t, x, y}) => { const has = kids(t.id).length;
-      return `<div class="node${t.id === treeSel ? ' is-sel' : ''}${t.status === 'done' ? ' is-done' : ''}" style="left:${x}px;top:${y}px" data-node="${esc(t.id)}">
+      return `<div class="node${t.id === treeSel ? ' is-sel' : ''}${t.status === 'done' ? ' is-done' : ''}${has ? ' has-kids' : ''}" style="left:${x}px;top:${y}px" data-node="${esc(t.id)}">
         <div class="n-top"><span ${siAttr(t)}></span><span class="id">${esc(t.id)}</span>${t.assignee ? ava(person(t.assignee), true) : ''}</div>
         <div class="n-ttl">${esc(t.title)}</div><div class="n-sub">${treeMeta(t, has)}</div>
-        ${has ? `<button class="n-fold" data-tfold="${esc(t.id)}" title="${isOpen(t.id) ? 'Свернуть ветку' : `Раскрыть: ${desc(t.id).length} подзадач`}" aria-label="${isOpen(t.id) ? 'Свернуть ветку' : 'Раскрыть ветку'}">${isOpen(t.id) ? '−' : '+' + desc(t.id).length}</button>` : ''}</div>`;
+        ${has ? `<button class="n-fold" data-tfold="${esc(t.id)}" title="${isOpen(t.id) ? 'Свернуть ветку' : `Раскрыть: ${desc(t.id).length} подзадач`}" aria-label="${isOpen(t.id) ? 'Свернуть ветку' : 'Раскрыть ветку'}">${isOpen(t.id) ? '−' : '+' + desc(t.id).length}</button>` : ''}
+        <button class="n-add" data-tadd="${esc(t.id)}" title="Добавить подзадачу" aria-label="Добавить подзадачу в ${esc(t.id)}">+</button></div>`;
     }).join('');
   if (mapView().fresh) fitMap(); else applyView();
 }
@@ -1470,6 +1565,7 @@ function fitMap(){
     if (!start) return;
     const s = start, d = drop; start = null; drop = null;
     m.classList.remove('panning'); clearDrop();
+    if (!$('#ctx').hidden && !s.moved) return; // a long press opened the context menu: the release is not a click
     if (!s.moved){ if (s.node){ treeSel = s.node; renderMap(); openTask(s.node); } return; }
     if (!s.node) return;
     if (d?.bad) toast('Нельзя вложить задачу в её же подзадачу');
@@ -1874,13 +1970,7 @@ function openTask(id, opts = {}){
   d.querySelector('#f-cmt-send')?.addEventListener('click', sendComment);
   d.querySelector('#f-cmt')?.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); sendComment(); } });
   d.querySelector('#f-cancel').onclick = () => d.close();
-  // deleting a parent lifts its subtasks one level up, nothing is lost
-  d.querySelector('#f-del')?.addEventListener('click', () => {
-    d.close();
-    const up = kids(t.id).length;
-    change(() => { const gone = byId(t.id); db.tasks.forEach(x => { if (x.parent === t.id) x.parent = gone?.parent || null; }); db.tasks = db.tasks.filter(x => x.id !== t.id); },
-      `${t.id} удалена${up ? `, подзадачи (${up}) подняты на уровень выше` : ''}`);
-  });
+  d.querySelector('#f-del')?.addEventListener('click', () => { d.close(); deleteTask(t.id); });
 
   /* path and subtasks */
   const formSig = () => [...d.querySelectorAll('#task-form input:not(#f-sub-new):not(#f-check-new):not(#f-cmt):not(#f-link):not(#f-link-title), #task-form select, #task-form textarea:not(#f-cmt)')].map(x => x.type === 'checkbox' ? x.checked : x.value).join('\u0001') + JSON.stringify(t.checklist);
