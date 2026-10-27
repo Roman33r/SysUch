@@ -312,6 +312,116 @@ button.si{cursor:pointer}
 .map-ctl{position:absolute;right:12px;bottom:12px;display:flex;gap:6px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:5px;box-shadow:var(--shadow)}
 .zoom-val{font:500 12px var(--f-mono);color:var(--muted);min-width:44px;text-align:center}
 .map-hint{position:absolute;left:12px;top:12px;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px;max-width:calc(100% - 24px);pointer-events:none;opacity:.92}
+/* task window (variant A): content left, properties right */
+dialog.tw{width:min(960px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:hidden}
+dialog.tw[open]{display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.tw-head{display:flex;align-items:center;gap:6px;padding:10px 12px 10px 20px;border-bottom:1px solid var(--line)}
+.tw-head .crumbs{flex:1;min-width:0}
+.tw-head .close{margin-left:0;background:none}
+.ibtn{border:0;background:none;width:32px;height:32px;border-radius:8px;cursor:pointer;color:var(--muted);display:grid;place-items:center;flex:none;font-size:16px}
+.ibtn:hover{background:var(--sunken);color:var(--fg)}
+.tw-cols{display:grid;grid-template-columns:minmax(0,1fr) 280px;min-height:0}
+.tw-main{padding:18px 24px 20px;display:grid;gap:18px;align-content:start;overflow:auto;min-width:0}
+.tw-title,.tw-desc{border:1px solid transparent;border-radius:8px;background:none;resize:none;overflow:hidden;width:100%;padding:4px 6px;margin-left:-6px}
+.tw-title{font:600 22px/1.3 var(--f-body)}
+.tw-desc{font-size:14px;line-height:1.55;min-height:48px;max-width:68ch}
+.tw-title:hover,.tw-desc:hover{background:var(--sunken)}
+.tw-title:focus,.tw-desc:focus{outline:none;border-color:var(--line);background:var(--sunken)}
+.tw-desc::placeholder{color:var(--muted)}
+.tw-sec{display:grid;gap:8px}
+.tw-sec .sec-b{display:grid;gap:8px}
+.sec-h{display:flex;align-items:center;gap:8px;border:0;background:none;padding:0;cursor:pointer;text-align:left;width:100%}
+.sec-h b{font:500 12px var(--f-display);text-transform:uppercase;letter-spacing:.06em}
+.sec-h .cnt{font:500 12px var(--f-mono);color:var(--muted);display:inline-flex;align-items:center;gap:8px}
+.sec-h .car{color:var(--muted);transition:transform .15s;flex:none}
+.sec-h[aria-expanded="false"] .car{transform:rotate(-90deg)}
+/* sbar / ibtn: not .bar / .icon-btn, those names already style the person card */
+.sbar{display:inline-block;width:90px;height:5px;border-radius:3px;background:var(--sunken);overflow:hidden;vertical-align:middle}
+.sbar i{display:block;height:100%;background:var(--low);border-radius:3px}
+.tw-list{display:grid;gap:1px}
+.tw-item{display:flex;gap:10px;align-items:center;padding:5px 8px;border-radius:8px;font-size:14px;min-width:0}
+.tw-item:hover{background:var(--sunken)}
+.tw-item .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.tw-item.done .t{color:var(--muted);text-decoration:line-through}
+.tw-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);flex:none;margin:0}
+.tw-item .att-rm{opacity:0}
+.tw-item:hover .att-rm,.tw-item .att-rm:focus-visible{opacity:1}
+.linkish{border:0;background:none;padding:0;text-align:left;color:inherit;font:inherit}
+.linkish:hover{color:var(--accent)}
+.small{font-size:12px}
+.soon{color:var(--med)}
+.muted{color:var(--muted)}
+.tw-add{border:1px dashed transparent;background:none;border-radius:8px;padding:6px 8px;font-size:14px;width:100%}
+.tw-add:hover{border-color:var(--line)}
+.tw-add:focus{outline:none;border-style:solid;border-color:var(--accent);background:var(--surface)}
+.tw-add::placeholder{color:var(--muted)}
+.tw-filter{justify-self:start}
+.tw-filter button{padding:4px 10px;font-size:12px}
+.tw-feed{display:grid;gap:10px}
+.tw-ev{display:flex;gap:10px;font-size:13px;color:var(--muted);align-items:baseline}
+.tw-ev time{font:500 11px var(--f-mono);flex:none}
+.tw-cmt{display:flex;gap:10px;align-items:flex-start}
+.tw-cmt .body{background:var(--sunken);border-radius:12px;padding:8px 12px;font-size:14px;min-width:0}
+.tw-cmt .who{font-size:12px;color:var(--muted)} .tw-cmt .who b{color:var(--fg);font-weight:600}
+.tw-cmt p{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.tw-composer{display:flex;gap:8px;align-items:flex-end;border:1px solid var(--line);border-radius:12px;padding:6px 6px 6px 12px;background:var(--surface)}
+.tw-composer textarea{flex:1;min-width:0;border:0;background:none;outline:none;resize:none;font-size:14px;max-height:160px;padding:4px 0}
+.tw-side{border-left:1px solid var(--line);padding:12px 10px;display:grid;gap:1px;align-content:start;overflow:auto;background:var(--bg)}
+.tw-side hr{border:0;border-top:1px solid var(--line);margin:8px 6px}
+.prop{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px;align-items:center;padding:5px 8px;border-radius:8px;min-height:36px;border:0;background:none;text-align:left;width:100%;cursor:pointer;font:inherit;color:inherit}
+.prop:hover{background:var(--sunken)}
+.prop .k{font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0}
+.prop .v{display:flex;gap:6px;align-items:center;font-size:14px;min-width:0}
+.prop .v.empty{color:var(--muted)}
+.prop .ell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prop input,.prop select{border:0;background:none;font-size:14px;padding:2px 0;min-width:0;width:100%;cursor:pointer;color:inherit}
+.prop input[type=number]{width:70px;cursor:text}
+.prop input:focus,.prop select:focus{outline:none}
+.prop:focus-within{background:var(--sunken)}
+.prop select:disabled{cursor:not-allowed;opacity:.7}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:500;background:var(--sunken);white-space:nowrap}
+.flag{width:12px;height:12px;flex:none;vertical-align:-1px}
+.pc-high{color:var(--high)} .pc-med{color:var(--med)} .pc-low{color:var(--low)}
+.tw-foot{display:flex;align-items:center;gap:10px;padding:8px 20px;border-top:1px solid var(--line);font-size:12px}
+.saved{color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.saved::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--low)}
+.date-pop{position:fixed;z-index:31;padding:6px 8px;border-radius:8px;border:1px solid var(--accent);background:var(--surface);box-shadow:var(--shadow)}
+@media (max-width:760px){
+  .tw-cols{grid-template-columns:minmax(0,1fr);overflow:auto}
+  .tw-main{overflow:visible}
+  .tw-side{border-left:0;border-bottom:1px solid var(--line);order:-1;grid-template-columns:1fr 1fr;overflow:visible}
+  .tw-side hr{grid-column:1/-1}
+  .prop{grid-template-columns:minmax(0,1fr);gap:0;min-height:0}
+  .tw-keys{display:none}
+}
+/* creation window */
+dialog.nw{width:min(620px,calc(100vw - 32px))}
+.nw-head{display:flex;align-items:center;gap:8px;padding:12px 12px 4px 20px;flex-wrap:wrap}
+.nw-head .close{margin-left:0;background:none}
+.nw-label{font:600 13px var(--f-body);color:var(--muted)}
+.ctx-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);background:var(--sunken);border-radius:999px;padding:3px 4px 3px 10px;max-width:100%;overflow:hidden;white-space:nowrap}
+.ctx-chip .x{border:0;background:none;color:var(--muted);cursor:pointer;border-radius:50%;width:20px;height:20px;padding:0;flex:none}
+.ctx-chip .x:hover{background:var(--line);color:var(--fg)}
+.nw-body{padding:4px 20px 14px;display:grid;gap:10px}
+.nw-title{font:600 21px/1.3 var(--f-body);border:0;background:none;outline:none;padding:4px 0;width:100%}
+.nw-title::placeholder{color:var(--muted);opacity:.75}
+.nw-desc{border:1px solid var(--line);border-radius:10px;background:var(--sunken);padding:8px 10px;min-height:72px;resize:vertical;font-size:14px}
+#nw-desc-btn{justify-self:start;padding:2px 0;border:0;background:none;color:var(--muted);cursor:pointer;font-size:14px}
+#nw-desc-btn:hover{color:var(--fg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip.ghost{border:1px dashed var(--line);background:none;color:var(--muted);cursor:pointer}
+.chip.filled{border:1px solid var(--accent);background:var(--accent-soft);color:var(--fg);cursor:pointer}
+button.chip{font:inherit;font-size:13px;padding:4px 10px;gap:6px}
+.chip .ava.sm{width:18px;height:18px;font-size:8px}
+.nw-foot{display:flex;gap:8px;align-items:center;padding:10px 12px 12px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+@media (pointer:coarse){.nw-keys{display:none}}
+/* «+ Задача» right in a column or a person card */
+.col-add{border:1px dashed transparent;background:none;color:var(--muted);border-radius:10px;padding:7px 10px;text-align:left;cursor:pointer;font-size:13px;width:100%}
+.col-add:hover{border-color:var(--line);color:var(--fg);background:var(--surface)}
+.inl-new{background:var(--surface);border:1.5px solid var(--accent);border-radius:10px;padding:8px 10px;display:grid;gap:4px}
+.inl-new input{border:0;background:none;outline:none;font-size:14px;width:100%}
+.inl-new .note{font-size:11px}
 /* subtasks in the task card and marks on board cards */
 .crumbs{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12px;color:var(--muted)}
 .crumbs button{border:0;background:none;padding:2px 4px;border-radius:6px;cursor:pointer;color:var(--accent);font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -348,7 +458,11 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
   body{padding-block:12px 32px}
   header{gap:8px}
   .logo{font-size:19px}
-  header .seg:first-of-type{order:10;width:100%;overflow-x:auto;scrollbar-width:none}
+  /* the views switcher scrolls sideways instead of widening the page (:first-of-type matched the logo div, not this group) */
+  header .seg[aria-label="Вид"]{order:10;width:100%;min-width:0;overflow-x:auto;scrollbar-width:none}
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  .wrap > *{min-width:0} /* grid items would otherwise grow to their widest row */
+  .filters select{flex:1 1 140px}
   header .seg button{white-space:nowrap}
   #dict-btn,#help-btn,#pal-btn{padding:6px 10px;font-size:13px}
   dialog{width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}
@@ -508,6 +622,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 </div>
 
 <dialog id="d-task"></dialog>
+<dialog id="d-new" aria-label="Новая задача"></dialog>
 <dialog id="d-inbox"></dialog>
 <dialog id="d-person"></dialog>
 <dialog id="d-store"></dialog>
@@ -550,20 +665,23 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       </section>
 
       <section id="h-tasks"><h3>Задачи</h3>
-        <p>Новая задача: кнопка «+ Задача» или клавиша <kbd>N</kbd>. Нажатие на карточку открывает подробности, там можно изменить любое поле.</p>
+        <p><b>Создание.</b> Кнопка «+ Задача» или клавиша <kbd>N</kbd> открывает короткое окно: обязательно только название. Остальное:</p>
+        <ul>
+          <li>подставляется из места, откуда открыто окно: из дерева — родитель и проект, при фильтре по проекту — проект, в режиме «Я: …» — исполнитель;</li>
+          <li>распознаётся прямо в названии (<code>завтра !высокий #баг @Анна 3ч</code>, см. «Быстрый ввод») и подсвечивается;</li>
+          <li>выбирается чипами под названием: статус, исполнитель, срок, приоритет, оценка, тег, проект, повтор. Пустые чипы пунктирные;</li>
+          <li>берётся из шаблона: чип «Шаблон» в шапке окна.</li>
+        </ul>
+        <p>«+ Описание» раскрывает поле описания. <kbd>Enter</kbd> или <kbd>Ctrl</kbd>+<kbd>Enter</kbd> создаёт задачу. Галочка «Создать ещё одну» оставляет окно открытым для следующей задачи. В уведомлении о создании есть кнопка «Открыть».</p>
+        <p><b>Прямо на месте.</b> «+ Задача» внизу колонки канбана или в карточке сотрудника превращается в строку ввода: задача получит статус колонки или этого исполнителя. <kbd>Enter</kbd> создаёт, строка остаётся для следующей, <kbd>Esc</kbd> закрывает.</p>
+        <p><b>Окно задачи.</b> Нажатие на карточку открывает окно из двух частей. Всё, что меняете, сохраняется сразу, кнопки «Сохранить» нет; внизу видно «Сохранено · время».</p>
         <dl>
-          <dt>Название</dt><dd>Обязательно. Без него задача не сохранится.</dd>
-          <dt>Статус, приоритет, исполнитель, проект</dt><dd>Выбираются из списков. «Бэклог» в поле исполнителя означает «без исполнителя».</dd>
-          <dt>Срок</dt><dd>Дата. На карточке показывается «сегодня», «завтра», «через N дн.» или красное «просрочено».</dd>
-          <dt>Оценка, ч</dt><dd>Часы работы. По ним считается загрузка сотрудников.</dd>
-          <dt>Тег</dt><dd>Короткая метка: Баг, UI, Дизайн. По тегу можно фильтровать.</dd>
-          <dt>Повтор</dt><dd>См. раздел «Повторяющиеся задачи».</dd>
-          <dt>Чек-лист</dt><dd>Пункт добавляется кнопкой «Добавить» или клавишей <kbd>Enter</kbd>. Прогресс «☑ 2/5» виден на карточке.</dd>
-          <dt>Вложения</dt><dd>См. раздел «Вложения». Число вложений видно на карточке (📎).</dd>
-          <dt>Комментарии</dt><dd>Отправляются сразу, кнопкой или <kbd>Ctrl</kbd>+<kbd>Enter</kbd>, без кнопки «Сохранить». Подписываются тем, кто выбран в «Я: …». Число комментариев видно на карточке (💬).</dd>
-          <dt>История</dt><dd>Кто, когда и что менял в задаче.</dd>
+          <dt>Слева</dt><dd>Название (нажмите и правьте, <kbd>Enter</kbd> — готово), описание и разделы: чек-лист, подзадачи, вложения, обсуждение. Разделы сворачиваются, окно помнит какие. В «Обсуждении» комментарии и история изменений одной лентой, переключатель «Только комментарии» оставляет одни комментарии.</dd>
+          <dt>Справа</dt><dd>Свойства: статус, приоритет, исполнитель, срок («через 6 дн.»), оценка; ниже черты — проект, «Входит в», тег, повтор. Нажатие на строку открывает выбор; у срока есть «Сегодня», «Завтра», «В пятницу», «Через неделю» и «Выбрать дату…».</dd>
+          <dt>Меню ⋯</dt><dd>Дублировать, сохранить как шаблон, удалить.</dd>
+          <dt>Клавиши</dt><dd><kbd>S</kbd> статус, <kbd>A</kbd> исполнитель, <kbd>D</kbd> срок, <kbd>P</kbd> приоритет, <kbd>C</kbd> к комментарию, <kbd>Esc</kbd> закрыть.</dd>
         </dl>
-        <p>Остальные поля применяются кнопкой «Сохранить». «Отмена» и <kbd>Esc</kbd> закрывают окно без изменений.</p>
+        <p>Смену статуса, исполнителя, срока, приоритета, проекта и повтора можно отменить кнопкой в уведомлении. Правки текста видны в истории задачи.</p>
         <p><b>Отмена действий.</b> После назначения, смены статуса, удаления, архивации и других действий внизу появляется уведомление с кнопкой «Отменить», она доступна около 6 секунд.</p>
       </section>
 
@@ -1218,7 +1336,8 @@ function addNewTask(t){
   if (t.parent && byId(t.parent)) t.project = rootTask(byId(t.parent)).project;
   t.log = [{at: stamp(), text: `${actor()} создал задачу`}];
   if (t.assignee) t.log.push({at: stamp(), text: `${actor()} назначил: ${person(t.assignee).name}`});
-  change(() => { db.tasks.push(t); }, () => `${t.id} создана${t.assignee ? ': ' + person(t.assignee).name : ''}${overloadNote(t)}`);
+  change(() => { db.tasks.push(t); }, () => `${t.id} создана${t.assignee ? ': ' + person(t.assignee).name : ''}${overloadNote(t)}`,
+    {label: 'Открыть', run: () => openTask(t.id)});
 }
 
 /* ---------- render ---------- */
@@ -1257,6 +1376,29 @@ const byPrio = (a, b) => ({high:0, med:1, low:2}[a.prio] - {high:0, med:1, low:2
 const SORTS = {manual: (a, b) => a.order - b.order, prio: byPrio, due: (a, b) => (a.due || '9').localeCompare(b.due || '9') || byPrio(a, b)};
 const sorter = () => SORTS[ui.sort] || SORTS.manual;
 
+/* «+ Задача» in a kanban column or a person card: an input right there, the place gives the status or the assignee.
+   render() rebuilds the board, so the open input is kept as state and re-created with its draft. */
+let inlineAt = null; // {key: 'col:progress' | 'p:<person id>', draft}
+const inlineHtml = (key, label) => inlineAt?.key === key
+  ? `<div class="inl-new"><input id="inl-input" maxlength="300" placeholder="Название и Enter" aria-label="Новая задача: ${esc(label)}" autocomplete="off"><span class="note">Enter — создать · Esc — закрыть · можно <code>завтра</code> <code>!высокий</code> <code>#тег</code></span></div>`
+  : `<button type="button" class="col-add" data-inl="${esc(key)}">+ Задача</button>`;
+function inlineCreate(text){
+  const r = parseQuick(text, active(), new Date(), activeProjects(), db.tasks); if (!r.title) return;
+  const k = inlineAt.key, place = k.startsWith('col:') ? {status: k.slice(4)} : {assignee: k.slice(2)};
+  inlineAt.draft = '';
+  addNewTask(normTask({title: r.title, prio: r.prio || 'med', tag: r.tag, due: r.due, est: r.est, project: r.project ?? (ui.proj && ui.proj !== '-' ? ui.proj : null), parent: r.parent, assignee: r.assignee || null, ...place}));
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-inl]');
+  if (b){ inlineAt = {key: b.dataset.inl, draft: ''}; return render(); }
+  if (inlineAt && !e.target.closest('.inl-new') && !inlineAt.draft){ inlineAt = null; render(); }
+});
+document.addEventListener('input', e => { if (e.target.id === 'inl-input') inlineAt.draft = e.target.value; });
+document.addEventListener('keydown', e => {
+  if (e.target.id !== 'inl-input') return;
+  if (e.key === 'Enter'){ e.preventDefault(); inlineCreate(e.target.value); }
+  if (e.key === 'Escape'){ e.preventDefault(); inlineAt = null; render(); }
+});
 function render(){
   renderFilters();
   const bl = db.tasks.filter(t => !t.assignee && t.status !== 'done' && visible(t)).sort(sorter());
@@ -1279,7 +1421,7 @@ function render(){
         </div></div>
       <div class="load"><div class="l-top"><span>Эта неделя · всего открыто ${total} ч</span><span>${h} / ${p.cap} ч</span></div>
         <div class="bar"><i class="${h > p.cap ? 'over' : ''}" style="width:${Math.min(100, h / p.cap * 100)}%"></i></div></div>
-      <div class="mini">${mine.length ? mine.map(t => card(t, 'mini')).join('') : '<div class="drop-hint">Перетащите сюда задачу</div>'}</div>
+      <div class="mini">${mine.length ? mine.map(t => card(t, 'mini')).join('') : '<div class="drop-hint">Перетащите сюда задачу</div>'}${inlineHtml('p:' + p.id, p.name)}</div>
     </div>`;
   }).join('') : '<div class="empty">В команде пока никого. Добавьте сотрудника.</div>')
   + (archived.length ? `<details class="archive"><summary>Архив сотрудников (${archived.length})</summary>${archived.map(p => `<div class="arch-row">${ava(p, true)}<span>${esc(p.name)}</span><button class="btn small" data-restore="${esc(p.id)}" style="margin-left:auto">Вернуть</button></div>`).join('')}</details>` : '');
@@ -1288,9 +1430,10 @@ function render(){
     let list = db.tasks.filter(t => t.status === k && visible(t)).sort(sorter()), archived = 0;
     if (k === 'done'){ const n = list.length; list = list.filter(t => !isArchived(t)); archived = n - list.length; }
     return `<section class="col zone" data-status="${k}"><h2>${label} <span class="count">${list.length}</span></h2>${list.map(t => card(t, 'board')).join('')}
-      ${k === 'done' ? `<button class="btn small" id="open-archive">Архив выполненных${archived ? ` · ${archived}` : ''}</button>` : ''}</section>`;
+      ${inlineHtml('col:' + k, label)}${k === 'done' ? `<button class="btn small" id="open-archive">Архив выполненных${archived ? ` · ${archived}` : ''}</button>` : ''}</section>`;
   }).join('');
   renderMe();
+  if (inlineAt){ const i = $('#inl-input'); if (i && !document.querySelector('dialog[open]')){ i.value = inlineAt.draft; i.focus(); } }
   if (view === 'my') renderMy();
   if (view === 'load') renderLoad();
   if (view === 'log') renderLog();
@@ -1405,8 +1548,10 @@ $('#tree').addEventListener('keydown', e => {
 })();
 
 /* context menu: right click (long press on touch) on a block, a tree row or empty map space */
-function openCtx(x, y, items){
+// host: the open dialog, if any; a modal dialog sits in the browser's top layer, so the menu must live inside it to be visible
+function openCtx(x, y, items, host = document.body){
   const m = $('#ctx');
+  if (m.parentElement !== host) host.appendChild(m);
   m.innerHTML = items.map(it => it === '-' ? '<hr>' : it.head ? `<div class="ctx-h">${esc(it.head)}</div>`
     : `<button type="button" role="${it.checked != null ? 'menuitemradio' : 'menuitem'}" ${it.checked != null ? `aria-checked="${it.checked}"` : ''} class="${it.danger ? 'danger' : ''}">${it.icon || ''}<span>${esc(it.label)}</span>${it.key ? `<kbd>${esc(it.key)}</kbd>` : ''}</button>`).join('');
   const acts = items.filter(it => it.run);
@@ -1418,7 +1563,8 @@ function openCtx(x, y, items){
   m.style.top = Math.max(8, Math.min(y, innerHeight - r.height - 8)) + 'px';
   m.querySelector('button')?.focus();
 }
-function closeCtx(){ $('#ctx').hidden = true; }
+// back to <body>: a dialog rebuilds its innerHTML and would otherwise delete the menu with it
+function closeCtx(){ const m = $('#ctx'); m.hidden = true; if (m.parentElement !== document.body) document.body.appendChild(m); }
 document.addEventListener('pointerdown', e => { if (!$('#ctx').hidden && !e.target.closest('#ctx')) closeCtx(); }, true);
 addEventListener('blur', closeCtx);
 addEventListener('resize', closeCtx);
@@ -1815,257 +1961,355 @@ function drawStore(){
 }
 
 // opts.asEmployee: opened from the employee's inbox; opts.template: prefill a new task
+/* ---------- task window: content on the left, properties on the right, every change saves at once ---------- */
+const REPEATS = {'': 'Не повторять', 'day:1': 'Каждый день', 'week:1': 'Каждую неделю', 'week:2': 'Каждые 2 недели', 'month:1': 'Каждый месяц', 'month:3': 'Каждый квартал'};
+const repeatKey = r => r ? `${r.unit}:${r.n}` : '';
+const flagSvg = '<svg class="flag" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 11V1.5h7l-1.5 2.5L9 6.5H2" fill="currentColor"/></svg>';
+const dueWords = iso => { const n = daysTo(iso); return n < 0 ? `просрочено на ${-n} дн.` : n === 0 ? 'сегодня' : n === 1 ? 'завтра' : `через ${n} дн.`; };
+const dueCls = (iso, done) => done ? '' : daysTo(iso) < 0 ? 'due-over' : daysTo(iso) <= 3 ? 'soon' : 'muted';
+const nextWeekday = wd => { const n = (wd - new Date().getDay() + 7) % 7 || 7; return addDays(n); };
+const dueQuick = () => [['Сегодня', addDays(0)], ['Завтра', addDays(1)], ['В пятницу', nextWeekday(5)], ['Через неделю', addDays(7)]];
+const anchor = el => { const r = el.getBoundingClientRect(); return [r.left, r.bottom + 4]; };
+const authorAva = name => { const p = db.people.find(x => x.name === name); return p ? ava(p, true) : `<span class="ava sm none">${esc(initials(name || '?'))}</span>`; };
+// pickers shared by the task window and the creation window; host = the open dialog so the menu sits above it
+const pickStatus = (el, cur, run, host) => openCtx(...anchor(el), Object.entries(STATUS).map(([k, v]) => ({label: v, icon: `<span class="si ${k}"></span>`, checked: cur === k, run: () => run(k)})), host);
+const pickPrio = (el, cur, run, host) => openCtx(...anchor(el), Object.entries(PRIO).map(([k, v]) => ({label: v, icon: `<span class="pc-${k}">${flagSvg}</span>`, checked: cur === k, run: () => run(k)})), host);
+const pickPerson = (el, cur, run, host) => openCtx(...anchor(el), [{label: 'Не назначен', checked: !cur, run: () => run(null)},
+  ...active().map(p => ({label: p.name, icon: ava(p, true), checked: cur === p.id, run: () => run(p.id)}))], host);
+function pickDue(el, cur, run, host){
+  openCtx(...anchor(el), [...dueQuick().map(([l, iso]) => ({label: l, key: fmtDay(iso, true), checked: cur === iso, run: () => run(iso)})),
+    {label: 'Выбрать дату…', run: () => {
+      // a real date input, opened right where the row is
+      const inp = document.createElement('input'); inp.type = 'date'; inp.value = cur || ''; inp.className = 'date-pop';
+      const [x, y] = anchor(el); Object.assign(inp.style, {left: x + 'px', top: y + 'px'});
+      (host || document.body).appendChild(inp); inp.focus();
+      try { inp.showPicker(); } catch {}
+      inp.onchange = () => { if (inp.value) run(inp.value); inp.remove(); };
+      inp.onblur = () => setTimeout(() => inp.remove(), 200);
+      inp.onkeydown = e => { if (e.key === 'Escape'){ e.preventDefault(); inp.remove(); } };
+    }},
+    ...(cur ? ['-', {label: 'Убрать срок', danger: true, run: () => run('')}] : [])], host);
+}
+
 function openTask(id, opts = {}){
-  const existing = id ? byId(id) : null;
-  if (id && !existing) return;
-  const asEmployee = !!existing && (opts.asEmployee || (meId && existing.assignee === meId));
-  if (existing && asEmployee && !existing.seen){ existing.seen = true; addLog(existing, `${person(existing.assignee)?.name} просмотрел задачу`); commit(); }
-  const t = existing ? structuredClone(existing) : normTask({id: '', title: '', log: []});
-  if (!existing){ t.title = ''; const tp = db.templates.find(x => x.id === opts.template); if (tp) fromTemplate(t, tp); }
-  // new subtask: project from the branch, assignee from the parent (both can be changed)
-  if (!existing && opts.parent && byId(opts.parent)){ const p = byId(opts.parent); Object.assign(t, {parent: p.id, project: rootTask(p).project, assignee: p.assignee}); }
-  else if (!existing && 'project' in opts) t.project = opts.project;
-  const d = $('#d-task');
-  const banned = new Set(existing ? [existing.id, ...desc(existing.id).map(x => x.id)] : []);
-  const parentOpts = [...db.projects, {id: null, name: 'Без проекта'}].map(p => {
-    const list = db.tasks.filter(x => x.project === p.id && !banned.has(x.id) && (!isArchived(x) || x.id === t.parent));
-    return list.length ? `<optgroup label="${esc(p.name)}">${list.map(x => `<option value="${esc(x.id)}" ${t.parent === x.id ? 'selected' : ''}>${esc(x.id)} · ${esc(x.title.slice(0, 60))}</option>`).join('')}</optgroup>` : '';
-  }).join('');
-  const peopleOpts = [...active(), ...(t.assignee && person(t.assignee)?.archived ? [person(t.assignee)] : [])]
-    .map(p => `<option value="${esc(p.id)}" ${t.assignee === p.id ? 'selected' : ''}>${esc(p.name)}${p.archived ? ' (архив)' : ''}</option>`).join('');
-  const projOpts = [...activeProjects(), ...(t.project && project(t.project)?.archived ? [project(t.project)] : [])]
-    .map(p => `<option value="${esc(p.id)}" ${t.project === p.id ? 'selected' : ''}>${esc(p.name)}${p.archived ? ' (архив)' : ''}</option>`).join('');
-  const opts2 = (map, cur) => Object.entries(map).map(([k, v]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${v}</option>`).join('');
-  const REPEATS = {'': 'Не повторять', 'day:1': 'Каждый день', 'week:1': 'Каждую неделю', 'week:2': 'Каждые 2 недели', 'month:1': 'Каждый месяц', 'month:3': 'Каждый квартал'};
-  const repKey = t.repeat ? `${t.repeat.unit}:${t.repeat.n}` : '';
-  if (repKey && !REPEATS[repKey]) REPEATS[repKey] = repeatLabel({...t.repeat, from: 'due'}).replace(' от срока', '');
-  d.innerHTML = `<form id="task-form" novalidate>
-  <div class="d-head">${existing ? `<span class="id">${esc(t.id)}</span>` : ''}<h2>${existing ? 'Задача' : 'Новая задача'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
-  <div class="d-body">
-    ${!existing && db.templates.length ? `<div class="field"><label for="f-tpl">Шаблон</label><select id="f-tpl"><option value="">Без шаблона</option>${db.templates.map(x => `<option value="${esc(x.id)}" ${opts.template === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : ''}
-    ${t.parent && byId(t.parent) ? `<div class="crumbs" id="f-crumbs"></div>` : ''}
-    <div class="field"><label for="f-title">Название</label><input id="f-title" class="title-input" maxlength="200" value="${esc(t.title)}" placeholder="Что нужно сделать"><span class="err" id="f-title-err" hidden>Введите название задачи</span></div>
-    <div class="fields">
-      <div class="field"><label for="f-status">Статус</label><select id="f-status">${opts2(STATUS, t.status)}</select></div>
-      <div class="field"><label for="f-prio">Приоритет</label><select id="f-prio">${opts2(PRIO, t.prio)}</select></div>
-      <div class="field"><label for="f-proj">Проект</label><select id="f-proj" ${t.parent ? 'disabled title="Подзадача всегда в проекте родителя"' : ''}><option value="">Без проекта</option>${projOpts}</select></div>
-      <div class="field"><label for="f-parent">Входит в</label><select id="f-parent"><option value="">Верхний уровень</option>${parentOpts}</select></div>
-      <div class="field"><label for="f-asg">Исполнитель</label><select id="f-asg"><option value="">Бэклог</option>${peopleOpts}</select></div>
-      <div class="field"><label for="f-due">Срок</label><input id="f-due" type="date" value="${esc(t.due)}"></div>
-      <div class="field"><label for="f-est">Оценка, ч</label><input id="f-est" type="number" min="0" step="0.5" value="${t.est || ''}"></div>
-      <div class="field"><label for="f-tag">Тег</label><input id="f-tag" maxlength="40" value="${esc(t.tag)}" placeholder="Баг, UI…"></div>
-      <div class="field"><label for="f-rep">Повтор</label><select id="f-rep">${opts2(REPEATS, repKey)}</select></div>
-      <div class="field"><label for="f-rep-from">Следующий считать</label><select id="f-rep-from"><option value="due" ${t.repeat?.from !== 'done' ? 'selected' : ''}>от срока</option><option value="done" ${t.repeat?.from === 'done' ? 'selected' : ''}>от даты выполнения</option></select></div>
+  if (!id) return openCreate(opts);
+  const t0 = byId(id); if (!t0) return;
+  const asEmployee = opts.asEmployee || (meId && t0.assignee === meId);
+  if (asEmployee && !t0.seen){ t0.seen = true; addLog(t0, `${person(t0.assignee)?.name} просмотрел задачу`); commit(); }
+  const author = asEmployee && !meId ? (person(t0.assignee)?.name || ME) : actor();
+  closeCtx();
+  const d = $('#d-task'), live = () => byId(id);
+  const caret = '<svg class="car" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4 6 7.5 9.5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const sec = (key, title, body) => `<section class="tw-sec" data-sec="${key}"><button type="button" class="sec-h" aria-expanded="${!ui.twClosed.includes(key)}" data-sec-toggle="${key}">${caret}<b>${title}</b><span class="cnt" id="tw-cnt-${key}"></span></button>
+    <div class="sec-b" ${ui.twClosed.includes(key) ? 'hidden' : ''}>${body}</div></section>`;
+  d.className = 'tw';
+  d.innerHTML = `
+  <div class="tw-head"><div class="crumbs" id="tw-crumbs"></div>
+    <button type="button" class="ibtn" id="tw-more" aria-label="Ещё действия" title="Ещё действия">⋯</button>
+    <button type="button" class="ibtn close" aria-label="Закрыть" title="Закрыть (Esc)">✕</button></div>
+  <div class="tw-cols">
+    <div class="tw-main">
+      <textarea id="tw-title" class="tw-title" rows="1" maxlength="200" aria-label="Название задачи"></textarea>
+      <textarea id="tw-desc" class="tw-desc" maxlength="5000" placeholder="Добавить описание…" aria-label="Описание"></textarea>
+      ${sec('check', 'Чек-лист', `<div class="tw-list" id="tw-checks"></div><input id="tw-check-new" class="tw-add" maxlength="300" placeholder="+ Пункт и Enter" aria-label="Новый пункт чек-листа">`)}
+      ${sec('subs', 'Подзадачи', `<div class="tw-list" id="tw-subs"></div><input id="tw-sub-new" class="tw-add" maxlength="200" placeholder="+ Подзадача и Enter" aria-label="Новая подзадача">`)}
+      ${sec('files', 'Вложения', `<div class="attach" id="tw-attach"></div>
+        <div class="add-row"><input id="tw-link" maxlength="2000" placeholder="Ссылка: https://…" aria-label="Адрес ссылки"><input id="tw-link-title" maxlength="200" placeholder="Подпись" aria-label="Подпись ссылки"><button type="button" class="btn small" id="tw-link-add">Добавить</button></div>
+        <span class="err" id="tw-link-err" hidden>Нужна ссылка, начинающаяся с http:// или https://</span>
+        <div class="add-row">${canAttach() ? `<label class="btn small" for="tw-file">Прикрепить файлы…</label><input type="file" id="tw-file" multiple hidden><span class="note">до ${fmtSize(FILE_MAX)} каждый, хранятся в ${esc(file.name)}</span>`
+          : `<span class="note">Файлы можно прикреплять, когда подключён JSON-файл: в браузере для них мало места.</span>`}</div>`)}
+      ${sec('talk', 'Обсуждение', `<div class="seg tw-filter" role="group" aria-label="Что показывать"><button type="button" data-feed="all">Всё</button><button type="button" data-feed="comments">Только комментарии</button></div>
+        <div class="tw-feed" id="tw-feed"></div>
+        <div class="tw-composer"><textarea id="tw-cmt" rows="1" maxlength="3000" placeholder="Написать комментарий…" aria-label="Новый комментарий"></textarea><button type="button" class="btn small primary" id="tw-cmt-send">Отправить</button></div>`)}
     </div>
-    <label class="chk" id="f-close-kids-row" hidden><input type="checkbox" id="f-close-kids" checked> <span id="f-close-kids-text"></span></label>
-    <p class="note" id="f-rep-note" ${t.repeat ? '' : 'hidden'}>Когда задача станет «Готово», появится следующая с новым сроком, тем же исполнителем и чистым чек-листом.</p>
-    <div class="field"><label for="f-desc">Описание</label><textarea id="f-desc" maxlength="5000">${esc(t.desc)}</textarea></div>
-    <div><h4 class="sec-t">Чек-лист</h4><div id="f-checks"></div>
-      <div class="add-row"><input id="f-check-new" maxlength="300" placeholder="Новый пункт" aria-label="Новый пункт чек-листа"><button type="button" class="btn small" id="f-check-add">Добавить</button></div></div>
-    ${existing ? `<div><h4 class="sec-t">Подзадачи <span class="count" id="f-sub-count"></span></h4><div class="subs" id="f-subs"></div>
-      <div class="add-row"><input id="f-sub-new" maxlength="200" placeholder="Новая подзадача и Enter" aria-label="Новая подзадача"><button type="button" class="btn small" id="f-sub-add">Добавить</button></div>
-      <p class="note" style="margin-top:6px">Подзадача — отдельная задача со своим исполнителем и сроком. Для мелких шагов без исполнителя есть чек-лист.</p></div>` : ''}
-    ${existing ? `<div><h4 class="sec-t">Вложения</h4><div class="attach" id="f-attach"></div>
-      <div class="add-row"><input id="f-link" maxlength="2000" placeholder="Ссылка: https://…" aria-label="Адрес ссылки"><input id="f-link-title" maxlength="200" placeholder="Подпись (необязательно)" aria-label="Подпись ссылки"><button type="button" class="btn small" id="f-link-add">Добавить ссылку</button></div>
-      <span class="err" id="f-link-err" hidden>Нужна ссылка, начинающаяся с http:// или https://</span>
-      <div class="add-row">${canAttach() ? `<label class="btn small" for="f-file">Прикрепить файлы…</label><input type="file" id="f-file" multiple hidden><span class="note">до ${fmtSize(FILE_MAX)} каждый, хранятся в ${esc(file.name)}</span>`
-        : `<span class="note">Файлы можно прикреплять, когда подключён JSON-файл: в браузере для них мало места. Подключите его через кнопку хранения в шапке.</span>`}</div></div>` : ''}
-    ${existing ? `<div><h4 class="sec-t">Комментарии</h4><div class="comments" id="f-comments"></div>
-      <div class="add-row"><textarea id="f-cmt" maxlength="3000" rows="2" aria-label="Новый комментарий" placeholder="Комментарий… Ctrl+Enter отправит"></textarea><button type="button" class="btn small" id="f-cmt-send">Отправить</button></div></div>` : ''}
-    ${existing ? `<div><h4 class="sec-t">История</h4><ul class="log">${t.log.slice().reverse().map(l => `<li><time>${esc(fmtStamp(l.at))}</time>${esc(l.text)}</li>`).join('')}</ul></div>` : ''}
+    <aside class="tw-side" id="tw-side" aria-label="Свойства задачи"></aside>
   </div>
-  <div class="d-foot">${existing ? '<button type="button" class="btn danger" id="f-del">Удалить</button>' : ''}<button type="button" class="btn" id="f-save-tpl">Сохранить как шаблон</button><span class="spacer"></span>
-    <button type="button" class="btn" id="f-cancel">Отмена</button><button class="btn primary">${existing ? 'Сохранить' : 'Создать'}</button></div>
-  </form>`;
-  const val = s => d.querySelector(s).value;
-  d.querySelector('#f-rep').onchange = e => { d.querySelector('#f-rep-note').hidden = !e.target.value; };
-  d.querySelector('#f-tpl')?.addEventListener('change', e => {
-    const tp = db.templates.find(x => x.id === e.target.value); if (!tp) return;
-    d.close(); openTask(null, {template: tp.id});
-  });
-  d.querySelector('#f-save-tpl').onclick = () => {
-    const name = val('#f-title').trim() || 'Шаблон';
-    const tp = normTemplate({name, title: val('#f-title'), prio: val('#f-prio'), tag: val('#f-tag').trim(), est: val('#f-est'), project: val('#f-proj') || null, desc: val('#f-desc'), checklist: t.checklist.map(c => c.text)});
-    change(() => { db.templates.push(tp); addEvent(`${actor()} сохранил шаблон «${tp.name}»`); }, `Шаблон «${tp.name}» сохранён`);
+  <div class="tw-foot"><span class="saved" id="tw-saved">Изменения сохраняются сами</span><span class="spacer"></span>
+    <span class="muted tw-keys"><kbd>S</kbd> статус · <kbd>A</kbd> исполнитель · <kbd>D</kbd> срок · <kbd>P</kbd> приоритет · <kbd>C</kbd> комментарий</span></div>`;
+  const q = s => d.querySelector(s), titleEl = q('#tw-title'), descEl = q('#tw-desc'), side = q('#tw-side');
+  let feedAll = false;
+
+  const mark = () => { q('#tw-saved').textContent = `Сохранено · ${new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}`; };
+  // quiet save for typing (title, text, checklist): logs, no toast; pickers go through change() and can be undone
+  const save = (fn, log) => { const t = live(); if (!t) return toast('Задача уже удалена'); fn(t); if (log) addLog(t, log); commit(); mark(); };
+  const loud = (fn, msg) => { if (!live()) return toast('Задача уже удалена'); change(() => fn(live()), msg); mark(); };
+  const grow = el => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; };
+  const flush = () => {
+    const t = live(); if (!t) return;
+    const ti = titleEl.value.replace(/\s+/g, ' ').trim(), de = descEl.value, ch = [];
+    if (!ti) titleEl.value = t.title;
+    if (ti && ti !== t.title) ch.push('название');
+    if (de !== t.desc) ch.push('описание');
+    if (ch.length) save(x => { if (ti) x.title = ti; x.desc = de; }, `${author} изменил: ${ch.join(', ')}`);
   };
+  const go = other => { flush(); openTask(other, {asEmployee: opts.asEmployee}); };
+  titleEl.value = t0.title; descEl.value = t0.desc;
+  titleEl.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); titleEl.blur(); } };
+  titleEl.oninput = () => grow(titleEl); descEl.oninput = () => grow(descEl);
+  titleEl.onblur = descEl.onblur = flush;
+  d.onclose = flush;
+
+  /* header: path and ⋯ menu */
+  let crumbsFull = false;
+  const drawCrumbs = () => {
+    const t = live(), a = ancestors(t), pr = project(t.project), link = x => `<span>›</span><button type="button" data-go="${esc(x.id)}" title="${esc(x.id)} ${esc(x.title)}">${esc(x.id)} ${esc(x.title)}</button>`;
+    q('#tw-crumbs').innerHTML = `${pr ? `<span class="pdot" style="background:${pr.hue}"></span><span>${esc(pr.name)}</span>` : '<span>Без проекта</span>'}` +
+      (a.length <= 3 || crumbsFull ? a.map(link).join('') : link(a[0]) + `<span>›</span><button type="button" data-crumb-more title="Показать весь путь">… ещё ${a.length - 3}</button>` + a.slice(-2).map(link).join('')) +
+      `<span>›</span><span class="id">${esc(t.id)}</span>`;
+  };
+  q('#tw-more').onclick = e => openCtx(...anchor(e.currentTarget), [
+    {label: 'Дублировать', run: () => { flush(); const t = live(); addNewTask(normTask({...structuredClone(t), id: '', title: `${t.title} (копия)`, status: 'new', comments: [], files: [], log: [], checklist: t.checklist.map(c => ({text: c.text, done: false}))})); }},
+    {label: 'Сохранить как шаблон', run: () => { flush(); const t = live(); const tp = normTemplate({name: t.title, title: t.title, prio: t.prio, tag: t.tag, est: t.est, project: t.project, desc: t.desc, checklist: t.checklist.map(c => c.text)});
+      change(() => { db.templates.push(tp); addEvent(`${actor()} сохранил шаблон «${tp.name}»`); }, `Шаблон «${tp.name}» сохранён`); }},
+    '-', {label: kids(id).length ? 'Удалить (подзадачи останутся)' : 'Удалить задачу', danger: true, run: () => { d.onclose = null; d.close(); deleteTask(id); }},
+  ], d);
+
+  /* properties */
+  const drawSide = () => {
+    // don't rebuild under the user's fingers while a field in the panel is being edited
+    if (side.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return;
+    const t = live(), p = person(t.assignee), pr = project(t.project), r = rollup(t), has = kids(t.id).length;
+    const row = (key, label, value, empty) => `<button type="button" class="prop" data-prop="${key}"><span class="k">${label}</span><span class="v${empty ? ' empty' : ''}">${value}</span></button>`;
+    const banned = new Set([t.id, ...desc(t.id).map(x => x.id)]);
+    const parents = db.tasks.filter(x => x.project === t.project && !banned.has(x.id) && (!isArchived(x) || x.id === t.parent)).sort((a, b) => a.order - b.order);
+    const projOpts = [...activeProjects(), ...(pr?.archived ? [pr] : [])];
+    side.innerHTML =
+      row('status', 'Статус', `<span class="pill st-${t.status}"><span class="si ${t.status}"></span>${STATUS[t.status]}</span>`) +
+      row('prio', 'Приоритет', `<span class="pc-${t.prio}">${flagSvg}</span>${PRIO[t.prio]}`) +
+      row('assignee', 'Исполнитель', p ? `${ava(p, true)}<span class="ell">${esc(p.name)}</span>` : 'Не назначен', !p) +
+      row('due', 'Срок', t.due ? `${fmtDay(t.due)} <span class="${dueCls(t.due, t.status === 'done')}">${t.status === 'done' ? '' : dueWords(t.due)}</span>` : 'Нет срока', !t.due) +
+      `<label class="prop" for="tw-est"><span class="k">Оценка, ч</span><span class="v"><input id="tw-est" type="number" min="0" step="0.5" value="${t.est || ''}" placeholder="—">${has && r.hours !== t.est ? `<span class="muted">ветка ${r.hours} ч</span>` : ''}</span></label>` +
+      '<hr>' +
+      `<label class="prop" for="tw-proj"><span class="k">Проект</span><span class="v">${pr ? `<span class="pdot" style="background:${pr.hue}"></span>` : ''}<select id="tw-proj" ${t.parent ? 'disabled title="Подзадача всегда в проекте родителя"' : ''}><option value="">Без проекта</option>${projOpts.map(x => `<option value="${esc(x.id)}" ${x.id === t.project ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></span></label>` +
+      `<label class="prop" for="tw-parent"><span class="k">Входит в</span><span class="v"><select id="tw-parent"><option value="">Верхний уровень</option>${parents.map(x => `<option value="${esc(x.id)}" ${x.id === t.parent ? 'selected' : ''}>${esc(x.id)} · ${esc(x.title.slice(0, 50))}</option>`).join('')}</select></span></label>` +
+      `<label class="prop" for="tw-tag"><span class="k">Тег</span><span class="v"><input id="tw-tag" maxlength="40" value="${esc(t.tag)}" placeholder="—" list="tw-tags"></span></label>` +
+      `<datalist id="tw-tags">${[...new Set(db.tasks.map(x => x.tag).filter(Boolean))].map(x => `<option value="${esc(x)}">`).join('')}</datalist>` +
+      `<label class="prop" for="tw-rep"><span class="k">Повтор</span><span class="v"><select id="tw-rep">${Object.entries({...REPEATS, ...(t.repeat && !REPEATS[repeatKey(t.repeat)] ? {[repeatKey(t.repeat)]: repeatLabel({...t.repeat, from: 'due'}).replace(' от срока', '')} : {})}).map(([k, v]) => `<option value="${k}" ${k === repeatKey(t.repeat) ? 'selected' : ''}>${v}</option>`).join('')}</select></span></label>` +
+      (t.repeat ? `<label class="prop" for="tw-rep-from"><span class="k">Считать</span><span class="v"><select id="tw-rep-from"><option value="due" ${t.repeat.from === 'due' ? 'selected' : ''}>от срока</option><option value="done" ${t.repeat.from === 'done' ? 'selected' : ''}>от выполнения</option></select></span></label>` : '');
+  };
+  const pick = key => {
+    const el = side.querySelector(`[data-prop="${key}"]`), t = live(); if (!el || !t) return;
+    if (key === 'status') pickStatus(el, t.status, s => setStatus(id, s, author), d);
+    if (key === 'prio') pickPrio(el, t.prio, v => loud(x => { x.prio = v; addLog(x, `${author}: приоритет «${PRIO[v]}»`); }, `${id}: приоритет «${PRIO[v]}»`), d);
+    if (key === 'assignee') pickPerson(el, t.assignee, v => assign(id, v), d);
+    if (key === 'due') pickDue(el, t.due, v => loud(x => { x.due = v; addLog(x, `${author}: ${v ? `срок ${fmtDay(v)}` : 'срок убран'}`); }, v ? `${id}: срок ${fmtDay(v)}` : `${id}: срок убран`), d);
+  };
+  side.onclick = e => { const b = e.target.closest('button[data-prop]'); if (b) pick(b.dataset.prop); };
+  side.onchange = e => {
+    const el = e.target, t = live(); if (!t) return;
+    if (el.id === 'tw-est') save(x => x.est = Math.max(0, Number(el.value) || 0), `${author}: оценка ${Number(el.value) || 0} ч`);
+    if (el.id === 'tw-tag') save(x => x.tag = el.value.trim().slice(0, 40), `${author}: тег «${el.value.trim() || 'без тега'}»`);
+    if (el.id === 'tw-proj') loud(x => { x.project = el.value || null; desc(x.id).forEach(y => y.project = x.project); addLog(x, `${author}: проект «${project(x.project)?.name || 'без проекта'}»`); }, `${id}: проект изменён`);
+    if (el.id === 'tw-parent') el.value ? (setOpen(el.value, true), moveTask(id, el.value, 'in')) : moveTask(id, null, 'top', t.project);
+    if (el.id === 'tw-rep'){ const [unit, n] = el.value.split(':'); loud(x => { x.repeat = unit ? normRepeat({unit, n, from: x.repeat?.from || 'due'}) : null; addLog(x, `${author}: повтор «${x.repeat ? repeatLabel(x.repeat) : 'нет'}»`); }, `${id}: ${unit ? 'повтор задан' : 'повтор убран'}`); }
+    if (el.id === 'tw-rep-from') loud(x => { x.repeat = normRepeat({...x.repeat, from: el.value}); }, `${id}: повтор ${el.value === 'done' ? 'от выполнения' : 'от срока'}`);
+    el.blur();
+  };
+
+  /* sections */
+  const bar = (done, total) => total ? `${done}/${total} <span class="sbar"><i style="width:${done / total * 100}%"></i></span>` : '';
   const drawChecks = () => {
-    d.querySelector('#f-checks').innerHTML = t.checklist.map((c, i) => `<div class="check"><input type="checkbox" id="ck-${i}" data-i="${i}" ${c.done ? 'checked' : ''}><span><label for="ck-${i}">${esc(c.text)}</label></span><button type="button" data-rm="${i}" aria-label="Удалить пункт">✕</button></div>`).join('') || '<p class="note">Пунктов нет</p>';
+    const t = live();
+    q('#tw-cnt-check').innerHTML = bar(t.checklist.filter(c => c.done).length, t.checklist.length);
+    q('#tw-checks').innerHTML = t.checklist.map((c, i) => `<div class="tw-item${c.done ? ' done' : ''}"><input type="checkbox" id="twc-${i}" data-ci="${i}" ${c.done ? 'checked' : ''}>
+      <label for="twc-${i}" class="t">${esc(c.text)}</label><button type="button" class="att-rm" data-crm="${i}" aria-label="Удалить пункт">✕</button></div>`).join('');
   };
-  drawChecks();
-  d.querySelector('#f-checks').onclick = e => { const rm = e.target.closest('[data-rm]'); if (rm){ t.checklist.splice(+rm.dataset.rm, 1); drawChecks(); } };
-  d.querySelector('#f-checks').onchange = e => { if (e.target.dataset.i != null) t.checklist[+e.target.dataset.i].done = e.target.checked; };
-  const addCheck = () => { const inp = d.querySelector('#f-check-new'), v = inp.value.trim(); if (v){ t.checklist.push({text: v, done: false}); inp.value = ''; drawChecks(); } inp.focus(); };
-  d.querySelector('#f-check-add').onclick = addCheck;
-  d.querySelector('#f-check-new').onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); addCheck(); } };
-  // comments are sent at once, not with «Сохранить», so they go to the live task and to the draft
-  const author = asEmployee && !meId ? (person(t.assignee)?.name || ME) : actor();
-  const drawComments = () => {
-    const box = d.querySelector('#f-comments'); if (!box) return;
-    box.innerHTML = t.comments.map(c => `<div class="cmt"><div class="c-top"><b>${esc(c.author)}</b><time>${esc(fmtStamp(c.at))}</time></div><p>${esc(c.text)}</p></div>`).join('') || '<p class="note">Комментариев пока нет</p>';
+  q('#tw-checks').onchange = e => { const i = e.target.dataset.ci; if (i != null) save(x => x.checklist[+i].done = e.target.checked); };
+  q('#tw-checks').onclick = e => { const b = e.target.closest('[data-crm]'); if (b){ const i = +b.dataset.crm; save(x => x.checklist.splice(i, 1), `${author} убрал пункт чек-листа`); } };
+  q('#tw-check-new').onkeydown = e => { if (e.key !== 'Enter') return; e.preventDefault(); const v = e.target.value.trim(); if (!v) return; save(x => x.checklist.push({text: v.slice(0, 300), done: false})); e.target.value = ''; };
+  const drawSubs = () => {
+    const t = live(), ks = kids(t.id), r = rollup(t);
+    q('#tw-cnt-subs').innerHTML = bar(ks.filter(k => k.status === 'done').length, ks.length) + (r.total > ks.length ? ` <span class="muted">· в ветке ${r.total}</span>` : '');
+    q('#tw-subs').innerHTML = ks.map(k => `<div class="tw-item${k.status === 'done' ? ' done' : ''}">
+        <button type="button" ${siAttr(k)} data-sub-flip="${esc(k.id)}" aria-label="${k.status === 'done' ? 'Вернуть в работу' : 'Отметить готовой'}: ${esc(k.title)}"></button>
+        <span class="id">${esc(k.id)}</span><button type="button" class="t linkish" data-go="${esc(k.id)}">${esc(k.title)}${kids(k.id).length ? ` <span class="id">· ${rollup(k).done}/${rollup(k).total}</span>` : ''}</button>
+        ${k.due ? `<span class="${dueCls(k.due, k.status === 'done')} small">${fmtDay(k.due)}</span>` : ''}${k.assignee ? ava(person(k.assignee), true) : ''}</div>`).join('');
   };
-  drawComments();
-  // attachments, like comments, apply at once to the live task and to the draft
-  const drawAttach = () => {
-    const box = d.querySelector('#f-attach'); if (!box) return;
-    box.innerHTML = [
-      ...t.links.map((l, i) => `<div class="att"><span class="att-ic">🔗</span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title || l.url)}</a>
-        <button type="button" class="att-rm" data-rm-link="${i}" aria-label="Убрать ссылку">✕</button></div>`),
+  q('#tw-subs').onclick = e => { const b = e.target.closest('[data-sub-flip]'); if (b){ const k = byId(b.dataset.subFlip); if (k) setStatus(k.id, k.status === 'done' ? 'progress' : 'done', author); } };
+  q('#tw-sub-new').onkeydown = e => { if (e.key !== 'Enter') return; e.preventDefault(); const v = e.target.value.trim(); if (!v) return; const t = live(); addNewTask(normTask({title: v, parent: t.id, assignee: t.assignee})); e.target.value = ''; e.target.focus(); };
+  const drawFiles = () => {
+    const t = live();
+    q('#tw-cnt-files').textContent = t.links.length + t.files.length || '';
+    q('#tw-attach').innerHTML = [
+      ...t.links.map((l, i) => `<div class="att"><span class="att-ic">🔗</span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title || l.url)}</a><button type="button" class="att-rm" data-rm-link="${i}" aria-label="Убрать ссылку">✕</button></div>`),
       ...t.files.map((f, i) => { const b = db.blobs[f.id];
         return `<div class="att">${b && /^image\/(png|jpeg|gif|webp)$/.test(f.type) ? `<img class="att-img" src="${esc(b.data)}" alt="">` : '<span class="att-ic">📄</span>'}
           <span class="grow">${esc(f.name)} <span class="muted">· ${fmtSize(f.size)}${b ? '' : ' · недоступен: разрешите доступ к JSON-файлу'}</span></span>
           ${b ? `<button type="button" class="btn small" data-dl-file="${i}">Скачать</button>` : ''}<button type="button" class="att-rm" data-rm-file="${i}" aria-label="Убрать файл">✕</button></div>`; }),
-    ].join('') || '<p class="note">Вложений нет</p>';
+    ].join('');
   };
-  const liveTask = () => { const live = byId(t.id); if (!live) toast('Задача уже удалена'); return live; };
-  drawAttach();
   const addLink = () => {
-    const url = safeUrl(d.querySelector('#f-link').value), title = d.querySelector('#f-link-title').value.trim();
-    d.querySelector('#f-link-err').hidden = !!url;
-    if (!url) return d.querySelector('#f-link').focus();
-    const live = liveTask(); if (!live) return;
-    const l = {url, title, at: stamp()};
-    live.links.push(l); t.links.push({...l}); addLog(live, `${actor()} добавил ссылку ${title || url}`);
-    d.querySelector('#f-link').value = ''; d.querySelector('#f-link-title').value = '';
-    commit(); drawAttach();
+    const url = safeUrl(q('#tw-link').value), title = q('#tw-link-title').value.trim();
+    q('#tw-link-err').hidden = !!url; if (!url) return q('#tw-link').focus();
+    save(x => x.links.push({url, title, at: stamp()}), `${author} добавил ссылку ${title || url}`);
+    q('#tw-link').value = q('#tw-link-title').value = '';
   };
-  d.querySelector('#f-link-add')?.addEventListener('click', addLink);
-  d.querySelector('#f-link')?.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); addLink(); } });
-  d.querySelector('#f-file')?.addEventListener('change', async e => {
-    const live = liveTask(); if (!live) return;
+  q('#tw-link-add').onclick = addLink;
+  q('#tw-link').onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); addLink(); } };
+  q('#tw-file')?.addEventListener('change', async e => {
     const big = [...e.target.files].filter(f => f.size > FILE_MAX).map(f => f.name);
     for (const f of [...e.target.files].filter(f => f.size <= FILE_MAX)){
       const data = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(f); });
       const meta = {id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: f.name.slice(0, 200), type: f.type.slice(0, 100), size: f.size, at: stamp()};
-      db.blobs[meta.id] = {data}; live.files.push(meta); t.files.push({...meta});
-      addLog(live, `${actor()} прикрепил файл ${meta.name}`);
+      db.blobs[meta.id] = {data};
+      save(x => x.files.push(meta), `${author} прикрепил файл ${meta.name}`);
     }
     e.target.value = '';
-    commit(); drawAttach();
     if (big.length) toast(`Не прикреплены, больше ${fmtSize(FILE_MAX)}: ${big.join(', ')}`);
   });
-  d.querySelector('#f-attach')?.addEventListener('click', async e => {
-    const live = liveTask(); if (!live) return;
-    let b;
-    if ((b = e.target.closest('[data-rm-link]'))){
-      const l = t.links[+b.dataset.rmLink], same = x => x.url === l.url && x.at === l.at;
-      change(() => { live.links = live.links.filter(x => !same(x)); addLog(live, `${actor()} убрал ссылку ${l.title || l.url}`); }, 'Ссылка убрана');
-      t.links = t.links.filter(x => !same(x));
-    } else if ((b = e.target.closest('[data-rm-file]'))){
-      const f = t.files[+b.dataset.rmFile];
-      change(() => { live.files = live.files.filter(x => x.id !== f.id); delete db.blobs[f.id]; addLog(live, `${actor()} убрал файл ${f.name}`); }, `Файл ${f.name} убран`);
-      t.files = t.files.filter(x => x.id !== f.id);
-    } else if ((b = e.target.closest('[data-dl-file]'))){
-      const f = t.files[+b.dataset.dlFile];
-      return download(f.name, await (await fetch(db.blobs[f.id].data)).blob());
-    } else return;
-    drawAttach();
-  });
+  q('#tw-attach').onclick = async e => {
+    const t = live(); let b;
+    if ((b = e.target.closest('[data-rm-link]'))){ const l = t.links[+b.dataset.rmLink]; loud(x => { x.links = x.links.filter(y => !(y.url === l.url && y.at === l.at)); addLog(x, `${author} убрал ссылку ${l.title || l.url}`); }, 'Ссылка убрана'); }
+    else if ((b = e.target.closest('[data-rm-file]'))){ const f = t.files[+b.dataset.rmFile]; loud(x => { x.files = x.files.filter(y => y.id !== f.id); delete db.blobs[f.id]; addLog(x, `${author} убрал файл ${f.name}`); }, `Файл ${f.name} убран`); }
+    else if ((b = e.target.closest('[data-dl-file]'))){ const f = t.files[+b.dataset.dlFile]; download(f.name, await (await fetch(db.blobs[f.id].data)).blob()); }
+  };
+  // comments and history in one feed, oldest first, like a chat
+  const drawFeed = () => {
+    const t = live(), onlyC = ui.twFeed === 'comments';
+    d.querySelectorAll('[data-feed]').forEach(b => b.setAttribute('aria-pressed', b.dataset.feed === (onlyC ? 'comments' : 'all')));
+    const pl = (n, f) => f[n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2];
+    q('#tw-cnt-talk').textContent = `${t.comments.length} ${pl(t.comments.length, ['комментарий', 'комментария', 'комментариев'])} · ${t.log.length} ${pl(t.log.length, ['событие', 'события', 'событий'])}`;
+    const items = [...t.comments.map(c => ({at: c.at, c})), ...(onlyC ? [] : t.log.map(l => ({at: l.at, l})))].sort((a, b) => a.at.localeCompare(b.at));
+    const shown = feedAll ? items : items.slice(-25);
+    q('#tw-feed').innerHTML = (items.length > shown.length ? `<button type="button" class="add" data-feed-all>Показать раньше (${items.length - shown.length})</button>` : '') +
+      (shown.map(x => x.c ? `<div class="tw-cmt">${authorAva(x.c.author)}<div class="body"><div class="who"><b>${esc(x.c.author)}</b> · ${esc(fmtStamp(x.c.at))}</div><p>${esc(x.c.text)}</p></div></div>`
+        : `<div class="tw-ev"><time>${esc(fmtStamp(x.l.at))}</time><span>${esc(x.l.text)}</span></div>`).join('') || '<p class="note">Пока пусто. Напишите первый комментарий.</p>');
+  };
+  q('#tw-feed').onclick = e => { if (e.target.closest('[data-feed-all]')){ feedAll = true; drawFeed(); } };
+  d.querySelector('.tw-filter').onclick = e => { const b = e.target.closest('[data-feed]'); if (b){ ui.twFeed = b.dataset.feed; saveUi(); drawFeed(); } };
   const sendComment = () => {
-    const ta = d.querySelector('#f-cmt'), v = ta.value.trim(); if (!v) return;
-    const live = byId(t.id); if (!live) return toast('Задача уже удалена');
-    const c = {at: stamp(), author, text: v};
-    live.comments.push(c); t.comments.push({...c}); ta.value = '';
-    commit(); drawComments();
+    const ta = q('#tw-cmt'), v = ta.value.trim(); if (!v) return ta.focus();
+    save(x => x.comments.push({at: stamp(), author, text: v.slice(0, 3000)}));
+    ta.value = ''; grow(ta); ta.focus();
   };
-  d.querySelector('#f-cmt-send')?.addEventListener('click', sendComment);
-  d.querySelector('#f-cmt')?.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); sendComment(); } });
-  d.querySelector('#f-cancel').onclick = () => d.close();
-  d.querySelector('#f-del')?.addEventListener('click', () => { d.close(); deleteTask(t.id); });
+  q('#tw-cmt-send').onclick = sendComment;
+  q('#tw-cmt').oninput = e => grow(e.target);
+  q('#tw-cmt').onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); sendComment(); } };
 
-  /* path and subtasks */
-  const formSig = () => [...d.querySelectorAll('#task-form input:not(#f-sub-new):not(#f-check-new):not(#f-cmt):not(#f-link):not(#f-link-title), #task-form select, #task-form textarea:not(#f-cmt)')].map(x => x.type === 'checkbox' ? x.checked : x.value).join('\u0001') + JSON.stringify(t.checklist);
-  const sig0 = formSig();
-  // jumping to another task would drop unsaved edits, so it is refused until the user saves or cancels
-  const goTask = id => { if (formSig() !== sig0) return toast('Сначала сохраните или отмените изменения в этой задаче'); d.close(); openTask(id); };
-  let crumbsFull = false;
-  const drawCrumbs = () => {
-    const box = d.querySelector('#f-crumbs'); if (!box) return;
-    const live = byId(t.id) || t, a = ancestors(live), pr = project(live.project), link = x => `<span>›</span><button type="button" data-crumb="${esc(x.id)}" title="${esc(x.id)} ${esc(x.title)}">${esc(x.id)} ${esc(x.title)}</button>`;
-    box.innerHTML = `${pr ? `<span class="pdot" style="background:${pr.hue}"></span><span>${esc(pr.name)}</span>` : '<span>Без проекта</span>'}` +
-      (a.length <= 3 || crumbsFull ? a.map(link).join('') : link(a[0]) + `<span>›</span><button type="button" data-crumb-more title="Показать весь путь">… ещё ${a.length - 3}</button>` + a.slice(-2).map(link).join(''));
-  };
-  d.querySelector('#f-crumbs')?.addEventListener('click', e => {
-    if (e.target.closest('[data-crumb-more]')){ crumbsFull = true; return drawCrumbs(); }
-    const b = e.target.closest('[data-crumb]'); if (b) goTask(b.dataset.crumb);
-  });
-  const drawSubs = () => {
-    drawCrumbs();
-    const box = d.querySelector('#f-subs'); if (!box) return;
-    const ks = kids(t.id), r = rollup(byId(t.id) || t);
-    d.querySelector('#f-sub-count').textContent = ks.length ? `${ks.filter(k => k.status === 'done').length} из ${ks.length}${r.total > ks.length ? ` · всего в ветке ${r.total}` : ''}` : '';
-    box.innerHTML = ks.map(k => `<div class="sub${k.status === 'done' ? ' is-done' : ''}">
-        <button type="button" ${siAttr(k)} data-sub-flip="${esc(k.id)}" aria-label="${k.status === 'done' ? 'Вернуть в работу' : 'Отметить готовой'}: ${esc(k.title)}"></button>
-        <span class="id">${esc(k.id)}</span><button type="button" class="ttl" data-sub-open="${esc(k.id)}">${esc(k.title)}${kids(k.id).length ? ` <span class="id">· ${rollup(k).done}/${rollup(k).total}</span>` : ''}</button>
-        ${k.assignee ? ava(person(k.assignee), true) : '<span class="ava sm none" title="Без исполнителя">?</span>'}</div>`).join('') || '<p class="note">Подзадач нет.</p>';
-  };
-  refreshTaskDialog = existing ? drawSubs : drawCrumbs;
-  drawSubs();
-  d.querySelector('#f-subs')?.addEventListener('click', e => {
+  /* navigation, collapsing, keys */
+  d.querySelector('.tw-cols').onclick = d.querySelector('.tw-head').onclick = e => {
     let b;
-    if ((b = e.target.closest('[data-sub-flip]'))){ const k = byId(b.dataset.subFlip); if (k) setStatus(k.id, k.status === 'done' ? 'progress' : 'done'); }
-    else if ((b = e.target.closest('[data-sub-open]'))) goTask(b.dataset.subOpen);
-  });
-  const addSub = () => {
-    const inp = d.querySelector('#f-sub-new'), v = inp.value.trim(); if (!v) return inp.focus();
-    const live = byId(t.id); if (!live) return toast('Задача уже удалена');
-    addNewTask(normTask({title: v, parent: live.id, assignee: live.assignee}));
-    inp.value = ''; inp.focus();
+    if ((b = e.target.closest('[data-sec-toggle]'))){
+      const k = b.dataset.secToggle, on = b.getAttribute('aria-expanded') !== 'true';
+      b.setAttribute('aria-expanded', on); b.nextElementSibling.hidden = !on;
+      ui.twClosed = ui.twClosed.filter(x => x !== k).concat(on ? [] : [k]); saveUi();
+    }
+    else if (e.target.closest('[data-crumb-more]')){ crumbsFull = true; drawCrumbs(); }
+    else if ((b = e.target.closest('[data-go]'))) go(b.dataset.go);
   };
-  d.querySelector('#f-sub-add')?.addEventListener('click', addSub);
-  d.querySelector('#f-sub-new')?.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); addSub(); } });
-  // closing a task that still has open subtasks: offer to close them too
-  const syncCloseKids = () => {
-    const n = existing ? openDesc(t.id).length : 0, on = val('#f-status') === 'done' && existing?.status !== 'done' && n > 0;
-    d.querySelector('#f-close-kids-row').hidden = !on;
-    d.querySelector('#f-close-kids-text').textContent = `Закрыть вместе с ней открытые подзадачи (${n})`;
+  d.onkeydown = e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input,textarea,select,#ctx')) return;
+    const act = {KeyS: () => pick('status'), KeyA: () => pick('assignee'), KeyD: () => pick('due'), KeyP: () => pick('prio'), KeyC: () => { ui.twClosed = ui.twClosed.filter(x => x !== 'talk'); q('[data-sec="talk"] .sec-b').hidden = false; q('#tw-cmt').focus(); }}[e.code];
+    if (act){ e.preventDefault(); act(); }
   };
-  d.querySelector('#f-status').addEventListener('change', syncCloseKids);
-  d.querySelector('#f-parent').addEventListener('change', e => {
-    const p = byId(e.target.value), sel = d.querySelector('#f-proj');
-    sel.disabled = !!p;
-    if (p) sel.value = rootTask(p).project || '';
-  });
-  d.querySelector('#task-form').onsubmit = e => {
-    e.preventDefault();
-    const [unit, n] = val('#f-rep').split(':');
-    const status = val('#f-status');
-    // status goes through applyStatus below so doneAt and repeats are handled in one place
-    const parentT = byId(val('#f-parent'));
-    const next = normTask({...t, title: val('#f-title'), status: existing ? existing.status : status, prio: val('#f-prio'), assignee: val('#f-asg') || null,
-      due: val('#f-due'), est: val('#f-est'), tag: val('#f-tag').trim(), desc: val('#f-desc'),
-      parent: parentT ? parentT.id : null, project: parentT ? rootTask(parentT).project : (val('#f-proj') || null),
-      repeat: unit ? {unit, n, from: val('#f-rep-from')} : null, doneAt: existing?.doneAt});
-    const closeKids = !d.querySelector('#f-close-kids-row').hidden && d.querySelector('#f-close-kids').checked;
-    if (!val('#f-title').trim()){ d.querySelector('#f-title-err').hidden = false; d.querySelector('#f-title').focus(); return; }
-    d.close();
-    if (!existing){ if (status === 'done') next.doneAt = stamp(); return addNewTask(next); }
-    const statusChanged = status !== existing.status;
-    const names = {title:'название', prio:'приоритет', due:'срок', est:'оценку', tag:'тег', desc:'описание', checklist:'чек-лист', project:'проект', parent:'родительскую задачу', repeat:'повтор'};
-    const changed = Object.keys(names).filter(k => JSON.stringify(next[k]) !== JSON.stringify(existing[k]));
-    const reassigned = next.assignee !== existing.assignee;
-    if (!changed.length && !reassigned && !statusChanged) return;
-    if (changed.length) next.log.push({at: stamp(), text: `${actor()} изменил: ${changed.map(k => names[k]).join(', ')}`});
-    if (reassigned){ next.seen = !next.assignee; next.log.push({at: stamp(), text: next.assignee ? `${actor()} назначил: ${person(next.assignee).name}` : `${actor()} вернул в бэклог`}); }
-    // look up by id: an undo while the dialog was open replaces the task objects
-    let spawned = null, ready = null, closed = 0;
-    change(() => {
-      const i = db.tasks.findIndex(x => x.id === next.id);
-      if (i < 0){ toast('Задача уже удалена, изменения не сохранены'); return false; }
-      if (next.parent && !byId(next.parent)) next.parent = null; // the chosen parent was deleted meanwhile
-      Object.assign(next, {comments: db.tasks[i].comments, links: db.tasks[i].links, files: db.tasks[i].files});
-      if (next.parent !== existing.parent) next.order = Math.max(0, ...(next.parent ? kids(next.parent) : []).map(x => x.order)) + 1;
-      db.tasks[i] = next;
-      desc(next.id).forEach(x => x.project = next.project); // the branch follows its top task
-      if (statusChanged){
-        if (status === 'done' && closeKids){ const open = openDesc(next.id); closed = open.length; open.forEach(x => applyStatus(x, 'done', actor())); }
-        spawned = applyStatus(next, status, actor());
-        if (status === 'done') ready = readyParent(next);
-      }
-    }, () => `${next.id} сохранена${closed ? ` и закрыта с подзадачами (${closed})` : ''}${spawned ? ` · следующий повтор ${spawned.id} на ${fmtDay(spawned.due)}` : ''}${reassigned ? overloadNote(next) : ''}${ready ? ` · все подзадачи ${ready.id} готовы` : ''}`,
-    () => ready && byId(ready.id)?.status !== 'done' ? {label: `Закрыть ${ready.id}`, run: () => setStatus(ready.id, 'done')} : null);
-  };
+
+  const drawAll = () => { if (!live()){ d.onclose = null; d.close(); return; } drawCrumbs(); drawSide(); drawChecks(); drawSubs(); drawFiles(); drawFeed(); };
+  refreshTaskDialog = drawAll;
+  drawAll();
   if (!d.open) d.showModal();
-  if (!existing) d.querySelector('#f-title').focus();
+  grow(titleEl); grow(descEl);
+  q('.tw-main').scrollTop = 0;
+  (opts.focus === 'comment' ? q('#tw-cmt') : q('#tw-more')).focus({preventScroll: true});
+}
+
+/* ---------- creation window: only the title is required, the rest comes from context, chips or the title itself ---------- */
+function openCreate(opts = {}){
+  closeCtx();
+  const d = $('#d-new');
+  // what the place the window was opened from already says about the task
+  const base = {status: 'new', prio: 'med', assignee: null, due: '', est: 0, tag: '', project: null, parent: null, repeat: null, checklist: []};
+  const par = opts.parent && byId(opts.parent);
+  if (par) Object.assign(base, {parent: par.id, project: rootTask(par).project, assignee: par.assignee});
+  else if ('project' in opts) base.project = opts.project;
+  else if (ui.proj && ui.proj !== '-' && project(ui.proj) && ['team', 'board'].includes(view)) base.project = ui.proj;
+  if (opts.status) base.status = opts.status;
+  if ('assignee' in opts) base.assignee = opts.assignee; else if (!base.assignee && meId) base.assignee = meId;
+  let pick = structuredClone(base), tplName = '';
+  d.className = 'nw';
+  d.innerHTML = `<form id="nw-form" novalidate autocomplete="off">
+    <div class="nw-head"><span class="nw-label">Новая задача</span><span id="nw-ctx"></span><span class="spacer"></span>
+      ${db.templates.length ? '<button type="button" class="chip" id="nw-tpl">Шаблон ▾</button>' : ''}
+      <button type="button" class="ibtn close" aria-label="Закрыть">✕</button></div>
+    <div class="nw-body">
+      <input id="nw-title" class="nw-title" maxlength="300" placeholder="Что нужно сделать?" aria-label="Название задачи" aria-describedby="nw-help">
+      <span class="err" id="nw-err" hidden>Напишите, что нужно сделать</span>
+      <div class="quick-prev" id="nw-tokens" aria-live="polite"></div>
+      <button type="button" class="add" id="nw-desc-btn">+ Описание</button>
+      <textarea id="nw-desc" class="nw-desc" maxlength="5000" placeholder="Подробности, ссылки, критерии готовности" aria-label="Описание" hidden></textarea>
+      <div class="chips" id="nw-chips"></div>
+      <p class="note" id="nw-help">Можно писать прямо в названии: <code>завтра</code> <code>!высокий</code> <code>#тег</code> <code>@имя</code> <code>+проект</code> <code>3ч</code> <code>^PLN-120</code></p>
+    </div>
+    <div class="nw-foot"><label class="chk"><input type="checkbox" id="nw-more" ${ui.nwMore ? 'checked' : ''}> Создать ещё одну</label><span class="spacer"></span>
+      <span class="muted nw-keys"><kbd>Ctrl</kbd> <kbd>Enter</kbd></span><button type="button" class="btn small" id="nw-cancel">Отмена</button><button class="btn small primary" id="nw-create">Создать задачу</button></div>
+  </form>`;
+  const q = s => d.querySelector(s), titleEl = q('#nw-title'), descEl = q('#nw-desc');
+  // effective values: words recognised in the title win over chips while they are in the title
+  const eff = () => {
+    const r = parseQuick(titleEl.value, active(), new Date(), activeProjects(), db.tasks), v = {...pick};
+    for (const k of ['prio', 'tag', 'due', 'est', 'assignee']) if (r[k]) v[k] = r[k];
+    if (r.parent){ v.parent = r.parent; v.project = rootTask(byId(r.parent)).project; }
+    else if (r.project){ v.project = r.project; if (v.parent && rootTask(byId(v.parent)).project !== r.project) v.parent = null; }
+    return {r, v};
+  };
+  const chip = (key, html, filled, extra = '') => `<button type="button" class="chip${filled ? ' filled' : ' ghost'}" data-nchip="${key}" ${extra}>${html}</button>`;
+  const draw = () => {
+    const {r, v} = eff(), p = person(v.assignee), pr = project(v.project), pa = v.parent && byId(v.parent);
+    q('#nw-ctx').innerHTML = pa ? `<span class="ctx-chip" title="Новая задача станет подзадачей">↳ ${esc(pa.id)} ${esc(pa.title.slice(0, 40))}<button type="button" class="x" data-nclear="parent" aria-label="Создать не как подзадачу">✕</button></span>` : '';
+    q('#nw-tokens').innerHTML = titleEl.value.trim() ? quickChips(r, false) : '';
+    q('#nw-chips').innerHTML =
+      chip('status', `<span class="si ${v.status}"></span>${STATUS[v.status]}`, v.status !== 'new') +
+      chip('assignee', p ? `${ava(p, true)}${esc(p.name.split(' ')[0])}` : '👤 Исполнитель', !!p) +
+      chip('due', v.due ? `📅 ${fmtDay(v.due)} <span class="${dueCls(v.due)}">${dueWords(v.due)}</span>` : '📅 Срок', !!v.due) +
+      chip('prio', `<span class="pc-${v.prio}">${flagSvg}</span>${PRIO[v.prio]}`, v.prio !== 'med') +
+      chip('est', v.est ? `⏱ ${v.est} ч` : '⏱ Оценка', !!v.est) +
+      chip('tag', v.tag ? `# ${esc(v.tag)}` : '# Тег', !!v.tag) +
+      (pa ? '' : chip('project', pr ? `<span class="pdot" style="background:${pr.hue}"></span>${esc(pr.name)}` : '● Проект', !!pr)) +
+      chip('repeat', v.repeat ? `↻ ${esc(repeatLabel(v.repeat))}` : '↻ Повтор', !!v.repeat) +
+      (v.checklist.length ? `<span class="chip filled" title="Из шаблона${tplName ? ' «' + esc(tplName) + '»' : ''}">☑ ${v.checklist.length} пункта</span>` : '');
+    q('#nw-create').disabled = !r.title.trim();
+  };
+  const set = (k, val) => { pick[k] = val; draw(); titleEl.focus(); };
+  q('#nw-chips').onclick = e => {
+    const b = e.target.closest('[data-nchip]'); if (!b) return;
+    const {v} = eff(), k = b.dataset.nchip;
+    if (k === 'status') pickStatus(b, v.status, s => set('status', s), d);
+    if (k === 'assignee') pickPerson(b, v.assignee, s => set('assignee', s), d);
+    if (k === 'due') pickDue(b, v.due, s => set('due', s), d);
+    if (k === 'prio') pickPrio(b, v.prio, s => set('prio', s), d);
+    if (k === 'est') openCtx(...anchor(b), [...[0.5, 1, 2, 4, 8, 16].map(h => ({label: `${h} ч`, checked: v.est === h, run: () => set('est', h)})), ...(v.est ? ['-', {label: 'Убрать оценку', danger: true, run: () => set('est', 0)}] : [])], d);
+    if (k === 'tag') openCtx(...anchor(b), [...[...new Set(db.tasks.map(x => x.tag).filter(Boolean))].slice(0, 12).map(g => ({label: g, checked: v.tag === g, run: () => set('tag', g)})),
+      {label: 'Свой тег: напишите #тег в названии', run: () => { titleEl.value += (titleEl.value.endsWith(' ') || !titleEl.value ? '' : ' ') + '#'; draw(); titleEl.focus(); }}, ...(v.tag ? ['-', {label: 'Без тега', danger: true, run: () => set('tag', '')}] : [])], d);
+    if (k === 'project') openCtx(...anchor(b), [{label: 'Без проекта', checked: !v.project, run: () => set('project', null)}, ...activeProjects().map(p => ({label: p.name, icon: `<span class="pdot" style="background:${p.hue}"></span>`, checked: v.project === p.id, run: () => set('project', p.id)}))], d);
+    if (k === 'repeat') openCtx(...anchor(b), Object.entries(REPEATS).map(([key, label]) => ({label, checked: repeatKey(v.repeat) === key, run: () => { const [unit, n] = key.split(':'); set('repeat', unit ? normRepeat({unit, n, from: 'due'}) : null); }})), d);
+  };
+  q('#nw-ctx').onclick = e => { if (e.target.closest('[data-nclear="parent"]')){ pick.parent = null; draw(); titleEl.focus(); } };
+  q('#nw-tpl')?.addEventListener('click', e => openCtx(...anchor(e.currentTarget), db.templates.map(tp => ({label: tp.name, key: tp.checklist.length ? `☑ ${tp.checklist.length}` : '', run: () => {
+    tplName = tp.name; q('#nw-tpl').textContent = `Шаблон: ${tp.name}`;
+    Object.assign(pick, {prio: tp.prio, tag: tp.tag, est: tp.est, checklist: tp.checklist.map(text => ({text, done: false}))});
+    if (tp.project && !pick.parent && project(tp.project)) pick.project = tp.project;
+    if (tp.desc){ descEl.value = tp.desc; descEl.hidden = false; q('#nw-desc-btn').hidden = true; }
+    titleEl.value = tp.title; draw(); titleEl.focus(); titleEl.setSelectionRange(titleEl.value.length, titleEl.value.length);
+  }})), d));
+  q('#nw-desc-btn').onclick = () => { descEl.hidden = false; q('#nw-desc-btn').hidden = true; descEl.focus(); };
+  titleEl.oninput = () => { q('#nw-err').hidden = true; draw(); };
+  q('#nw-cancel').onclick = () => d.close();
+  q('#nw-more').onchange = e => { ui.nwMore = e.target.checked; saveUi(); };
+  const create = () => {
+    const {r, v} = eff();
+    if (!r.title.trim()){ q('#nw-err').hidden = false; return titleEl.focus(); }
+    const t = normTask({...v, title: r.title, desc: descEl.value, checklist: v.checklist});
+    if (t.status === 'done') t.doneAt = stamp();
+    addNewTask(t);
+    if (!q('#nw-more').checked) return d.close();
+    // keep the context and chips for the next one, clear what is specific to this task
+    titleEl.value = ''; descEl.value = ''; descEl.hidden = true; q('#nw-desc-btn').hidden = false;
+    pick = {...pick, due: '', checklist: []}; draw(); titleEl.focus();
+  };
+  q('#nw-form').onsubmit = e => { e.preventDefault(); create(); };
+  d.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); create(); } };
+  draw();
+  if (!d.open) d.showModal();
+  titleEl.focus();
 }
 
 function openInbox(pid){
@@ -2098,10 +2342,6 @@ function openReturn(id){
     }, `${t.id} возвращена в бэклог`);
   };
   d.showModal(); d.querySelector('#ret-why').focus();
-}
-function fromTemplate(t, tp){
-  Object.assign(t, {title: tp.title, prio: tp.prio, tag: tp.tag, est: tp.est, desc: tp.desc,
-    project: tp.project && project(tp.project) ? tp.project : null, checklist: tp.checklist.map(text => ({text, done: false}))});
 }
 
 /* ---------- projects & templates ---------- */
@@ -2188,9 +2428,10 @@ function archivePerson(id){
 
 /* ---------- filters (per browser, not part of the data) ---------- */
 const UI_DEFAULT = {q: '', who: '', proj: '', prio: '', tag: '', overdue: false, top: false, sort: 'manual', repPeriod: '30',
-  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}};
+  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}, twClosed: [], twFeed: 'all', nwMore: false};
 const ui = (() => { try { return {...UI_DEFAULT, ...JSON.parse(localStorage.getItem(LS_UI) || '{}')}; } catch { return {...UI_DEFAULT}; } })();
 if (!Array.isArray(ui.treeClosed)) ui.treeClosed = [];
+if (!Array.isArray(ui.twClosed)) ui.twClosed = [];
 if (!ui.mapViews || typeof ui.mapViews !== 'object') ui.mapViews = {};
 const saveUi = () => { try { localStorage.setItem(LS_UI, JSON.stringify(ui)); } catch {} };
 const filtersOn = () => !!(ui.q || ui.who || ui.proj || ui.prio || ui.tag || ui.overdue || ui.top);
@@ -2275,11 +2516,14 @@ function parseQuick(text, people, now = new Date(), projects = [], tasks = []){
 function quickPreview(){
   const v = $('#quick-in').value, box = $('#quick-prev');
   if (!v.trim()){ box.innerHTML = ''; return; }
-  const r = parseQuick(v, active(), new Date(), activeProjects(), db.tasks);
-  box.innerHTML = [
+  box.innerHTML = quickChips(parseQuick(v, active(), new Date(), activeProjects(), db.tasks), true);
+}
+// what the quick-entry parser recognised, as chips; shared by the backlog line and the creation window
+function quickChips(r, warnTitle){
+  return [
     r.parent && `<span class="chip">↳ в ${esc(r.parent)} · ${esc(byId(r.parent).title.slice(0, 40))}</span>`,
     r.unknownParent && `<span class="chip warn">^${esc(r.unknownParent)}: такой задачи нет</span>`,
-    !r.title && '<span class="chip warn">Добавьте название</span>',
+    warnTitle && !r.title && '<span class="chip warn">Добавьте название</span>',
     r.project && `<span class="chip"><span class="pdot" style="background:${project(r.project).hue}"></span>${esc(project(r.project).name)}</span>`,
     r.unknownProject && `<span class="chip warn">+${esc(r.unknownProject)}: такого проекта нет</span>`,
     r.assignee && `<span class="chip">→ ${esc(person(r.assignee).name)}</span>`,
