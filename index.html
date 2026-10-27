@@ -416,6 +416,106 @@ button.chip{font:inherit;font-size:13px;padding:4px 10px;gap:6px}
 .nw-foot{display:flex;gap:8px;align-items:center;padding:10px 12px 12px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 @media (pointer:coarse){.nw-keys{display:none}}
+/* avatar in the header: the way into the personal cabinet; last on a wide screen, top-right on a phone */
+/* pinned to the header's top-right corner at any width; the header keeps room for it */
+header{position:relative;padding-right:52px}
+.me-ava{position:absolute;top:2px;right:0;width:38px;height:38px;border-radius:50%;border:2px solid var(--line);padding:0;cursor:pointer;display:grid;place-items:center;font:600 13px var(--f-display)}
+.me-ava:hover{border-color:var(--accent)}
+.me-ava[aria-current]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.p-name.linkish{font-weight:600;cursor:pointer}
+/* personal cabinet */
+.cab{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+.cab > *{min-width:0}
+.cab-who{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.cab-ava{width:56px;height:56px;font-size:18px}
+.cab-name{font:600 20px var(--f-body);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cab-week{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.cab-week b{color:var(--fg)}
+/* six tiles: one row, or two rows of three, or three rows of two; never an orphan */
+.cab-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media (max-width:1150px){.cab-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.cab-kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:2px;align-content:start}
+.cab-kpi .k{font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0}
+.cab-kpi .v{font:600 26px/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.cab-kpi .d{font-size:12px;color:var(--muted)}
+.cab-kpi .up{color:var(--low)} .cab-kpi .down{color:var(--high)}
+.cab-kpi.bad .v{color:var(--high)}
+.cab-gauge{display:block;height:6px;border-radius:3px;background:var(--sunken);overflow:hidden;margin-top:6px}
+.cab-gauge i{display:block;height:100%;border-radius:3px;background:var(--accent)}
+.cab-kpi.bad .cab-gauge i{background:var(--high)}
+.cab-tabs{display:none;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+.cab-tabs button{border:0;background:none;padding:10px 14px;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;gap:6px;align-items:center}
+.cab-tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent);font-weight:500}
+.cab-tabs .n{font:500 11px var(--f-mono);background:var(--sunken);border-radius:999px;padding:0 6px}
+.cab-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;align-items:start}
+.cab-side{display:grid;gap:14px;min-width:0}
+.cab-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.cab-panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:12px;align-content:start;min-width:0}
+.cab-ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cab-ph h3{margin:0;font:500 12px var(--f-display);text-transform:uppercase;letter-spacing:.06em}
+.cab-chips{display:flex;gap:4px;flex-wrap:wrap}
+.cab-chips button{border:1px solid var(--line);background:none;border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;color:var(--muted)}
+.cab-chips button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--fg)}
+.cab-groups{display:grid;gap:12px}
+.cab-grp{display:grid;gap:2px}
+.cab-grp-h{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:2px 6px}
+.cab-grp-h.over{color:var(--high)}
+.cab-grp-h .n{font:500 11px var(--f-mono);background:var(--sunken);border-radius:999px;padding:0 6px}
+.cab-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:7px 8px;border-radius:9px;font-size:14px;cursor:pointer}
+.cab-row:hover,.cab-row:focus-visible{background:var(--sunken)}
+.cab-row .t,.cab-drow .t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cab-row .m{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);white-space:nowrap}
+.cab-act{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:3px 8px;font-size:12px;cursor:pointer;opacity:0;transition:opacity .12s;white-space:nowrap}
+.cab-row:hover .cab-act,.cab-act:focus-visible{opacity:1}
+@media (pointer:coarse){.cab-act{opacity:1}}
+.new-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none;margin:0 3px}
+#cab-done{display:grid;gap:8px;justify-items:start}
+#cab-done .note{justify-self:stretch}
+.cab-day{display:grid;gap:2px;width:100%}
+.cab-day > b{font-size:12px;color:var(--muted);font-weight:600;padding:2px 6px}
+.cab-drow{display:flex;gap:10px;align-items:center;padding:5px 6px;border-radius:8px;font-size:14px;min-width:0;cursor:pointer}
+.cab-drow:hover{background:var(--sunken)}
+.cab-drow .t{flex:1}
+.ontime{font-size:12px;color:var(--low);white-space:nowrap} .late{font-size:12px;color:var(--high);white-space:nowrap}
+.cab-chart{width:100%;height:auto;display:block;overflow:visible}
+.cab-chart text{fill:var(--muted);font:500 10px var(--f-mono)}
+.cab-chart text.today{fill:var(--fg);font-weight:700}
+.cab-chart .grid{stroke:var(--line);stroke-width:1}
+.cab-chart .barr{fill:var(--accent)} .cab-chart .barr.cur{fill:var(--accent);opacity:.55}
+.cab-chart .plan{fill:var(--accent);opacity:.7} .cab-chart .over{fill:var(--high)}
+.cab-chart .avg{stroke:var(--med);stroke-width:1.5;stroke-dasharray:4 3}
+.cab-chart .cap{stroke:var(--high);stroke-width:1.5;stroke-dasharray:4 3}
+.cab-heat{display:grid;grid-template-columns:auto repeat(12,minmax(0,1fr));gap:3px;font:500 10px var(--f-mono);color:var(--muted);align-items:center}
+.cab-heat i,.cab-legend i{aspect-ratio:1;border-radius:3px;background:var(--sunken);display:block}
+.cab-heat i.future{visibility:hidden}
+.cab-heat i.l1,.cab-legend i.l1{background:var(--accent-soft)}
+.cab-heat i.l2,.cab-legend i.l2{background:color-mix(in srgb,var(--accent) 45%,var(--accent-soft))}
+.cab-heat i.l3,.cab-legend i.l3{background:color-mix(in srgb,var(--accent) 75%,var(--accent-soft))}
+.cab-heat i.l4,.cab-legend i.l4{background:var(--accent)}
+.cab-legend{display:flex;gap:4px;align-items:center;font-size:11px;color:var(--muted);justify-content:flex-end}
+.cab-legend i{width:11px}
+.cab-hbars{display:grid;gap:8px}
+.cab-hb{display:grid;grid-template-columns:minmax(0,110px) minmax(0,1fr) 48px;gap:10px;align-items:center;font-size:13px}
+.cab-hb .track{height:10px;border-radius:5px;background:var(--sunken);overflow:hidden}
+.cab-hb .track i{display:block;height:100%;border-radius:5px}
+.cab-hb .val{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.cab-ring{display:flex;gap:12px;align-items:center}
+.cab-ring b{font:600 20px var(--f-display)}
+.cab-tools{display:flex;gap:8px;flex-wrap:wrap}
+.cab-tools input,.cab-tools select{padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-size:14px;min-width:0}
+.cab-tools input{flex:1 1 220px}
+#d-cabdone{width:min(820px,calc(100vw - 32px))}
+.wrap-cell{white-space:normal!important;min-width:220px}
+@media (max-width:1000px){.cab-stats{grid-template-columns:repeat(2,minmax(0,1fr))} .cab-grid{grid-template-columns:minmax(0,1fr)}}
+/* a one-column chart would otherwise scale up to the full width */
+.cab-chart{max-height:240px}
+.cab-heat{max-width:460px}
+@media (max-width:760px){
+  .cab-tabs{display:flex}
+  #v-cab [data-cpane]:not(.on){display:none}
+  .cab-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cab-stats{grid-template-columns:minmax(0,1fr)}
+}
 /* «+ Задача» right in a column or a person card */
 .col-add{border:1px dashed transparent;background:none;color:var(--muted);border-radius:10px;padding:7px 10px;text-align:left;cursor:pointer;font-size:13px;width:100%}
 .col-add:hover{border-color:var(--line);color:var(--fg);background:var(--surface)}
@@ -523,7 +623,6 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       <button data-view="team" id="vw-team">Распределение</button>
       <button data-view="board" id="vw-board">Канбан</button>
       <button data-view="tree" id="vw-tree">Дерево</button>
-      <button data-view="my" id="vw-my" hidden>Мои задачи</button>
       <button data-view="load" id="vw-load">Загрузка</button>
       <button data-view="log" id="vw-log">Журнал</button>
       <button data-view="report" id="vw-report">Отчёты</button>
@@ -539,6 +638,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       <button data-t="light">Светлая</button>
       <button data-t="dark">Тёмная</button>
     </div>
+    <button type="button" class="me-ava" id="me-ava" aria-label="Личный кабинет" title="Личный кабинет"></button>
   </header>
 
   <div class="banner" id="banner" hidden></div>
@@ -596,9 +696,35 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
     <p class="note" id="tree-note">Клавиши в списке: <kbd>↑</kbd><kbd>↓</kbd> выбор, <kbd>→</kbd><kbd>←</kbd> раскрыть или свернуть, <kbd>Tab</kbd> сделать подзадачей предыдущей, <kbd>Shift</kbd>+<kbd>Tab</kbd> поднять уровнем выше, <kbd>Enter</kbd> открыть. Перетаскивание строки: на середину другой — подзадача, на верх или низ — рядом.</p>
   </main>
 
-  <main id="v-my" hidden>
-    <div class="panel-h"><h2 id="my-title">Мои задачи</h2><span class="count" id="my-count"></span></div>
-    <div class="my-list" id="my-list"></div>
+  <main id="v-cab" class="cab" hidden>
+    <div class="cab-who" id="cab-who"></div>
+    <div class="cab-kpis" id="cab-kpis"></div>
+    <!-- on a phone the three parts become tabs; on a wide screen everything is visible at once -->
+    <div class="cab-tabs" role="tablist" aria-label="Разделы кабинета">
+      <button type="button" role="tab" data-ctab="cur" aria-selected="true">Текущие <span class="n" id="cab-n-cur"></span></button>
+      <button type="button" role="tab" data-ctab="done" aria-selected="false">Выполненные</button>
+      <button type="button" role="tab" data-ctab="stat" aria-selected="false">Статистика</button>
+    </div>
+    <div class="cab-grid">
+      <section class="cab-panel" data-cpane="cur">
+        <div class="cab-ph"><h3>Текущие задачи</h3><span class="count" id="cab-cur-cnt"></span><span class="spacer"></span>
+          <div class="cab-chips" id="cab-filter" role="group" aria-label="Фильтр по статусу"><button type="button" data-cf="all">Все</button><button type="button" data-cf="new">Новые</button><button type="button" data-cf="progress">В работе</button><button type="button" data-cf="review">На проверке</button></div></div>
+        <div class="cab-groups" id="cab-groups"></div>
+      </section>
+      <div class="cab-side">
+        <section class="cab-panel" data-cpane="stat"><div class="cab-ph"><h3>План недели</h3><span class="count">часы по сроку задач</span></div>
+          <svg class="cab-chart" id="cab-week" viewBox="0 0 320 130" role="img" aria-label="Запланированные часы по дням недели"></svg>
+          <p class="note" id="cab-week-note"></p></section>
+        <section class="cab-panel" data-cpane="done"><div class="cab-ph"><h3>Выполнено</h3><span class="count" id="cab-done-cnt"></span></div>
+          <div id="cab-done"></div></section>
+      </div>
+    </div>
+    <div class="cab-stats" data-cpane="stat">
+      <section class="cab-panel"><div class="cab-ph"><h3>Закрыто по неделям</h3><span class="count">12 недель</span></div><svg class="cab-chart" id="cab-weeks" viewBox="0 0 320 150" role="img" aria-label="Закрыто задач по неделям"></svg></section>
+      <section class="cab-panel"><div class="cab-ph"><h3>Активность</h3><span class="count">закрыто по дням</span></div><div class="cab-heat" id="cab-heat"></div>
+        <div class="cab-legend">меньше <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> больше</div></section>
+      <section class="cab-panel"><div class="cab-ph"><h3>По проектам</h3><span class="count">часы закрытых, 30 дней</span></div><div class="cab-hbars" id="cab-proj"></div><div class="cab-ring" id="cab-ring"></div></section>
+    </div>
   </main>
 
   <main id="v-load" class="stack" hidden>
@@ -632,6 +758,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <dialog id="d-dict"></dialog>
 <dialog id="d-archive"></dialog>
 <dialog id="d-close"></dialog>
+<dialog id="d-cabdone"></dialog>
 <dialog id="d-act" class="sheet"></dialog>
 <dialog id="d-help" aria-labelledby="help-h">
   <div class="d-head"><h2 id="help-h">Справка</h2>
@@ -659,7 +786,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <dt>Загрузка <kbd>4</kbd></dt><dd>Сколько часов у каждого сотрудника на каждой неделе.</dd>
           <dt>Журнал <kbd>5</kbd></dt><dd>Все действия по дням.</dd>
           <dt>Отчёты <kbd>6</kbd></dt><dd>Итоги за период, графики, выгрузка в CSV.</dd>
-          <dt>Мои задачи <kbd>M</kbd></dt><dd>Видна, когда в шапке выбран сотрудник («Я: …»). Это его входящие.</dd>
+          <dt>Личный кабинет <kbd>M</kbd></dt><dd>Круглый аватар в правом верхнем углу шапки. См. раздел «Личный кабинет».</dd>
         </dl>
         <p>Выбранный вид, тема и фильтры запоминаются в этом браузере и не попадают в файл данных.</p>
       </section>
@@ -753,13 +880,27 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <li>«В архив»: сотрудник пропадает из команды, его открытые задачи возвращаются в бэклог, история сохраняется. Вернуть: «Архив сотрудников» внизу колонки «Команда».</li>
           <li>«Входящие»: экран глазами сотрудника, руководитель может посмотреть, что у человека.</li>
         </ul>
-        <p><b>Режим «Я: …»</b> — список в шапке. Выберите себя, если вы сотрудник. Откроется «Мои задачи», там можно:</p>
+        <p><b>Режим «Я: …»</b> — список в шапке. Выберите себя, если вы сотрудник. Откроется ваш личный кабинет, в его списке текущих задач и во «Входящих» можно:</p>
         <ul>
           <li><b>Взять в работу</b>: статус «В работе».</li>
           <li><b>На проверку</b>: статус «На проверке».</li>
           <li><b>Вернуть</b> с обязательной причиной: задача уходит в бэклог, причина пишется в комментарии и в журнал.</li>
         </ul>
         <p>Все действия в истории подписываются выбранным именем. Это не вход в систему: паролей нет, выбор хранится только в этом браузере.</p>
+      </section>
+
+      <section id="h-cab"><h3>Личный кабинет</h3>
+        <p>Страница одного сотрудника: что у него сейчас, что сделано и как идёт работа.</p>
+        <ul>
+          <li><b>Как открыть.</b> Круглый аватар в правом верхнем углу шапки или клавиша <kbd>M</kbd>. Если в «Я: …» выбран сотрудник, откроется его кабинет. Руководитель выбирает сотрудника в списке под аватаром. Ещё кабинет открывается нажатием на имя в карточке команды и в таблице загрузки.</li>
+          <li><b>Цифры сверху:</b> открыто (и сколько новых), просрочено, закрыто за 30 дней со сравнением с прошлыми 30 днями, доля закрытых вовремя, загрузка недели к норме, время до готовности.</li>
+          <li><b>Текущие задачи</b> по срокам: просрочено, сегодня, на этой неделе, позже, без срока. Фильтр по статусу. Новые, ещё не открытые, отмечены синей точкой. При наведении — «Взять» или «На проверку».</li>
+          <li><b>План недели</b> — часы задач по дню срока; просроченные считаются на сегодня. Красный столбик — день, где сроков больше дневной нормы (часы в неделю ÷ 5). Стрелки у даты листают недели.</li>
+          <li><b>Выполнено</b> — последние 7 дней по дням с пометкой «вовремя» или «+N дн.». «Все выполненные» открывает таблицу с поиском и периодом.</li>
+          <li><b>Статистика:</b> закрыто по неделям за 12 недель с линией среднего, активность по дням, часы закрытых задач по проектам, доля закрытых вовремя.</li>
+          <li><b>Время до готовности</b> — медиана дней от первого ухода задачи из «Новой» до «Готово» за 90 дней. Для старых задач дата начала берётся из истории, а если её там нет — дата создания.</li>
+        </ul>
+        <p>На телефоне кабинет раскладывается во вкладки «Текущие», «Выполненные», «Статистика». Сравнения с коллегами в кабинете нет: только собственная динамика.</p>
       </section>
 
       <section id="h-dict"><h3>Проекты и шаблоны</h3>
@@ -848,7 +989,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <tr><td><kbd>/</kbd></td><td>Поиск</td></tr>
           <tr><td><kbd>1</kbd>…<kbd>6</kbd></td><td>Распределение, Канбан, Дерево, Загрузка, Журнал, Отчёты</td></tr>
           <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd> <kbd>Tab</kbd></td><td>В дереве: сделать подзадачей предыдущей / поднять уровнем выше</td></tr>
-          <tr><td><kbd>M</kbd></td><td>Мои задачи (если выбран сотрудник)</td></tr>
+          <tr><td><kbd>M</kbd></td><td>Личный кабинет</td></tr>
           <tr><td><kbd>Esc</kbd></td><td>Закрыть окно, очистить поиск</td></tr>
           <tr><td><kbd>Ctrl</kbd> <kbd>Enter</kbd></td><td>Отправить комментарий</td></tr>
           <tr><td><kbd>↑</kbd> <kbd>↓</kbd> <kbd>Enter</kbd></td><td>Выбор в палитре команд</td></tr>
@@ -876,7 +1017,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 5;
+const SCHEMA = 6;
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
 const LS_KEY = 'planerka.data', LS_BACKUP = 'planerka.backup', LS_THEME = 'planerka.theme', LS_VIEW = 'planerka.view', LS_UI = 'planerka.ui', LS_ME = 'planerka.me';
@@ -925,6 +1066,7 @@ function normTask(t){
     order: Number.isFinite(Number(t.order)) ? Number(t.order) : 0,
     createdAt: s(t.createdAt, 40) || stamp(),
     doneAt: t.status === 'done' ? (s(t.doneAt, 40) || s(t.createdAt, 40) || stamp()) : '',
+    startedAt: s(t.startedAt, 40), // first time the task left «Новая»; the cabinet measures time to done from here
     project: t.project ? s(t.project, 40) : null,
     parent: t.parent ? s(t.parent, 40) : null,
     repeat: normRepeat(t.repeat),
@@ -974,6 +1116,8 @@ function migrate(raw){
     seen.add(t.id);
     if (t.assignee && !pids.has(t.assignee)) t.assignee = null;
   });
+  // v5 -> v6: startedAt, recovered from the history where the task was first moved to «В работе»
+  if (v < 6) tasks.forEach(t => { if (!t.startedAt && t.status !== 'new'){ const l = t.log.find(x => x.text.includes('статус «В работе»')); if (l) t.startedAt = l.at; } });
   // v4 -> v5: parent links. Links to missing tasks are dropped and a loop (A in B in A) is cut, so walking up always ends
   const byKey = new Map(tasks.map(t => [t.id, t]));
   tasks.forEach(t => { if (t.parent && (t.parent === t.id || !byKey.has(t.parent))) t.parent = null; });
@@ -1251,12 +1395,13 @@ function overloadNote(t){
 // the one place for status side effects: doneAt and the next occurrence of a repeating task
 function applyStatus(t, s, who){
   t.status = s; t.doneAt = s === 'done' ? stamp() : '';
+  if (s !== 'new' && !t.startedAt) t.startedAt = stamp();
   addLog(t, `${who}: статус «${STATUS[s]}»`);
   if (s !== 'done' || !t.repeat) return null;
   const today = addDays(0);
   let due = addInterval(t.repeat.from === 'done' || !t.due ? today : t.due, t.repeat);
   while (due < today) due = addInterval(due, t.repeat); // closed late: jump to the next future date
-  const n = normTask({...structuredClone(t), status: 'new', due, comments: [], seen: !t.assignee,
+  const n = normTask({...structuredClone(t), status: 'new', due, comments: [], seen: !t.assignee, startedAt: '',
     checklist: t.checklist.map(c => ({text: c.text, done: false})), createdAt: stamp(), log: [{at: stamp(), text: `Создана повтором после ${t.id}`}]});
   n.id = 'PLN-' + db.nextId++; n.order = t.order + 0.5;
   db.tasks.push(n);
@@ -1414,7 +1559,7 @@ function render(){
     const h = weekLoad(p.id, weekStart(addDays(0))), total = open.reduce((s, t) => s + t.est, 0), unread = open.filter(t => !t.seen).length;
     return `<div class="person zone" data-assign="${esc(p.id)}" id="p-${esc(p.id)}">
       <div class="p-row">${ava(p)}
-        <div><div class="p-name">${esc(p.name)}</div><div class="p-role">${esc(p.role)}</div></div>
+        <div><button type="button" class="p-name linkish" data-cab="${esc(p.id)}" title="Открыть кабинет">${esc(p.name)}</button><div class="p-role">${esc(p.role)}</div></div>
         <div class="p-actions">
           <button class="icon-btn" data-inbox="${esc(p.id)}" aria-label="Входящие: ${esc(p.name)}">Входящие ${unread ? `<span class="badge">${unread}</span>` : ''}</button>
           <button class="icon-btn" data-person="${esc(p.id)}" aria-label="Изменить: ${esc(p.name)}">✎</button>
@@ -1434,7 +1579,7 @@ function render(){
   }).join('');
   renderMe();
   if (inlineAt){ const i = $('#inl-input'); if (i && !document.querySelector('dialog[open]')){ i.value = inlineAt.draft; i.focus(); } }
-  if (view === 'my') renderMy();
+  if (view === 'cab') renderCab();
   if (view === 'load') renderLoad();
   if (view === 'log') renderLog();
   if (view === 'report') renderReport();
@@ -1756,24 +1901,179 @@ function openArchive(){
   draw(); d.showModal();
 }
 
-/* ---------- current user ---------- */
+/* ---------- current user and the avatar in the header ---------- */
 function renderMe(){
-  if (meId && (!person(meId) || person(meId).archived)){ meId = null; savePref(LS_ME, ''); if (view === 'my') return setView('team'); }
+  if (meId && (!person(meId) || person(meId).archived)){ meId = null; savePref(LS_ME, ''); }
   $('#me-sel').innerHTML = `<option value="">Я: ${ME}</option>` + active().map(p => `<option value="${esc(p.id)}" ${p.id === meId ? 'selected' : ''}>Я: ${esc(p.name)}</option>`).join('');
-  $('#vw-my').hidden = !meId;
+  const p = person(meId), a = $('#me-ava');
+  a.textContent = p ? initials(p.name) : 'Р';
+  a.style.background = p ? p.hue : 'var(--fg)';
+  a.style.color = p ? '#fff' : 'var(--bg)';
+  a.title = p ? `${p.name}: личный кабинет` : 'Руководитель: открыть кабинет сотрудника';
+  a.setAttribute('aria-label', a.title);
+  a.toggleAttribute('aria-current', view === 'cab' && cabPid === meId && !!p);
 }
 $('#me-sel').onchange = e => {
   meId = e.target.value || null; savePref(LS_ME, meId || '');
-  setView(meId ? 'my' : (view === 'my' ? 'team' : view));
+  if (meId) openCab(meId); else { if (view === 'cab') setView('team'); else render(); }
   toast(meId ? `Вы работаете как ${person(meId).name}. Действия в истории подписываются этим именем.` : 'Вы работаете как руководитель.');
 };
-function renderMy(){
-  const p = person(meId); if (!p) return;
-  const open = db.tasks.filter(t => t.assignee === meId && t.status !== 'done');
-  const doneWeek = db.tasks.filter(t => t.assignee === meId && t.status === 'done' && t.doneAt >= daysAgo(7)).length;
-  $('#my-title').textContent = `Мои задачи · ${p.name}`;
-  $('#my-count').textContent = `открыто ${open.length} · новых ${open.filter(t => !t.seen).length} · сделано за 7 дней ${doneWeek}`;
-  $('#my-list').innerHTML = inboxHtml(meId);
+// an employee goes straight to their cabinet; the manager picks whose cabinet to open
+$('#me-ava').onclick = e => {
+  if (meId) return openCab(meId);
+  const r = e.currentTarget.getBoundingClientRect();
+  openCtx(r.right - 240, r.bottom + 6, [{head: 'Кабинет сотрудника'}, ...active().map(p => ({label: p.name, icon: ava(p, true), checked: view === 'cab' && cabPid === p.id, run: () => openCab(p.id)})),
+    '-', {label: 'Работать как сотрудник…', run: () => $('#me-sel').focus()}]);
+};
+
+/* ---------- personal cabinet: current tasks, done, statistics ---------- */
+let cabPid = null, cabWeek = 0, cabFilter = 'all', cabTab = 'cur';
+function openCab(pid){ if (!person(pid)) return; cabPid = pid; cabWeek = 0; setView('cab'); scrollTo(0, 0); }
+const medianOf = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+// time to done counts from the first move out of «Новая»; tasks from before that field existed fall back to creation
+const cycleDays = t => (new Date(t.doneAt) - new Date(t.startedAt || t.createdAt)) / 864e5;
+const doneDay = t => isoDay(new Date(t.doneAt));
+const isLate = t => t.due && doneDay(t) > t.due;
+const f1 = n => n == null ? '—' : n.toLocaleString('ru-RU', {maximumFractionDigits: 1});
+function renderCab(){
+  const p = person(cabPid); if (!p) return setView('team');
+  const me = cabPid === meId, today = addDays(0), thisWs = weekStart(today);
+  const mine = db.tasks.filter(t => t.assignee === p.id);
+  const open = mine.filter(t => t.status !== 'done');
+  const done = mine.filter(t => t.status === 'done').sort((a, b) => b.doneAt.localeCompare(a.doneAt));
+  const d30 = daysAgo(30), d60 = daysAgo(60);
+  const done30 = done.filter(t => t.doneAt >= d30), prev30 = done.filter(t => t.doneAt >= d60 && t.doneAt < d30);
+  const withDue = done30.filter(t => t.due), onTime = withDue.filter(t => !isLate(t));
+  const over = open.filter(t => t.due && t.due < today).sort((a, b) => a.due.localeCompare(b.due));
+  const ws = shiftDay(thisWs, 7 * cabWeek), load = weekLoad(p.id, ws);
+  const cyc = medianOf(done.filter(t => t.doneAt >= daysAgo(90)).map(cycleDays).filter(x => x >= 0));
+
+  $('#cab-who').innerHTML = `<span class="ava cab-ava" style="background:${p.hue}">${esc(initials(p.name))}</span>
+    <div class="cab-id"><div class="cab-name">${esc(p.name)}${me ? ' <span class="chip">это вы</span>' : ''}</div><div class="muted">${esc(p.role || 'Без роли')} · ${p.cap} ч в неделю</div></div>
+    <span class="spacer"></span>
+    <div class="cab-week"><button type="button" class="ibtn" data-cweek="-1" aria-label="Прошлая неделя">‹</button><span>Неделя <b class="num">${fmtDay(ws)} – ${fmtDay(shiftDay(ws, 6))}</b></span><button type="button" class="ibtn" data-cweek="1" aria-label="Следующая неделя">›</button>${cabWeek ? '<button type="button" class="btn small" data-cweek="0">К этой неделе</button>' : ''}</div>
+    ${me ? '' : `<button type="button" class="btn small" data-person="${esc(p.id)}">Карточка сотрудника</button>`}`;
+
+  const diff = done30.length - prev30.length;
+  const tiles = [
+    {k: 'Открыто', v: open.length, d: `${open.filter(t => !t.seen).length} новых · ${open.reduce((s, t) => s + t.est, 0)} ч`},
+    {k: 'Просрочено', v: over.length, d: over.length ? `${over[0].id}: ${-daysTo(over[0].due)} дн.` : 'всё в срок', bad: over.length > 0},
+    {k: 'Закрыто за 30 дней', v: done30.length, d: diff ? `<span class="${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '▲' : '▼'} ${Math.abs(diff)}</span> к прошлым 30 дням` : 'как в прошлые 30 дней'},
+    {k: 'Вовремя', v: withDue.length ? Math.round(onTime.length / withDue.length * 100) + '%' : '—', d: withDue.length ? `${onTime.length} из ${withDue.length} со сроком` : 'нет закрытых со сроком'},
+    {k: cabWeek ? 'Загрузка той недели' : 'Загрузка недели', v: `${f1(load)}/${p.cap}`, d: load > p.cap ? 'часов, перегруз' : 'часов', gauge: Math.min(1, load / p.cap), bad: load > p.cap},
+    {k: 'Время до готовности', v: f1(cyc), d: cyc == null ? 'нет данных за 90 дней' : 'дней, медиана за 90 дней'},
+  ];
+  $('#cab-kpis').innerHTML = tiles.map(x => `<div class="cab-kpi${x.bad ? ' bad' : ''}"><span class="k">${x.k}</span><span class="v">${x.v}</span><span class="d">${x.d}</span>${x.gauge != null ? `<span class="cab-gauge"><i style="width:${x.gauge * 100}%"></i></span>` : ''}</div>`).join('');
+
+  /* current tasks by due date */
+  const endWeek = shiftDay(thisWs, 6);
+  const bucket = t => !t.due ? 'none' : t.due < today ? 'over' : t.due === today ? 'today' : t.due <= endWeek ? 'week' : 'later';
+  const list = open.filter(t => cabFilter === 'all' || t.status === cabFilter).sort((a, b) => (a.due || '9').localeCompare(b.due || '9') || byPrio(a, b));
+  document.querySelectorAll('[data-cf]').forEach(b => b.setAttribute('aria-pressed', b.dataset.cf === cabFilter));
+  $('#cab-n-cur').textContent = open.length;
+  $('#cab-cur-cnt').textContent = `${open.length} · ${open.reduce((s, t) => s + t.est, 0)} ч`;
+  $('#cab-groups').innerHTML = [['over', 'Просрочено'], ['today', 'Сегодня'], ['week', 'На этой неделе'], ['later', 'Позже'], ['none', 'Без срока']].map(([g, label]) => {
+    const items = list.filter(t => bucket(t) === g); if (!items.length) return '';
+    return `<div class="cab-grp"><div class="cab-grp-h${g === 'over' ? ' over' : ''}">${label} <span class="n">${items.length}</span></div>${items.map(t => {
+      const pr = project(t.project), act = t.status === 'new' ? ['data-take', 'Взять'] : t.status === 'progress' ? ['data-review', 'На проверку'] : null;
+      return `<div class="cab-row" data-cab-open="${esc(t.id)}" tabindex="0" role="button" aria-label="${esc(t.title)}">${t.seen ? `<span class="si ${t.status}" title="${STATUS[t.status]}"></span>` : '<span class="new-dot" title="Новая, ещё не открыта"></span>'}
+        <span class="id">${esc(t.id)}</span><span class="t">${esc(t.title)}</span>
+        <span class="m">${pr ? `<span class="pdot" style="background:${pr.hue}" title="${esc(pr.name)}"></span>` : ''}${t.due ? `<span class="${dueCls(t.due)}">${daysTo(t.due) < 0 ? `просрочено ${-daysTo(t.due)} дн.` : daysTo(t.due) <= 1 ? dueWords(t.due) : fmtDay(t.due)}</span>` : ''}${t.est ? `<span>${t.est} ч</span>` : ''}</span>
+        ${act ? `<button type="button" class="cab-act" ${act[0]}="${esc(t.id)}">${act[1]}</button>` : '<span></span>'}</div>`;
+    }).join('')}</div>`;
+  }).join('') || `<p class="note">${open.length ? 'Таких задач нет.' : 'Открытых задач нет.'}</p>`;
+
+  /* plan of the week: open hours by due day, overdue counted on today */
+  const norm = p.cap / 5, plan = [0, 1, 2, 3, 4, 5, 6].map(i => {
+    const day = shiftDay(ws, i);
+    return open.filter(t => t.due === day || (day === today && t.due && t.due < today)).reduce((s, t) => s + t.est, 0);
+  });
+  const W = 320, H = 130, L = 24, B = 20, T = 10, max = Math.max(4, Math.ceil(Math.max(norm, ...plan) / 2) * 2), y = v => T + (H - T - B) * (1 - v / max), bw = (W - L) / 7;
+  let s = '';
+  for (let g = 0; g <= max; g += max / 4) s += `<line class="grid" x1="${L}" x2="${W}" y1="${y(g)}" y2="${y(g)}"/><text x="${L - 6}" y="${y(g) + 3}" text-anchor="end">${f1(g)}</text>`;
+  ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].forEach((n, i) => {
+    const x = L + i * bw + 6, v = plan[i], day = shiftDay(ws, i);
+    if (v) s += `<rect class="${v > norm ? 'over' : 'plan'}" x="${x}" y="${y(v)}" width="${bw - 12}" height="${y(0) - y(v)}" rx="3"><title>${n}, ${fmtDay(day)}: ${f1(v)} ч${day === today && over.length ? ' (с просроченными)' : ''}</title></rect>`;
+    s += `<text x="${x + (bw - 12) / 2}" y="${H - 5}" text-anchor="middle" ${day === today ? 'class="today"' : ''}>${n}</text>`;
+  });
+  s += `<line class="cap" x1="${L}" x2="${W}" y1="${y(norm)}" y2="${y(norm)}"/><text x="${W}" y="${y(norm) - 4}" text-anchor="end">норма ${f1(norm)} ч</text>`;
+  $('#cab-week').innerHTML = s;
+  $('#cab-week-note').textContent = plan.some(v => v > norm) ? 'Красное — в этот день срок у задач больше чем на дневную норму. Стоит развести сроки.' : 'Пунктир — дневная норма: часы в неделю ÷ 5.';
+
+  /* done in the last 7 days, grouped by day */
+  const week = done.filter(t => t.doneAt >= daysAgo(7)), byDay = {};
+  week.forEach(t => (byDay[doneDay(t)] ||= []).push(t));
+  const dayName = d => d === today ? 'Сегодня' : d === addDays(-1) ? 'Вчера' : new Date(d + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'});
+  const tag = t => !t.due ? '' : isLate(t) ? `<span class="late">+${Math.round((new Date(doneDay(t)) - new Date(t.due)) / 864e5)} дн.</span>` : '<span class="ontime">вовремя</span>';
+  $('#cab-done-cnt').textContent = `за 7 дней: ${week.length}`;
+  $('#cab-done').innerHTML = (Object.entries(byDay).map(([d, l]) => `<div class="cab-day"><b>${dayName(d)}</b>${l.map(t => `<div class="cab-drow" data-cab-open="${esc(t.id)}"><span class="si done"></span><span class="t">${esc(t.title)}</span>${tag(t)}</div>`).join('')}</div>`).join('')
+    || '<p class="note">За неделю ничего не закрыто.</p>') + (done.length ? `<button type="button" class="btn small" id="cab-all-done">Все выполненные (${done.length})</button>` : '');
+
+  /* closed per week, 12 weeks */
+  const weeks = Array.from({length: 12}, (_, i) => shiftDay(thisWs, -7 * (11 - i)));
+  const perWeek = weeks.map(w => done.filter(t => weekStart(doneDay(t)) === w).length);
+  const full = perWeek.slice(0, -1), avg = full.reduce((a, b) => a + b, 0) / full.length;
+  const max2 = Math.max(4, Math.ceil(Math.max(...perWeek, avg) / 2) * 2), y2 = v => 10 + 118 * (1 - v / max2), bw2 = (320 - 24) / 12;
+  s = '';
+  for (let g = 0; g <= max2; g += max2 / 4) s += `<line class="grid" x1="24" x2="320" y1="${y2(g)}" y2="${y2(g)}"/><text x="18" y="${y2(g) + 3}" text-anchor="end">${f1(g)}</text>`;
+  perWeek.forEach((v, i) => {
+    const x = 24 + i * bw2 + 3, last = i === 11;
+    if (v) s += `<rect class="barr${last ? ' cur' : ''}" x="${x}" y="${y2(v)}" width="${bw2 - 6}" height="${y2(0) - y2(v)}" rx="3"><title>Неделя с ${fmtDay(weeks[i])}: ${v}${last ? ' (идёт)' : ''}</title></rect>`;
+    if (i % 3 === 2 || last) s += `<text x="${x + (bw2 - 6) / 2}" y="146" text-anchor="middle">${last ? 'эта' : fmtDay(weeks[i])}</text>`;
+  });
+  s += `<line class="avg" x1="24" x2="320" y1="${y2(avg)}" y2="${y2(avg)}"/><text x="320" y="${y2(avg) - 4}" text-anchor="end">среднее ${f1(avg)}</text>`;
+  $('#cab-weeks').innerHTML = s;
+
+  /* activity: 12 weeks × 7 days of closed tasks */
+  const perDay = {}; done.forEach(t => { const d = doneDay(t); perDay[d] = (perDay[d] || 0) + 1; });
+  let h = '';
+  ['пн', '', 'ср', '', 'пт', '', ''].forEach((n, d) => {
+    h += `<span>${n}</span>`;
+    weeks.forEach(w => { const day = shiftDay(w, d), c = perDay[day] || 0; h += day > today ? '<i class="future"></i>' : `<i class="${c ? 'l' + Math.min(4, c) : ''}" title="${fmtDay(day, true)}: закрыто ${c}"></i>`; });
+  });
+  $('#cab-heat').innerHTML = h;
+
+  /* hours of closed work by project, and the on-time ring */
+  const byProj = {}; done30.forEach(t => { byProj[t.project || ''] = (byProj[t.project || ''] || 0) + t.est; });
+  const rows = Object.entries(byProj).sort((a, b) => b[1] - a[1]), pmax = Math.max(1, ...rows.map(r => r[1]));
+  $('#cab-proj').innerHTML = rows.map(([id, v]) => { const pr = project(id); return `<div class="cab-hb"><span class="ell">${esc(pr ? pr.name : 'Без проекта')}</span><span class="track"><i style="width:${v / pmax * 100}%;background:${pr ? pr.hue : 'var(--muted)'}"></i></span><span class="val">${f1(v)} ч</span></div>`; }).join('')
+    || '<p class="note">За 30 дней ничего не закрыто.</p>';
+  const pct = withDue.length ? onTime.length / withDue.length : 0;
+  $('#cab-ring').innerHTML = withDue.length ? `<svg width="60" height="60" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--sunken)" stroke-width="4"/>
+      <circle cx="18" cy="18" r="15.9" fill="none" stroke="${pct >= .8 ? 'var(--low)' : pct >= .5 ? 'var(--med)' : 'var(--high)'}" stroke-width="4" stroke-dasharray="${pct * 100} 100" transform="rotate(-90 18 18)" stroke-linecap="round"/></svg>
+    <div><b class="num">${Math.round(pct * 100)}%</b><div class="note">закрыто вовремя<br>${onTime.length} из ${withDue.length} со сроком</div></div>` : '';
+
+  /* phone: one part at a time */
+  document.querySelectorAll('[data-ctab]').forEach(b => b.setAttribute('aria-selected', b.dataset.ctab === cabTab));
+  document.querySelectorAll('#v-cab [data-cpane]').forEach(el => el.classList.toggle('on', el.dataset.cpane === cabTab));
+}
+$('#v-cab').addEventListener('click', e => {
+  let b;
+  if ((b = e.target.closest('[data-cweek]'))){ const n = +b.dataset.cweek; cabWeek = n ? cabWeek + n : 0; return renderCab(); }
+  if ((b = e.target.closest('[data-cf]'))){ cabFilter = b.dataset.cf; return renderCab(); }
+  if ((b = e.target.closest('[data-ctab]'))){ cabTab = b.dataset.ctab; return renderCab(); }
+  if (e.target.closest('#cab-all-done')) return openCabDone(cabPid);
+  if (e.target.closest('[data-take],[data-review],[data-person]')) return; // the document handler does these
+  if ((b = e.target.closest('[data-cab-open]'))) openTask(b.dataset.cabOpen, {asEmployee: cabPid === meId});
+});
+$('#v-cab').addEventListener('keydown', e => { const r = e.target.closest('[data-cab-open]'); if (r && e.key === 'Enter'){ e.preventDefault(); openTask(r.dataset.cabOpen, {asEmployee: cabPid === meId}); } });
+// every closed task of one person: search and period
+function openCabDone(pid){
+  const p = person(pid), d = $('#d-cabdone');
+  d.innerHTML = `<div class="d-head"><h2>Выполненные · ${esc(p.name)}</h2><button class="close" aria-label="Закрыть">✕</button></div>
+    <div class="d-body"><div class="cab-tools"><input type="search" id="cd-q" placeholder="Поиск по названию или номеру" aria-label="Поиск" autocomplete="off">
+      <select id="cd-per" aria-label="Период"><option value="7">7 дней</option><option value="30" selected>30 дней</option><option value="90">90 дней</option><option value="0">Всё время</option></select></div>
+      <div class="table-wrap"><table class="grid"><thead><tr><th>Задача</th><th>Проект</th><th>Закрыта</th><th>Срок</th><th class="num">В работе</th></tr></thead><tbody id="cd-body"></tbody></table></div></div>`;
+  const draw = () => {
+    const q = d.querySelector('#cd-q').value.trim().toLowerCase(), per = +d.querySelector('#cd-per').value, from = per ? daysAgo(per) : '';
+    const rows = db.tasks.filter(t => t.assignee === pid && t.status === 'done' && t.doneAt >= from && (!q || `${t.id} ${t.title}`.toLowerCase().includes(q))).sort((a, b) => b.doneAt.localeCompare(a.doneAt));
+    d.querySelector('#cd-body').innerHTML = rows.map(t => { const pr = project(t.project), c = cycleDays(t);
+      return `<tr><td class="wrap-cell"><button type="button" class="link" data-task-link="${esc(t.id)}">${esc(t.id)}</button> ${esc(t.title)}</td><td>${pr ? `<span class="pdot" style="background:${pr.hue}"></span> ${esc(pr.name)}` : '—'}</td>
+        <td class="num">${fmtDay(doneDay(t))}</td><td>${t.due ? (isLate(t) ? '<span class="due-over">с опозданием</span>' : '<span class="ontime">вовремя</span>') + ` <span class="muted">${fmtDay(t.due)}</span>` : '—'}</td><td class="num">${c >= 0 ? f1(c) + ' дн.' : '—'}</td></tr>`; }).join('')
+      || '<tr><td colspan="5" class="muted">Ничего не найдено.</td></tr>';
+  };
+  d.querySelector('#cd-q').oninput = d.querySelector('#cd-per').onchange = draw;
+  draw(); d.showModal();
 }
 
 /* ---------- inbox: the same list for «Входящие» and «Мои задачи» ---------- */
@@ -1808,7 +2108,7 @@ function renderLoad(){
     return `<tr><td><span class="who">${label}</span>${cap ? ` <span class="muted">· ${cap} ч/нед</span>` : ''}</td>${cells}</tr>`;
   };
   $('#load-body').innerHTML = `<div class="table-wrap"><table class="grid"><thead><tr><th>Сотрудник</th>${head.map(h => `<th class="num">${h}</th>`).join('')}</tr></thead>
-    <tbody>${active().map(p => row(ava(p, true) + ' ' + esc(p.name), p.id, p.cap)).join('')}${row('Без исполнителя', '-', 0)}</tbody></table></div>
+    <tbody>${active().map(p => row(ava(p, true) + ` <button type="button" class="linkish" data-cab="${esc(p.id)}" title="Открыть кабинет">${esc(p.name)}</button>`, p.id, p.cap)).join('')}${row('Без исполнителя', '-', 0)}</tbody></table></div>
     <p class="note">Ёмкость берётся из карточки сотрудника, в часах на неделю. Зелёный: меньше 80%, жёлтый: 80–100%, красный: перегруз. Просроченные задачи считаются в текущую неделю. Задачи без оценки в часах здесь не видны.</p>`;
 }
 
@@ -2058,7 +2358,7 @@ function openTask(id, opts = {}){
       `<span>›</span><span class="id">${esc(t.id)}</span>`;
   };
   q('#tw-more').onclick = e => openCtx(...anchor(e.currentTarget), [
-    {label: 'Дублировать', run: () => { flush(); const t = live(); addNewTask(normTask({...structuredClone(t), id: '', title: `${t.title} (копия)`, status: 'new', comments: [], files: [], log: [], checklist: t.checklist.map(c => ({text: c.text, done: false}))})); }},
+    {label: 'Дублировать', run: () => { flush(); const t = live(); addNewTask(normTask({...structuredClone(t), id: '', title: `${t.title} (копия)`, status: 'new', startedAt: '', doneAt: '', comments: [], files: [], log: [], checklist: t.checklist.map(c => ({text: c.text, done: false}))})); }},
     {label: 'Сохранить как шаблон', run: () => { flush(); const t = live(); const tp = normTemplate({name: t.title, title: t.title, prio: t.prio, tag: t.tag, est: t.est, project: t.project, desc: t.desc, checklist: t.checklist.map(c => c.text)});
       change(() => { db.templates.push(tp); addEvent(`${actor()} сохранил шаблон «${tp.name}»`); }, `Шаблон «${tp.name}» сохранён`); }},
     '-', {label: kids(id).length ? 'Удалить (подзадачи останутся)' : 'Удалить задачу', danger: true, run: () => { d.onclose = null; d.close(); deleteTask(id); }},
@@ -2563,7 +2863,7 @@ const COMMANDS = [
   ['Вид: Журнал', '5', () => setView('log')],
   ['Вид: Отчёты', '6', () => setView('report')],
   ['Фильтр: только верхний уровень', '', () => { ui.top = true; saveUi(); initFilters(); render(); }],
-  ['Вид: Мои задачи', 'M', () => meId ? setView('my') : toast('Сначала выберите себя в списке «Я: …» в шапке')],
+  ['Мой кабинет', 'M', () => meId ? openCab(meId) : $('#me-ava').click()],
   ['Новый сотрудник', '', () => openPerson(null)],
   ['Проекты и шаблоны', '', openDict],
   ['Архив выполненных', '', openArchive],
@@ -2652,7 +2952,7 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.target.closest('input,textarea,select,[contenteditable]') || document.querySelector('dialog[open]')) return;
   const f = {KeyN: () => openTask(null), KeyQ: focusQuick, Slash: focusSearch, Digit1: () => setView('team'), Digit2: () => setView('board'),
-    Digit3: () => setView('tree'), Digit4: () => setView('load'), Digit5: () => setView('log'), Digit6: () => setView('report'), KeyM: () => meId && setView('my')}[e.code];
+    Digit3: () => setView('tree'), Digit4: () => setView('load'), Digit5: () => setView('log'), Digit6: () => setView('report'), KeyM: () => meId ? openCab(meId) : $('#me-ava').click()}[e.code];
   if (f){ e.preventDefault(); f(); }
 });
 
@@ -2706,6 +3006,7 @@ document.addEventListener('click', e => {
   const q = s => e.target.closest(s);
   let el;
   if (q('.close')) return q('dialog').close();
+  if ((el = q('[data-cab]'))) return openCab(el.dataset.cab);
   if ((el = q('[data-inbox]'))) return openInbox(el.dataset.inbox);
   if ((el = q('[data-person]'))) return openPerson(el.dataset.person);
   if ((el = q('[data-restore]'))) { const p = person(el.dataset.restore); return change(() => { p.archived = false; addEvent(`${actor()} вернул из архива сотрудника ${p.name}`); }, `${p.name} снова в команде`); }
@@ -2725,10 +3026,12 @@ $('#new-person').onclick = () => openPerson(null);
 $('#store-btn').onclick = openStore;
 
 /* ---------- view & theme (per browser, not part of the data) ---------- */
-const VIEWS = ['team', 'board', 'tree', 'my', 'load', 'log', 'report'];
+const VIEWS = ['team', 'board', 'tree', 'cab', 'load', 'log', 'report'];
 let view = 'team';
 function setView(v){
-  if (!VIEWS.includes(v) || (v === 'my' && !meId)) v = 'team';
+  if (v === 'my') v = 'cab'; // saved by older versions
+  if (v === 'cab' && !person(cabPid) && person(meId)) cabPid = meId;
+  if (!VIEWS.includes(v) || (v === 'cab' && !person(cabPid))) v = 'team';
   view = v;
   for (const k of VIEWS) $('#v-' + k).hidden = k !== v;
   $('.filters').hidden = !['team', 'board'].includes(v);
@@ -2784,6 +3087,8 @@ addEventListener('storage', e => {
   console.assert(t('PLN-2').project === 'p1' && t('PLN-3').project === 'p1', 'subtasks take the project of their top task');
   console.assert(t('PLN-4').parent === null && t('PLN-7').parent === null, 'missing and self parents dropped');
   console.assert(t('PLN-5').parent === null || t('PLN-6').parent === null, 'a loop is cut');
+  const m6 = migrate({version: 5, people: [], tasks: [{id: 'PLN-1', title: 'a', status: 'done', log: [{at: '2026-10-01T10:00:00.000Z', text: 'Анна: статус «В работе»'}]}, {id: 'PLN-2', title: 'b', status: 'new'}]});
+  console.assert(m6.tasks[0].startedAt === '2026-10-01T10:00:00.000Z' && m6.tasks[1].startedAt === '', 'v5 -> v6: startedAt from history');
 })();
 (function selfTestStage4(){
   console.assert(safeUrl('javascript:alert(1)') === '' && safeUrl('example.com/a') === 'https://example.com/a' && safeUrl('http://x.ru') === 'http://x.ru/', 'safeUrl');
