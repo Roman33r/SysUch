@@ -381,7 +381,7 @@ dialog.tw[open]{display:grid;grid-template-rows:auto minmax(0,1fr) auto}
 .prop:hover{background:var(--sunken)}
 .prop .k{font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0}
 .prop .v{display:flex;gap:6px;align-items:center;font-size:14px;min-width:0}
-.prop .v.empty{color:var(--muted)}
+.prop .v.is-empty{color:var(--muted)} /* not .empty: that class styles empty-state blocks across the page */
 .prop .ell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .prop input,.prop select{border:0;background:none;font-size:14px;padding:2px 0;min-width:0;width:100%;cursor:pointer;color:inherit}
 .prop input[type=number]{width:70px;cursor:text}
@@ -525,6 +525,30 @@ header{position:relative;padding-right:52px}
   .cab-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cab-stats{grid-template-columns:minmax(0,1fr)}
 }
+/* stages: several people on one task, one after another */
+.ava-stack{display:inline-flex;align-items:center}
+.ava-stack > span{margin-left:-6px;border-radius:50%;box-shadow:0 0 0 2px var(--surface);display:inline-flex}
+.ava-stack > span:first-child{margin-left:0}
+.ava-stack > span.past{opacity:.45}
+.ava-stack > span.now{box-shadow:0 0 0 2px var(--accent)}
+/* two lines: what and the tools on top, who / hours / date under the title */
+.tw-stage{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"c n t tools" ". . m m";gap:2px 8px;align-items:center;padding:6px 8px;border-radius:9px;font-size:14px}
+.tw-stage > input[type=checkbox]{grid-area:c} .tw-stage .st-n{grid-area:n} .tw-stage .st-title{grid-area:t} .tw-stage .st-tools{grid-area:tools} .tw-stage .st-meta{grid-area:m}
+.st-meta{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:13px;min-width:0}
+.st-meta select{width:auto!important;max-width:200px}
+.st-meta .st-est{width:58px!important}
+.st-meta .st-due{width:auto!important}
+.tw-stage:hover{background:var(--sunken)}
+.tw-stage.cur{background:var(--accent-soft)}
+.tw-stage.done .st-title{text-decoration:line-through;color:var(--muted)}
+.tw-stage input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);margin:0}
+.st-n{font:500 12px var(--f-mono);color:var(--muted);min-width:14px;text-align:center}
+.tw-stage input:not([type=checkbox]),.tw-stage select{border:1px solid transparent;background:none;border-radius:7px;padding:3px 6px;min-width:0;width:100%;font-size:13px;color:inherit}
+.tw-stage .st-title{font-size:14px}
+.tw-stage input:not([type=checkbox]):hover,.tw-stage select:hover,.tw-stage input:focus,.tw-stage select:focus{border-color:var(--line);background:var(--surface);outline:none}
+.st-tools{display:flex;gap:2px;align-items:center}
+.st-tools button:disabled{opacity:.25;cursor:default}
+.st-now{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-right:4px}
 /* projects and templates */
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-items:start}
 .proj-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:10px;min-width:0}
@@ -986,6 +1010,18 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         <p>На телефоне кабинет раскладывается во вкладки «Текущие», «Выполненные», «Статистика». Сравнения с коллегами в кабинете нет: только собственная динамика.</p>
       </section>
 
+      <section id="h-stages"><h3>Несколько исполнителей и этапы</h3>
+        <p>К задаче можно прикрепить нескольких сотрудников. Тогда она разбивается на этапы: у каждого этапа свой исполнитель, оценка и срок, этапы идут по очереди.</p>
+        <ul>
+          <li><b>Как добавить.</b> В окне задачи: строка «Исполнитель» справа → «Добавить этап с сотрудником», или «+ Этап с сотрудником» в разделе «Этапы». В окне создания: в чипе исполнителя отметьте нескольких — порядок выбора станет порядком этапов. В быстром вводе: несколько <code>@имя</code> подряд, например <code>Лендинг @марина @анна @денис</code>.</li>
+          <li><b>Кто держит задачу.</b> Задача числится за исполнителем текущего этапа: она у него в карточке команды, в кабинете и во «Входящих». На доске видно «этап 2/3» и аватары всех исполнителей, текущий обведён.</li>
+          <li><b>Передача.</b> Когда исполнитель отмечает «Этап готов» (во «Входящих», в кабинете или галочкой в разделе «Этапы»), задача сама переходит к следующему, и тот видит её как новую. После последнего этапа задача закрывается.</li>
+          <li><b>Правка этапов.</b> Название, исполнитель, часы и срок меняются прямо в строке этапа; стрелки меняют порядок, ✕ убирает этап. Если остаётся один этап, задача снова становится обычной.</li>
+          <li><b>Часы.</b> Оценка задачи — сумма этапов. В загрузке и плане недели каждый видит часы своих этапов, даже если задача сейчас у другого.</li>
+          <li>Перенос карточки на другого сотрудника отдаёт ему текущий этап, перенос в бэклог снимает этапы.</li>
+        </ul>
+      </section>
+
       <section id="h-dict"><h3>Проекты и шаблоны</h3>
         <p><b>Вкладка «Проекты».</b> Карточка проекта показывает, сколько задач открыто, готово и просрочено, сколько часов впереди, полосу готовности и людей с открытыми задачами. Кнопки «Дерево» и «Задачи на доске» открывают проект в дереве или на канбане с фильтром.</p>
         <p><b>Создавать, переименовывать, перекрашивать и убирать проекты в архив может только руководитель</b> — когда в «Я: …» выбран «Руководитель». Сотрудники видят проекты, но без кнопок изменения. Входа с паролем в Планёрке нет, поэтому это ограничение интерфейса: оно защищает от случайных правок, а не от намеренных.</p>
@@ -1113,7 +1149,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 6;
+const SCHEMA = 7;
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
 const LS_KEY = 'planerka.data', LS_BACKUP = 'planerka.backup', LS_THEME = 'planerka.theme', LS_VIEW = 'planerka.view', LS_UI = 'planerka.ui', LS_ME = 'planerka.me';
@@ -1165,6 +1201,7 @@ function normTask(t){
     startedAt: s(t.startedAt, 40), // first time the task left «Новая»; the cabinet measures time to done from here
     project: t.project ? s(t.project, 40) : null,
     parent: t.parent ? s(t.parent, 40) : null,
+    stages: (Array.isArray(t.stages) ? t.stages : []).filter(x => x && typeof x === 'object').map(normStage),
     repeat: normRepeat(t.repeat),
     links: (Array.isArray(t.links) ? t.links : []).map(l => ({url: safeUrl(l?.url), title: s(l?.title, 200), at: s(l?.at, 40)})).filter(l => l.url),
     files: (Array.isArray(t.files) ? t.files : []).map(f => ({id: s(f?.id, 40), name: s(f?.name, 200) || 'файл', type: s(f?.type, 100), size: Math.max(0, Number(f?.size) || 0), at: s(f?.at, 40)})).filter(f => f.id),
@@ -1175,6 +1212,12 @@ function safeUrl(v){
   let s = String(v ?? '').trim().slice(0, 2000);
   if (s && !/^[a-z][a-z0-9+.-]*:/i.test(s)) s = 'https://' + s;
   try { const u = new URL(s); return /^https?:$/.test(u.protocol) ? u.href : ''; } catch { return ''; }
+}
+// a stage of a task shared by several people: done one after another, each by its own person
+function normStage(x){
+  const s = (v, max) => String(v ?? '').slice(0, max);
+  return {id: s(x.id, 40) || 'st' + Math.random().toString(36).slice(2, 9), title: s(x.title, 120).trim() || 'Этап', assignee: x.assignee ? s(x.assignee, 40) : null,
+    est: Math.max(0, Number(x.est) || 0), due: /^\d{4}-\d{2}-\d{2}$/.test(x.due) ? x.due : '', done: !!x.done, doneAt: s(x.doneAt, 40)};
 }
 function normRepeat(r){
   if (!r || typeof r !== 'object' || !REPEAT_UNITS[r.unit]) return null;
@@ -1211,6 +1254,10 @@ function migrate(raw){
     if (!t.id || seen.has(t.id)) t.id = 'PLN-' + nextId++;
     seen.add(t.id);
     if (t.assignee && !pids.has(t.assignee)) t.assignee = null;
+    // v6 -> v7: stages. A single stage is just an ordinary task; with stages the task belongs to the current stage's person
+    t.stages.forEach(x => { if (x.assignee && !pids.has(x.assignee)) x.assignee = null; });
+    if (t.stages.length === 1){ t.assignee = t.stages[0].assignee ?? t.assignee; t.stages = []; }
+    if (t.stages.length){ const cur = t.stages.find(x => !x.done); t.assignee = (cur || t.stages.at(-1)).assignee; t.est = t.stages.reduce((a, x) => a + x.est, 0); }
   });
   // v5 -> v6: startedAt, recovered from the history where the task was first moved to «В работе»
   if (v < 6) tasks.forEach(t => { if (!t.startedAt && t.status !== 'new'){ const l = t.log.find(x => x.text.includes('статус «В работе»')); if (l) t.startedAt = l.at; } });
@@ -1265,8 +1312,12 @@ function demo(){
     {id:'PLN-126', title:'Состояния: нет в наличии, скидка', parent:'PLN-122', prio:'low', est:2, assignee:'ms', status:'done', createdAt: daysAgo(6), doneAt: daysAgo(2), log},
     {id:'PLN-123', title:'Вёрстка каталога', parent:'PLN-120', prio:'med', due:addDays(15), est:12, assignee:'am', log},
     {id:'PLN-124', title:'API фильтров и сортировки', parent:'PLN-120', prio:'med', est:6, assignee:'ik', status:'review', log},
+    {id:'PLN-112', title:'Пример: лендинг акции «Чёрная пятница»', prio:'high', due:addDays(7), tag:'Акция', status:'progress', log, stages:[
+      {title:'Дизайн', assignee:'ms', est:4, due:addDays(1), done:true, doneAt:daysAgo(1)},
+      {title:'Вёрстка', assignee:'am', est:6, due:addDays(4)},
+      {title:'Тестирование', assignee:'dp', est:2, due:addDays(6)}]},
   ]});
-  const proj = {'PLN-101':'web', 'PLN-102':'web', 'PLN-103':'app', 'PLN-104':'web', 'PLN-105':'app', 'PLN-106':'web', 'PLN-109':'web', 'PLN-110':'web', 'PLN-120':'web'};
+  const proj = {'PLN-101':'web', 'PLN-102':'web', 'PLN-103':'app', 'PLN-104':'web', 'PLN-105':'app', 'PLN-106':'web', 'PLN-109':'web', 'PLN-110':'web', 'PLN-120':'web', 'PLN-112':'web'};
   const by = new Map(d.tasks.map(t => [t.id, t])), root = t => t.parent ? root(by.get(t.parent)) : t;
   d.tasks.forEach(t => { t.project = proj[root(t).id] || null; });
   return d;
@@ -1477,10 +1528,50 @@ function addInterval(iso, {unit, n}){
   d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate())); // 31 янв + месяц = 28/29 фев
   return isoDay(d);
 }
+/* stages: a task with two or more people is split into stages done one after another;
+   the task belongs to whoever has the current (first unfinished) stage */
+const staged = t => t.stages.length > 1;
+const curStage = t => t.stages.find(s => !s.done);
+const makeStages = (pids, est = 0) => pids.map((pid, i) => normStage({title: person(pid)?.role || `Этап ${i + 1}`, assignee: pid, est: i === 0 ? est : 0}));
+// fields for a new task from a list of people: one person = ordinary task, more = stages
+const withPeople = (f, pids) => ({...f, assignee: pids[0] || null, stages: pids.length > 1 ? makeStages(pids, f.est) : []});
+function syncStages(t, who){
+  if (t.stages.length === 1){ t.assignee = t.stages[0].assignee; t.stages = []; return null; } // one person left: an ordinary task again
+  if (!t.stages.length) return null;
+  t.est = t.stages.reduce((s, x) => s + x.est, 0);
+  const cur = curStage(t);
+  if (!cur){ t.assignee = t.stages.at(-1).assignee; return t.status !== 'done' ? (applyStatus(t, 'done', who), null) : null; }
+  if (t.assignee !== cur.assignee){
+    t.assignee = cur.assignee; t.seen = !cur.assignee;
+    addLog(t, `${who}: задача передана на этап «${cur.title}»${cur.assignee ? ` — ${person(cur.assignee)?.name}` : ''}`);
+  }
+  if (t.status === 'done' || (t.status === 'new' && t.stages.some(s => s.done))) applyStatus(t, 'progress', who);
+  return cur;
+}
+function completeStage(id, who = actor()){
+  const t = byId(id), cur = t && curStage(t); if (!cur) return;
+  let next = null;
+  change(() => { cur.done = true; cur.doneAt = stamp(); addLog(t, `${who}: этап «${cur.title}» готов`); next = syncStages(t, who); },
+    () => next ? `Этап «${cur.title}» готов · дальше: ${person(next.assignee)?.name || 'без исполнителя'}` : `${t.id}: все этапы готовы, задача закрыта`);
+}
+function addStage(id, pid, who = actor()){
+  const t = byId(id); if (!t) return;
+  change(() => {
+    if (!t.stages.length && !t.assignee){ t.assignee = pid; t.seen = false; addLog(t, `${who} назначил: ${person(pid).name}`); return; }
+    if (!t.stages.length) t.stages = makeStages([t.assignee], t.est);
+    const st = normStage({title: person(pid)?.role || `Этап ${t.stages.length + 1}`, assignee: pid});
+    t.stages.push(st); addLog(t, `${who} добавил этап «${st.title}» — ${person(pid).name}`);
+    syncStages(t, who);
+  }, () => staged(t) ? `${t.id}: этапов ${t.stages.length}, сейчас — ${person(t.assignee)?.name || 'без исполнителя'}` : `${t.id} передана: ${person(pid).name}`);
+}
+// what each person has to do: a task is one item, a task with stages gives one item per unfinished stage
+const openWork = () => db.tasks.filter(t => t.status !== 'done').flatMap(t => t.stages.length
+  ? t.stages.filter(s => !s.done).map(s => ({t, pid: s.assignee, est: s.est, due: s.due || t.due}))
+  : [{t, pid: t.assignee, est: t.est, due: t.due}]);
 // open hours of a person in the week starting ws; overdue work counts toward the current week
 function weekLoad(pid, ws){
   const today = addDays(0), thisWs = weekStart(today);
-  return db.tasks.filter(t => t.assignee === pid && t.status !== 'done' && t.due && (weekStart(t.due) === ws || (ws === thisWs && t.due < today))).reduce((s, t) => s + t.est, 0);
+  return openWork().filter(w => w.pid === pid && w.due && (weekStart(w.due) === ws || (ws === thisWs && w.due < today))).reduce((s, w) => s + w.est, 0);
 }
 function overloadNote(t){
   const p = t.assignee && person(t.assignee);
@@ -1498,6 +1589,7 @@ function applyStatus(t, s, who){
   let due = addInterval(t.repeat.from === 'done' || !t.due ? today : t.due, t.repeat);
   while (due < today) due = addInterval(due, t.repeat); // closed late: jump to the next future date
   const n = normTask({...structuredClone(t), status: 'new', due, comments: [], seen: !t.assignee, startedAt: '',
+    stages: t.stages.map(s => ({...s, done: false, doneAt: ''})), assignee: t.stages.length ? t.stages[0].assignee : t.assignee,
     checklist: t.checklist.map(c => ({text: c.text, done: false})), createdAt: stamp(), log: [{at: stamp(), text: `Создана повтором после ${t.id}`}]});
   n.id = 'PLN-' + db.nextId++; n.order = t.order + 0.5;
   db.tasks.push(n);
@@ -1512,6 +1604,8 @@ function assign(id, to, pos = null){
   if (!moved && pos == null) return;
   change(() => {
     if (pos != null) t.order = pos;
+    // with stages, a drop on a person hands them the current stage; back to the backlog drops the stages
+    if (moved && t.stages.length){ const cur = curStage(t); if (to && cur) cur.assignee = to; else if (!to) t.stages = []; }
     if (moved){ t.assignee = to; t.seen = !to; addLog(t, to ? `${actor()} назначил: ${person(to).name}` : `${actor()} вернул в бэклог`); }
   }, moved ? () => (to ? `${t.id} передана: ${person(to).name}${overloadNote(t)}` : `${t.id} возвращена в бэклог`) : null);
   if (moved && to){ const el = $('#p-' + to); el?.classList.add('flash'); setTimeout(() => el?.classList.remove('flash'), 900); }
@@ -1608,10 +1702,12 @@ function card(t, kind){
   const who = kind === 'board' ? `<div class="meta"><span class="who">${t.assignee ? ava(person(t.assignee), true) + esc(person(t.assignee)?.name) : 'Без исполнителя'}</span></div>` : '';
   // tree marks: a subtask names its parent, a parent shows how many subtasks are done
   const par = t.parent && byId(t.parent), sub = kids(t.id).length ? rollup(t) : null;
+  // a task with stages shows which stage is on and who does each one
+  const stg = staged(t) ? `<div class="meta"><span class="chip" title="Этапы">этап ${Math.min(t.stages.filter(s => s.done).length + 1, t.stages.length)}/${t.stages.length}</span><span class="ava-stack">${t.stages.map(s => { const sp = person(s.assignee); return sp ? `<span class="${s === curStage(t) ? 'now' : s.done ? 'past' : ''}" title="${esc(s.title)}: ${esc(sp.name)}${s.done ? ', готово' : ''}">${ava(sp, true)}</span>` : ''; }).join('')}</span></div>` : '';
   const tree = (par ? `<div class="parent-of" title="Входит в ${esc(par.id)}">↳ <span>в ${esc(par.id)} · ${esc(par.title)}</span></div>` : '') +
     (sub && kind !== 'mini' ? `<div class="meta"><span class="prog" title="Готово подзадач"><i><b style="width:${sub.done / sub.total * 100}%"></b></i>подзадачи ${sub.done}/${sub.total}</span></div>` : '');
   return `<button class="task" draggable="true" data-id="${esc(t.id)}" aria-label="${esc(t.title)}, открыть">
-    <div class="top"><span class="id">${esc(t.id)}</span>${head}</div><h3>${esc(t.title)}</h3>${tree}${meta}${who}</button>`;
+    <div class="top"><span class="id">${esc(t.id)}</span>${head}</div><h3>${esc(t.title)}</h3>${tree}${stg}${meta}${who}</button>`;
 }
 const byPrio = (a, b) => ({high:0, med:1, low:2}[a.prio] - {high:0, med:1, low:2}[b.prio]) || (a.due || '9').localeCompare(b.due || '9');
 const SORTS = {manual: (a, b) => a.order - b.order, prio: byPrio, due: (a, b) => (a.due || '9').localeCompare(b.due || '9') || byPrio(a, b)};
@@ -1627,7 +1723,10 @@ function inlineCreate(text){
   const r = parseQuick(text, active(), new Date(), activeProjects(), db.tasks); if (!r.title) return;
   const k = inlineAt.key, place = k.startsWith('col:') ? {status: k.slice(4)} : {assignee: k.slice(2)};
   inlineAt.draft = '';
-  addNewTask(normTask({title: r.title, prio: r.prio || 'med', tag: r.tag, due: r.due, est: r.est, project: r.project ?? (ui.proj && ui.proj !== '-' ? ui.proj : null), parent: r.parent, assignee: r.assignee || null, ...place}));
+  const fields = {title: r.title, prio: r.prio || 'med', tag: r.tag, due: r.due, est: r.est, project: r.project ?? (ui.proj && ui.proj !== '-' ? ui.proj : null), parent: r.parent, ...place};
+  // in a person card that person goes first; @names written in the line add stages after them
+  const pids = place.assignee ? [place.assignee, ...r.assignees.filter(x => x !== place.assignee)] : r.assignees;
+  addNewTask(normTask(withPeople(fields, pids)));
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-inl]');
@@ -1652,7 +1751,7 @@ function render(){
   $('#team').innerHTML = (team.length ? team.map(p => {
     const open = db.tasks.filter(t => t.assignee === p.id && t.status !== 'done');
     const mine = open.filter(visible).sort(sorter());
-    const h = weekLoad(p.id, weekStart(addDays(0))), total = open.reduce((s, t) => s + t.est, 0), unread = open.filter(t => !t.seen).length;
+    const h = weekLoad(p.id, weekStart(addDays(0))), total = openWork().filter(w => w.pid === p.id).reduce((s, w) => s + w.est, 0), unread = open.filter(t => !t.seen).length;
     return `<div class="person zone" data-assign="${esc(p.id)}" id="p-${esc(p.id)}">
       <div class="p-row">${ava(p)}
         <div><button type="button" class="p-name linkish" data-cab="${esc(p.id)}" title="Открыть кабинет">${esc(p.name)}</button><div class="p-role">${esc(p.role)}</div></div>
@@ -2074,7 +2173,7 @@ function renderCab(){
   $('#cab-groups').innerHTML = [['over', 'Просрочено'], ['today', 'Сегодня'], ['week', 'На этой неделе'], ['later', 'Позже'], ['none', 'Без срока']].map(([g, label]) => {
     const items = list.filter(t => bucket(t) === g); if (!items.length) return '';
     return `<div class="cab-grp"><div class="cab-grp-h${g === 'over' ? ' over' : ''}">${label} <span class="n">${items.length}</span></div>${items.map(t => {
-      const pr = project(t.project), act = t.status === 'new' ? ['data-take', 'Взять'] : t.status === 'progress' ? ['data-review', 'На проверку'] : null;
+      const pr = project(t.project), act = t.status === 'new' ? ['data-take', 'Взять'] : t.status === 'progress' ? (staged(t) ? ['data-stage-done', 'Этап готов'] : ['data-review', 'На проверку']) : null;
       return `<div class="cab-row" data-cab-open="${esc(t.id)}" tabindex="0" role="button" aria-label="${esc(t.title)}">${t.seen ? `<span class="si ${t.status}" title="${STATUS[t.status]}"></span>` : '<span class="new-dot" title="Новая, ещё не открыта"></span>'}
         <span class="id">${esc(t.id)}</span><span class="t">${esc(t.title)}</span>
         <span class="m">${pr ? `<span class="pdot" style="background:${pr.hue}" title="${esc(pr.name)}"></span>` : ''}${t.due ? `<span class="${dueCls(t.due)}">${daysTo(t.due) < 0 ? `просрочено ${-daysTo(t.due)} дн.` : daysTo(t.due) <= 1 ? dueWords(t.due) : fmtDay(t.due)}</span>` : ''}${t.est ? `<span>${t.est} ч</span>` : ''}</span>
@@ -2083,9 +2182,10 @@ function renderCab(){
   }).join('') || `<p class="note">${open.length ? 'Таких задач нет.' : 'Открытых задач нет.'}</p>`;
 
   /* plan of the week: open hours by due day, overdue counted on today */
+  const work = openWork().filter(w => w.pid === p.id); // includes this person's stages in tasks held by others
   const norm = p.cap / 5, plan = [0, 1, 2, 3, 4, 5, 6].map(i => {
     const day = shiftDay(ws, i);
-    return open.filter(t => t.due === day || (day === today && t.due && t.due < today)).reduce((s, t) => s + t.est, 0);
+    return work.filter(w => w.due === day || (day === today && w.due && w.due < today)).reduce((s, w) => s + w.est, 0);
   });
   const W = 320, H = 130, L = 24, B = 20, T = 10, max = Math.max(4, Math.ceil(Math.max(norm, ...plan) / 2) * 2), y = v => T + (H - T - B) * (1 - v / max), bw = (W - L) / 7;
   let s = '';
@@ -2152,7 +2252,7 @@ $('#v-cab').addEventListener('click', e => {
   if ((b = e.target.closest('[data-cf]'))){ cabFilter = b.dataset.cf; return renderCab(); }
   if ((b = e.target.closest('[data-ctab]'))){ cabTab = b.dataset.ctab; return renderCab(); }
   if (e.target.closest('#cab-all-done')) return openCabDone(cabPid);
-  if (e.target.closest('[data-take],[data-review],[data-person]')) return; // the document handler does these
+  if (e.target.closest('[data-take],[data-review],[data-stage-done],[data-person]')) return; // the document handler does these
   if ((b = e.target.closest('[data-cab-open]'))) openTask(b.dataset.cabOpen, {asEmployee: cabPid === meId});
 });
 $('#v-cab').addEventListener('keydown', e => { const r = e.target.closest('[data-cab-open]'); if (r && e.key === 'Enter'){ e.preventDefault(); openTask(r.dataset.cabOpen, {asEmployee: cabPid === meId}); } });
@@ -2185,7 +2285,7 @@ function inboxHtml(pid){
     <span class="n-title">${esc(t.title)}</span><span class="meta">${dueChip(t)}${t.est ? `<span>· ${t.est} ч</span>` : ''}${t.comments.length ? `<span>💬 ${t.comments.length}</span>` : ''}</span>
     <span class="row"><button class="btn small" data-open="${id}">Подробности</button>
     ${t.status === 'new' ? `<button class="btn small primary" data-take="${id}">Взять в работу</button>` : ''}
-    ${t.status === 'progress' ? `<button class="btn small" data-review="${id}">На проверку</button>` : ''}
+    ${t.status === 'progress' ? (staged(t) ? `<button class="btn small" data-stage-done="${id}">Этап готов</button>` : `<button class="btn small" data-review="${id}">На проверку</button>`) : ''}
     ${t.status !== 'review' ? `<button class="btn small" data-return="${id}">Вернуть</button>` : ''}</span></div>`; }).join('');
 }
 
@@ -2196,9 +2296,10 @@ function renderLoad(){
   const keys = ['over', ...weeks, 'later', 'none'];
   const head = ['Просрочено', ...weeks.map((w, i) => i === 0 ? 'Эта неделя' : `${fmtDay(w)} – ${fmtDay(shiftDay(w, 6))}`), 'Позже', 'Без срока'];
   const row = (label, pid, cap) => {
-    const open = db.tasks.filter(t => (pid === '-' ? !t.assignee : t.assignee === pid) && t.status !== 'done');
+    // work items: a task, or each unfinished stage of a task with stages
+    const open = openWork().filter(w => pid === '-' ? !w.pid : w.pid === pid).map(w => ({...w, id: w.t.id}));
     const cells = keys.map(k => {
-      const list = open.filter(t => col(t) === k), h = list.reduce((s, t) => s + t.est, 0);
+      const list = open.filter(w => col(w) === k), h = list.reduce((s, w) => s + w.est, 0);
       if (!list.length) return '<td class="num"><span class="cell zero">—</span></td>';
       const load = k === weeks[0] ? weekLoad(pid, k) : h;
       const cls = !cap || !weeks.includes(k) ? (k === 'over' ? 'over' : '') : load > cap ? 'over' : load >= cap * 0.8 ? 'tight' : 'ok';
@@ -2410,6 +2511,7 @@ function openTask(id, opts = {}){
     <div class="tw-main">
       <textarea id="tw-title" class="tw-title" rows="1" maxlength="200" aria-label="Название задачи"></textarea>
       <textarea id="tw-desc" class="tw-desc" maxlength="5000" placeholder="Добавить описание…" aria-label="Описание"></textarea>
+      ${sec('stages', 'Этапы', `<div class="tw-list" id="tw-stages"></div><button type="button" class="tw-add" id="tw-stage-add" style="text-align:left;cursor:pointer">+ Этап с сотрудником</button>`)}
       ${sec('check', 'Чек-лист', `<div class="tw-list" id="tw-checks"></div><input id="tw-check-new" class="tw-add" maxlength="300" placeholder="+ Пункт и Enter" aria-label="Новый пункт чек-листа">`)}
       ${sec('subs', 'Подзадачи', `<div class="tw-list" id="tw-subs"></div><input id="tw-sub-new" class="tw-add" maxlength="200" placeholder="+ Подзадача и Enter" aria-label="Новая подзадача">`)}
       ${sec('files', 'Вложения', `<div class="attach" id="tw-attach"></div>
@@ -2468,16 +2570,19 @@ function openTask(id, opts = {}){
     // don't rebuild under the user's fingers while a field in the panel is being edited
     if (side.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return;
     const t = live(), p = person(t.assignee), pr = project(t.project), r = rollup(t), has = kids(t.id).length;
-    const row = (key, label, value, empty) => `<button type="button" class="prop" data-prop="${key}"><span class="k">${label}</span><span class="v${empty ? ' empty' : ''}">${value}</span></button>`;
+    const row = (key, label, value, empty) => `<button type="button" class="prop" data-prop="${key}"><span class="k">${label}</span><span class="v${empty ? ' is-empty' : ''}">${value}</span></button>`;
     const banned = new Set([t.id, ...desc(t.id).map(x => x.id)]);
     const parents = db.tasks.filter(x => x.project === t.project && !banned.has(x.id) && (!isArchived(x) || x.id === t.parent)).sort((a, b) => a.order - b.order);
     const projOpts = [...activeProjects(), ...(pr?.archived ? [pr] : [])];
     side.innerHTML =
       row('status', 'Статус', `<span class="pill st-${t.status}"><span class="si ${t.status}"></span>${STATUS[t.status]}</span>`) +
       row('prio', 'Приоритет', `<span class="pc-${t.prio}">${flagSvg}</span>${PRIO[t.prio]}`) +
-      row('assignee', 'Исполнитель', p ? `${ava(p, true)}<span class="ell">${esc(p.name)}</span>` : 'Не назначен', !p) +
+      (staged(t)
+        ? row('assignee', 'Исполнители', `<span class="ava-stack">${t.stages.map(s => { const sp = person(s.assignee); return sp ? `<span class="${s === curStage(t) ? 'now' : s.done ? 'past' : ''}">${ava(sp, true)}</span>` : ''; }).join('')}</span><span class="muted">этап ${Math.min(t.stages.filter(s => s.done).length + 1, t.stages.length)}/${t.stages.length}</span>`)
+        : row('assignee', 'Исполнитель', p ? `${ava(p, true)}<span class="ell">${esc(p.name)}</span>` : 'Не назначен', !p)) +
       row('due', 'Срок', t.due ? `${fmtDay(t.due)} <span class="${dueCls(t.due, t.status === 'done')}">${t.status === 'done' ? '' : dueWords(t.due)}</span>` : 'Нет срока', !t.due) +
-      `<label class="prop" for="tw-est"><span class="k">Оценка, ч</span><span class="v"><input id="tw-est" type="number" min="0" step="0.5" value="${t.est || ''}" placeholder="—">${has && r.hours !== t.est ? `<span class="muted">ветка ${r.hours} ч</span>` : ''}</span></label>` +
+      (staged(t) ? `<div class="prop"><span class="k">Оценка, ч</span><span class="v">${f1(t.est)} <span class="muted">сумма этапов</span></span></div>`
+        : `<label class="prop" for="tw-est"><span class="k">Оценка, ч</span><span class="v"><input id="tw-est" type="number" min="0" step="0.5" value="${t.est || ''}" placeholder="—">${has && r.hours !== t.est ? `<span class="muted">ветка ${r.hours} ч</span>` : ''}</span></label>`) +
       '<hr>' +
       `<label class="prop" for="tw-proj"><span class="k">Проект</span><span class="v">${pr ? `<span class="pdot" style="background:${pr.hue}"></span>` : ''}<select id="tw-proj" ${t.parent ? 'disabled title="Подзадача всегда в проекте родителя"' : ''}><option value="">Без проекта</option>${projOpts.map(x => `<option value="${esc(x.id)}" ${x.id === t.project ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></span></label>` +
       `<label class="prop" for="tw-parent"><span class="k">Входит в</span><span class="v"><select id="tw-parent"><option value="">Верхний уровень</option>${parents.map(x => `<option value="${esc(x.id)}" ${x.id === t.parent ? 'selected' : ''}>${esc(x.id)} · ${esc(x.title.slice(0, 50))}</option>`).join('')}</select></span></label>` +
@@ -2490,7 +2595,12 @@ function openTask(id, opts = {}){
     const el = side.querySelector(`[data-prop="${key}"]`), t = live(); if (!el || !t) return;
     if (key === 'status') pickStatus(el, t.status, s => setStatus(id, s, author), d);
     if (key === 'prio') pickPrio(el, t.prio, v => loud(x => { x.prio = v; addLog(x, `${author}: приоритет «${PRIO[v]}»`); }, `${id}: приоритет «${PRIO[v]}»`), d);
-    if (key === 'assignee') pickPerson(el, t.assignee, v => assign(id, v), d);
+    // one list replaces the person of the current stage, the other adds a stage with someone else
+    if (key === 'assignee') openCtx(...anchor(el), [{head: staged(t) ? 'Текущий этап' : 'Исполнитель'},
+      {label: 'Не назначен', checked: !t.assignee, run: () => assign(id, null)},
+      ...active().map(x => ({label: x.name, icon: ava(x, true), checked: t.assignee === x.id, run: () => assign(id, x.id)})),
+      '-', {head: 'Добавить этап с сотрудником'},
+      ...active().map(x => ({label: `+ ${x.name}`, run: () => addStage(id, x.id, author)}))], d);
     if (key === 'due') pickDue(el, t.due, v => loud(x => { x.due = v; addLog(x, `${author}: ${v ? `срок ${fmtDay(v)}` : 'срок убран'}`); }, v ? `${id}: срок ${fmtDay(v)}` : `${id}: срок убран`), d);
   };
   side.onclick = e => { const b = e.target.closest('button[data-prop]'); if (b) pick(b.dataset.prop); };
@@ -2516,6 +2626,45 @@ function openTask(id, opts = {}){
   q('#tw-checks').onchange = e => { const i = e.target.dataset.ci; if (i != null) save(x => x.checklist[+i].done = e.target.checked); };
   q('#tw-checks').onclick = e => { const b = e.target.closest('[data-crm]'); if (b){ const i = +b.dataset.crm; save(x => x.checklist.splice(i, 1), `${author} убрал пункт чек-листа`); } };
   q('#tw-check-new').onkeydown = e => { if (e.key !== 'Enter') return; e.preventDefault(); const v = e.target.value.trim(); if (!v) return; save(x => x.checklist.push({text: v.slice(0, 300), done: false})); e.target.value = ''; };
+  const drawStages = () => {
+    const t = live(), cur = curStage(t), box = q('#tw-stages');
+    q('#tw-cnt-stages').innerHTML = t.stages.length ? bar(t.stages.filter(s => s.done).length, t.stages.length) : '';
+    if (box.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName) && document.activeElement.type !== 'checkbox') return;
+    const people = [...active(), ...t.stages.map(s => person(s.assignee)).filter(x => x?.archived)];
+    box.innerHTML = t.stages.length ? t.stages.map((s, i) => `<div class="tw-stage${s.done ? ' done' : ''}${s === cur ? ' cur' : ''}">
+        <input type="checkbox" data-st-done="${i}" ${s.done ? 'checked' : ''} aria-label="Этап готов: ${esc(s.title)}">
+        <span class="st-n">${i + 1}</span>
+        <input class="st-title" data-st-title="${i}" value="${esc(s.title)}" maxlength="120" aria-label="Название этапа ${i + 1}">
+        <span class="st-meta">${s.assignee ? ava(person(s.assignee), true) : ''}<select data-st-who="${i}" aria-label="Исполнитель этапа ${i + 1}"><option value="">Не назначен</option>${people.map(p => `<option value="${esc(p.id)}" ${p.id === s.assignee ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+          <input type="number" class="st-est" data-st-est="${i}" min="0" step="0.5" value="${s.est || ''}" placeholder="ч" aria-label="Оценка этапа ${i + 1}, часов"><span class="muted">ч</span>
+          <input type="date" class="st-due" data-st-due="${i}" value="${esc(s.due)}" aria-label="Срок этапа ${i + 1}"></span>
+        <span class="st-tools">${s === cur ? '<span class="st-now">сейчас</span>' : ''}<button type="button" class="att-rm" data-st-up="${i}" ${i ? '' : 'disabled'} aria-label="Поднять этап">↑</button><button type="button" class="att-rm" data-st-down="${i}" ${i < t.stages.length - 1 ? '' : 'disabled'} aria-label="Опустить этап">↓</button><button type="button" class="att-rm" data-st-rm="${i}" aria-label="Убрать этап">✕</button></span>
+      </div>`).join('')
+      : '<p class="note">Сейчас у задачи один исполнитель. Добавьте этап с другим сотрудником, и задача разобьётся на этапы: каждый делает свою часть по очереди, а задача переходит от одного к другому.</p>';
+  };
+  // stage edits: who/order/done change the flow and can be undone; text, hours and dates save quietly
+  const stageEdit = (fn, msg) => loud(t => { fn(t); syncStages(t, author); }, msg);
+  q('#tw-stages').onchange = e => {
+    const el = e.target, t = live(); if (!t) return;
+    let i;
+    if ((i = el.dataset.stDone) != null){
+      const s = t.stages[+i];
+      if (el.checked && s === curStage(t)) return completeStage(id, author);
+      return stageEdit(x => { const st = x.stages[+i]; st.done = el.checked; st.doneAt = el.checked ? stamp() : ''; addLog(x, `${author}: этап «${st.title}» ${el.checked ? 'готов' : 'снова в работе'}`); }, `Этап «${s.title}» ${el.checked ? 'готов' : 'снова в работе'}`);
+    }
+    if ((i = el.dataset.stWho) != null) return stageEdit(x => { x.stages[+i].assignee = el.value || null; addLog(x, `${author}: этап «${x.stages[+i].title}» — ${person(el.value)?.name || 'без исполнителя'}`); }, 'Исполнитель этапа изменён');
+    if ((i = el.dataset.stTitle) != null){ const v = el.value.trim(); if (!v){ el.value = t.stages[+i].title; return; } return save(x => { x.stages[+i].title = v.slice(0, 120); }); }
+    if ((i = el.dataset.stEst) != null) return save(x => { x.stages[+i].est = Math.max(0, Number(el.value) || 0); syncStages(x, author); });
+    if ((i = el.dataset.stDue) != null) return save(x => { x.stages[+i].due = el.value; });
+  };
+  q('#tw-stages').onclick = e => {
+    let b;
+    const move = (i, j) => stageEdit(x => { [x.stages[i], x.stages[j]] = [x.stages[j], x.stages[i]]; addLog(x, `${author} изменил порядок этапов`); }, 'Порядок этапов изменён');
+    if ((b = e.target.closest('[data-st-up]'))) return move(+b.dataset.stUp, +b.dataset.stUp - 1);
+    if ((b = e.target.closest('[data-st-down]'))) return move(+b.dataset.stDown, +b.dataset.stDown + 1);
+    if ((b = e.target.closest('[data-st-rm]'))){ const i = +b.dataset.stRm; return stageEdit(x => { addLog(x, `${author} убрал этап «${x.stages[i].title}»`); x.stages.splice(i, 1); }, 'Этап убран'); }
+  };
+  q('#tw-stage-add').onclick = e => openCtx(...anchor(e.currentTarget), [{head: 'Этап с сотрудником'}, ...active().map(x => ({label: x.name, icon: ava(x, true), run: () => addStage(id, x.id, author)}))], d);
   const drawSubs = () => {
     const t = live(), ks = kids(t.id), r = rollup(t);
     q('#tw-cnt-subs').innerHTML = bar(ks.filter(k => k.status === 'done').length, ks.length) + (r.total > ks.length ? ` <span class="muted">· в ветке ${r.total}</span>` : '');
@@ -2602,7 +2751,7 @@ function openTask(id, opts = {}){
     if (act){ e.preventDefault(); act(); }
   };
 
-  const drawAll = () => { if (!live()){ d.onclose = null; d.close(); return; } drawCrumbs(); drawSide(); drawChecks(); drawSubs(); drawFiles(); drawFeed(); };
+  const drawAll = () => { if (!live()){ d.onclose = null; d.close(); return; } drawCrumbs(); drawSide(); drawStages(); drawChecks(); drawSubs(); drawFiles(); drawFeed(); };
   refreshTaskDialog = drawAll;
   drawAll();
   if (!d.open) d.showModal();
@@ -2623,6 +2772,7 @@ function openCreate(opts = {}){
   else if (ui.proj && ui.proj !== '-' && project(ui.proj) && ['team', 'board'].includes(view)) base.project = ui.proj;
   if (opts.status) base.status = opts.status;
   if ('assignee' in opts) base.assignee = opts.assignee; else if (!base.assignee && meId) base.assignee = meId;
+  base.people = base.assignee ? [base.assignee] : [];
   let pick = structuredClone(base), tplName = '';
   d.className = 'nw';
   d.innerHTML = `<form id="nw-form" novalidate autocomplete="off">
@@ -2645,19 +2795,20 @@ function openCreate(opts = {}){
   // effective values: words recognised in the title win over chips while they are in the title
   const eff = () => {
     const r = parseQuick(titleEl.value, active(), new Date(), activeProjects(), db.tasks), v = {...pick};
-    for (const k of ['prio', 'tag', 'due', 'est', 'assignee']) if (r[k]) v[k] = r[k];
+    for (const k of ['prio', 'tag', 'due', 'est']) if (r[k]) v[k] = r[k];
+    if (r.assignees.length) v.people = r.assignees;
     if (r.parent){ v.parent = r.parent; v.project = rootTask(byId(r.parent)).project; }
     else if (r.project){ v.project = r.project; if (v.parent && rootTask(byId(v.parent)).project !== r.project) v.parent = null; }
     return {r, v};
   };
   const chip = (key, html, filled, extra = '') => `<button type="button" class="chip${filled ? ' filled' : ' ghost'}" data-nchip="${key}" ${extra}>${html}</button>`;
   const draw = () => {
-    const {r, v} = eff(), p = person(v.assignee), pr = project(v.project), pa = v.parent && byId(v.parent);
+    const {r, v} = eff(), ps = v.people.map(person).filter(Boolean), pr = project(v.project), pa = v.parent && byId(v.parent);
     q('#nw-ctx').innerHTML = pa ? `<span class="ctx-chip" title="Новая задача станет подзадачей">↳ ${esc(pa.id)} ${esc(pa.title.slice(0, 40))}<button type="button" class="x" data-nclear="parent" aria-label="Создать не как подзадачу">✕</button></span>` : '';
     q('#nw-tokens').innerHTML = titleEl.value.trim() ? quickChips(r, false) : '';
     q('#nw-chips').innerHTML =
       chip('status', `<span class="si ${v.status}"></span>${STATUS[v.status]}`, v.status !== 'new') +
-      chip('assignee', p ? `${ava(p, true)}${esc(p.name.split(' ')[0])}` : '👤 Исполнитель', !!p) +
+      chip('assignee', ps.length > 1 ? `<span class="ava-stack">${ps.map(x => ava(x, true)).join('')}</span>${ps.length} этапа` : ps.length ? `${ava(ps[0], true)}${esc(ps[0].name.split(' ')[0])}` : '👤 Исполнитель', ps.length > 0) +
       chip('due', v.due ? `📅 ${fmtDay(v.due)} <span class="${dueCls(v.due)}">${dueWords(v.due)}</span>` : '📅 Срок', !!v.due) +
       chip('prio', `<span class="pc-${v.prio}">${flagSvg}</span>${PRIO[v.prio]}`, v.prio !== 'med') +
       chip('est', v.est ? `⏱ ${v.est} ч` : '⏱ Оценка', !!v.est) +
@@ -2672,7 +2823,10 @@ function openCreate(opts = {}){
     const b = e.target.closest('[data-nchip]'); if (!b) return;
     const {v} = eff(), k = b.dataset.nchip;
     if (k === 'status') pickStatus(b, v.status, s => set('status', s), d);
-    if (k === 'assignee') pickPerson(b, v.assignee, s => set('assignee', s), d);
+    // several people make stages, in the order they were picked
+    if (k === 'assignee') openCtx(...anchor(b), [{head: 'Исполнители · несколько = этапы по очереди'}, {label: 'Никого', checked: !v.people.length, run: () => set('people', [])},
+      ...active().map(p => { const i = v.people.indexOf(p.id); return {label: i >= 0 && v.people.length > 1 ? `${p.name} · этап ${i + 1}` : p.name, icon: ava(p, true), checked: i >= 0,
+        run: () => set('people', i >= 0 ? v.people.filter(x => x !== p.id) : [...v.people, p.id])}; })], d);
     if (k === 'due') pickDue(b, v.due, s => set('due', s), d);
     if (k === 'prio') pickPrio(b, v.prio, s => set('prio', s), d);
     if (k === 'est') openCtx(...anchor(b), [...[0.5, 1, 2, 4, 8, 16].map(h => ({label: `${h} ч`, checked: v.est === h, run: () => set('est', h)})), ...(v.est ? ['-', {label: 'Убрать оценку', danger: true, run: () => set('est', 0)}] : [])], d);
@@ -2696,7 +2850,7 @@ function openCreate(opts = {}){
   const create = () => {
     const {r, v} = eff();
     if (!r.title.trim()){ q('#nw-err').hidden = false; return titleEl.focus(); }
-    const t = normTask({...v, title: r.title, desc: descEl.value, checklist: v.checklist});
+    const t = normTask({...withPeople(v, v.people), title: r.title, desc: descEl.value, checklist: v.checklist});
     if (t.status === 'done') t.doneAt = stamp();
     addNewTask(t);
     if (!q('#nw-more').checked) return d.close();
@@ -2893,8 +3047,7 @@ function drawSettings(){
     </section>
     <section><h4 class="sec-t">Справка и команды</h4><div class="row">
       <button type="button" class="btn" data-set-act="help">Справка <kbd>F1</kbd></button>
-      <button type="button" class="btn" data-set-act="pal">Команды <kbd>${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K'}</kbd></button>
-      <button type="button" class="btn" data-set-act="keys">Горячие клавиши</button></div></section>
+      <button type="button" class="btn" data-set-act="pal">Команды <kbd>${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K'}</kbd></button></div></section>
     <section><button type="button" class="btn danger" data-set-act="reset">Сбросить мои настройки</button></section>
   </div>`;
   d.onclick = e => {
@@ -2904,7 +3057,7 @@ function drawSettings(){
       const a = b.dataset.setAct;
       if (a === 'reset'){ prefs = {...PREF_DEFAULT}; savePrefs(); applyPrefs(); return drawSettings(); }
       d.close();
-      if (a === 'help') openHelp(); if (a === 'pal') openPalette(); if (a === 'keys') openHelp('h-keys');
+      if (a === 'help') openHelp(); if (a === 'pal') openPalette();
     }
   };
   d.onchange = e => {
@@ -3002,7 +3155,7 @@ const WEEKDAYS = [['воскресенье', 'вс'], ['понедельник',
 const MONTHS = ['янв', 'фев', 'мар', 'апр', 'ма', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
 function parseQuick(text, people, now = new Date(), projects = [], tasks = []){
   let s = ` ${text} `;
-  const r = {title: '', prio: '', tag: '', assignee: null, unknown: '', project: null, unknownProject: '', est: 0, due: ''};
+  const r = {title: '', prio: '', tag: '', assignee: null, assignees: [], unknown: '', project: null, unknownProject: '', est: 0, due: ''};
   // cut the first match out of the text if fn accepts it (fn returning false keeps the words in the title)
   const take = (re, fn) => { const m = s.match(re); if (!m || fn(...m) === false) return false; s = s.slice(0, m.index) + ' ' + s.slice(m.index + m[0].length); return true; };
   const plus = n => { const d = new Date(now); d.setDate(d.getDate() + n); return isoDay(d); };
@@ -3012,11 +3165,13 @@ function parseQuick(text, people, now = new Date(), projects = [], tasks = []){
 
   take(/\s!([\p{L}\d]+)(?=\s)/u, (_, w) => { const k = Object.keys(PRIO_WORDS).find(k => PRIO_WORDS[k].includes(w.toLowerCase())); if (!k) return false; r.prio = k; });
   take(/\s#([\p{L}\p{N}_-]+)(?=\s)/u, (_, w) => { r.tag = w; });
-  take(/\s@([\p{L}-]+)(?=\s)/u, (_, w) => {
+  // every @name is taken: several people make stages, in the order written
+  for (let i = 0; i < 10; i++) if (!take(/\s@([\p{L}-]+)(?=\s)/u, (_, w) => {
     const p = people.find(p => p.name.toLowerCase().split(/\s+/).some(x => x.startsWith(w.toLowerCase())));
     if (!p){ r.unknown = w; return false; }
-    r.assignee = p.id;
-  });
+    if (!r.assignees.includes(p.id)) r.assignees.push(p.id);
+    r.assignee = r.assignees[0];
+  })) break;
   // ^PLN-120: the new task becomes a subtask of PLN-120 (and takes its project)
   take(/\s\^([\p{L}]+-\d+)(?=\s)/u, (_, w) => {
     const p = tasks.find(x => x.id.toLowerCase() === w.toLowerCase());
@@ -3056,7 +3211,7 @@ function quickChips(r, warnTitle){
     warnTitle && !r.title && '<span class="chip warn">Добавьте название</span>',
     r.project && `<span class="chip"><span class="pdot" style="background:${project(r.project).hue}"></span>${esc(project(r.project).name)}</span>`,
     r.unknownProject && `<span class="chip warn">+${esc(r.unknownProject)}: такого проекта нет</span>`,
-    r.assignee && `<span class="chip">→ ${esc(person(r.assignee).name)}</span>`,
+    r.assignees.length && r.assignees.map((pid, i) => `<span class="chip">${r.assignees.length > 1 ? `этап ${i + 1} →` : '→'} ${esc(person(pid).name)}</span>`).join(''),
     r.unknown && `<span class="chip warn">@${esc(r.unknown)}: такого сотрудника нет</span>`,
     r.due && `<span class="chip">срок ${fmtDay(r.due, true)}</span>`,
     r.prio && `<span class="chip p-${r.prio}"><span class="dot"></span>${PRIO[r.prio]}</span>`,
@@ -3070,7 +3225,7 @@ $('#quick').onsubmit = e => {
   e.preventDefault();
   const r = parseQuick($('#quick-in').value, active(), new Date(), activeProjects(), db.tasks);
   if (!r.title) return quickPreview();
-  addNewTask(normTask({title: r.title, prio: r.prio || 'med', tag: r.tag, due: r.due, est: r.est, assignee: r.assignee, project: r.project, parent: r.parent}));
+  addNewTask(normTask(withPeople({title: r.title, prio: r.prio || 'med', tag: r.tag, due: r.due, est: r.est, project: r.project, parent: r.parent}, r.assignees)));
   $('#quick-in').value = ''; quickPreview();
 };
 
@@ -3244,6 +3399,7 @@ document.addEventListener('click', e => {
   if ((el = q('[data-open]'))) { if ($('#d-inbox').open) $('#d-inbox').close(); return openTask(el.dataset.open, {asEmployee: true}); }
   if ((el = q('[data-take]'))) { const t = byId(el.dataset.take); if (t){ t.seen = true; setStatus(t.id, 'progress', assigneeName(t)); } return; }
   if ((el = q('[data-review]'))) { const t = byId(el.dataset.review); if (t) setStatus(t.id, 'review', assigneeName(t)); return; }
+  if ((el = q('[data-stage-done]'))) { const t = byId(el.dataset.stageDone); if (t) completeStage(t.id, assigneeName(t)); return; }
   if ((el = q('[data-return]'))) return openReturn(el.dataset.return);
   if ((el = q('[data-task-link]'))) return openTask(el.dataset.taskLink);
   if ((el = q('[data-cell]'))) { Object.assign(ui, {who: el.dataset.cell, q: '', proj: '', prio: '', tag: '', overdue: false}); saveUi(); initFilters(); return setView('team'); }
@@ -3300,6 +3456,8 @@ addEventListener('storage', e => {
   console.assert(q('Релиз 3 ноября !2').due === '2026-11-03' && q('Релиз 3 ноября !2').prio === 'med', 'quick: month name');
   console.assert(q('Ревью через 2 недели').due === '2026-11-08', 'quick: через N недель');
   r = q('@Ктото задача'); console.assert(r.assignee === null && r.unknown === 'Ктото' && r.title === '@Ктото задача', 'quick: unknown person stays in title');
+  r = parseQuick('Лендинг @марина @анна', [{id: 'am', name: 'Анна Морозова'}, {id: 'ms', name: 'Марина Соколова'}], now);
+  console.assert(r.assignees.join() === 'ms,am' && r.assignee === 'ms' && r.title === 'Лендинг', 'quick: several @ make stages in order', r);
   console.assert(q('Купить 31.02').due === '' && q('Купить 31.02').title === 'Купить 31.02', 'quick: invalid date ignored');
   r = parseQuick('Обновить баннер +моб', ppl, now, [{id: 'app', name: 'Мобильное приложение'}]);
   console.assert(r.project === 'app' && r.title === 'Обновить баннер', 'quick: +project');
@@ -3314,6 +3472,11 @@ addEventListener('storage', e => {
   console.assert(t('PLN-5').parent === null || t('PLN-6').parent === null, 'a loop is cut');
   const m6 = migrate({version: 5, people: [], tasks: [{id: 'PLN-1', title: 'a', status: 'done', log: [{at: '2026-10-01T10:00:00.000Z', text: 'Анна: статус «В работе»'}]}, {id: 'PLN-2', title: 'b', status: 'new'}]});
   console.assert(m6.tasks[0].startedAt === '2026-10-01T10:00:00.000Z' && m6.tasks[1].startedAt === '', 'v5 -> v6: startedAt from history');
+  const m7 = migrate({version: 6, people: [{id: 'a', name: 'A'}, {id: 'b', name: 'B'}], tasks: [
+    {id: 'PLN-1', title: 'x', assignee: 'a', stages: [{title: 's1', assignee: 'a', est: 2, done: true}, {title: 's2', assignee: 'b', est: 3}, {title: 's3', assignee: 'ghost'}]},
+    {id: 'PLN-2', title: 'y', assignee: null, stages: [{title: 'only', assignee: 'b'}]}]});
+  console.assert(m7.tasks[0].assignee === 'b' && m7.tasks[0].est === 5 && m7.tasks[0].stages[2].assignee === null, 'v6 -> v7: task belongs to the current stage, hours summed');
+  console.assert(m7.tasks[1].stages.length === 0 && m7.tasks[1].assignee === 'b', 'one stage is an ordinary task');
 })();
 (function selfTestStage4(){
   console.assert(safeUrl('javascript:alert(1)') === '' && safeUrl('example.com/a') === 'https://example.com/a' && safeUrl('http://x.ru') === 'http://x.ru/', 'safeUrl');
