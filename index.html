@@ -31,6 +31,15 @@
   --high:#FF7B6B; --high-soft:#3A1E1A; --med:#F0B44C; --med-soft:#352A14; --low:#6FD199; --low-soft:#16301F;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark}
 
+/* accent colour chosen in Настройки; the theme is always set as data-theme, so light and dark pairs are enough */
+:root[data-accent="green"]{--accent:#0F7A55;--accent-soft:#DBF0E6;--on-accent:#FFFFFF}
+:root[data-theme="dark"][data-accent="green"]{--accent:#5FD3A2;--accent-soft:#16352A;--on-accent:#04231A}
+:root[data-accent="violet"]{--accent:#6A4BC4;--accent-soft:#ECE6FA;--on-accent:#FFFFFF}
+:root[data-theme="dark"][data-accent="violet"]{--accent:#B39DFF;--accent-soft:#2A2147;--on-accent:#1A1033}
+:root[data-accent="orange"]{--accent:#B5500A;--accent-soft:#FBE8DA;--on-accent:#FFFFFF}
+:root[data-theme="dark"][data-accent="orange"]{--accent:#FFA466;--accent-soft:#3B2414;--on-accent:#2A1405}
+:root[data-accent="graphite"]{--accent:#3D4451;--accent-soft:#E3E6EA;--on-accent:#FFFFFF}
+:root[data-theme="dark"][data-accent="graphite"]{--accent:#C3CAD6;--accent-soft:#262B33;--on-accent:#12161C}
 *{box-sizing:border-box}
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 var(--f-body);
@@ -516,6 +525,66 @@ header{position:relative;padding-right:52px}
   .cab-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cab-stats{grid-template-columns:minmax(0,1fr)}
 }
+/* projects and templates */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-items:start}
+.proj-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:10px;min-width:0}
+.proj-card.arch{opacity:.7}
+.proj-top{display:flex;gap:10px;align-items:center;min-width:0}
+.pdot.big{width:14px;height:14px}
+.proj-name{font:600 17px var(--f-body);min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis}
+input.proj-name{border:1px solid transparent;border-radius:8px;background:none;padding:2px 6px;margin-left:-6px;color:inherit}
+input.proj-name:hover{background:var(--sunken)}
+input.proj-name:focus{outline:none;border-color:var(--line);background:var(--sunken)}
+.proj-stats{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted)}
+.proj-stats b{color:var(--fg);font-variant-numeric:tabular-nums}
+.proj-stats .due-over b{color:var(--high)}
+.proj-people{display:flex;gap:4px;flex-wrap:wrap;min-height:22px;align-items:center}
+.proj-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.proj-hues{display:flex;gap:4px}
+.proj-hues button{width:18px;height:18px;border-radius:50%;border:2px solid transparent;padding:0;cursor:pointer}
+.proj-hues button[aria-pressed="true"]{border-color:var(--fg)}
+.proj-add{display:flex;gap:8px;flex-wrap:wrap;max-width:560px}
+.proj-add input{flex:1 1 240px;min-width:0;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface)}
+.tpl-check{margin:0;padding-left:18px;font-size:14px;display:grid;gap:2px}
+#d-tpl{width:min(640px,calc(100vw - 32px))}
+/* settings */
+#d-set{width:min(640px,calc(100vw - 32px))}
+.set-body section{display:grid;gap:10px}
+.set-row{display:grid;grid-template-columns:170px minmax(0,1fr);gap:12px;align-items:center}
+.set-row.top{align-items:start}
+.set-row > span{font-size:14px}
+.set-row .seg{justify-self:start}
+.set-row .sel{justify-self:start}
+.set-acc{display:flex;gap:8px}
+.set-acc button{width:28px;height:28px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line);padding:0;cursor:pointer}
+.set-acc button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--fg)}
+.set-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px}
+.set-body .row{display:flex;flex-wrap:wrap;gap:8px}
+@media (max-width:600px){.set-row{grid-template-columns:minmax(0,1fr);gap:6px}}
+/* menu on the side: the header becomes a fixed column on the left (wide screens only) */
+@media (min-width:761px){
+  body.nav-side{padding-left:calc(236px + max(16px, env(safe-area-inset-left,0px)))}
+  body.nav-side header{position:fixed;left:0;top:0;bottom:0;width:220px;z-index:6;padding:18px 14px 16px;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:10px;
+    background:var(--surface);border-right:1px solid var(--line);overflow-y:auto}
+  body.nav-side header .logo{margin:4px 0 10px;padding-right:44px}
+  body.nav-side header .seg[aria-label="Вид"]{flex-direction:column;align-items:stretch;border-radius:14px;padding:4px;width:auto;flex-wrap:nowrap}
+  body.nav-side header .seg[aria-label="Вид"] button{text-align:left;border-radius:10px;padding:8px 12px;font-size:14px}
+  body.nav-side header .spacer{flex:1}
+  body.nav-side header .sel,body.nav-side header .btn{width:100%;text-align:left}
+  body.nav-side .me-ava{top:14px;right:14px}
+  body.nav-side .toast{left:calc(50% + 118px)}
+}
+/* compact density */
+body.compact{font-size:14px}
+body.compact .wrap{gap:14px}
+body.compact .task{padding:9px 11px;gap:6px}
+body.compact .person{padding:10px 12px;gap:8px}
+body.compact .col{padding:8px;gap:8px}
+body.compact .btn{padding:5px 11px}
+body.compact .trow,body.compact .cab-row{padding-top:4px;padding-bottom:4px}
+body.compact .cab-panel,body.compact .proj-card{padding:10px 12px;gap:8px}
+body.compact .cab-kpi{padding:8px 10px}
+body.compact .cab-kpi .v{font-size:21px}
 /* «+ Задача» right in a column or a person card */
 .col-add{border:1px dashed transparent;background:none;color:var(--muted);border-radius:10px;padding:7px 10px;text-align:left;cursor:pointer;font-size:13px;width:100%}
 .col-add:hover{border-color:var(--line);color:var(--fg);background:var(--surface)}
@@ -546,7 +615,7 @@ label.btn{display:inline-flex;align-items:center}
 
 /* phones and tablets: no hover, no drag; tap opens an action sheet instead */
 @media (pointer:coarse){
-  .hint,.drop-hint,header kbd,#pal-btn kbd,#help-btn kbd{display:none}
+  .hint,.drop-hint,header kbd{display:none}
   .task{cursor:pointer}
 }
 dialog.sheet{width:min(460px,calc(100vw - 16px))}
@@ -564,7 +633,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
   .wrap > *{min-width:0} /* grid items would otherwise grow to their widest row */
   .filters select{flex:1 1 140px}
   header .seg button{white-space:nowrap}
-  #dict-btn,#help-btn,#pal-btn{padding:6px 10px;font-size:13px}
+  #set-btn{padding:6px 10px;font-size:13px}
+  .set-lbl{display:none}
   dialog{width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}
   dialog.sheet{margin:auto auto 8px}
   .d-body{max-height:calc(100dvh - 170px)}
@@ -623,6 +693,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       <button data-view="team" id="vw-team">Распределение</button>
       <button data-view="board" id="vw-board">Канбан</button>
       <button data-view="tree" id="vw-tree">Дерево</button>
+      <button data-view="proj" id="vw-proj">Проекты</button>
+      <button data-view="tpl" id="vw-tpl">Шаблоны</button>
       <button data-view="load" id="vw-load">Загрузка</button>
       <button data-view="log" id="vw-log">Журнал</button>
       <button data-view="report" id="vw-report">Отчёты</button>
@@ -630,14 +702,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
     <div class="spacer"></div>
     <button class="btn primary" id="new-task">+ Задача</button>
     <select class="sel" id="me-sel" aria-label="Кто работает" title="Кто сейчас работает в Планёрке"></select>
-    <button class="btn" id="dict-btn">Проекты и шаблоны</button>
-    <button class="btn" id="help-btn" title="Справка по всем функциям">Справка <kbd>F1</kbd></button>
-    <button class="btn" id="pal-btn" title="Команды и горячие клавиши">Команды <kbd id="pal-kbd">Ctrl K</kbd></button>
     <button class="btn store-btn" id="store-btn" title="Где хранятся данные"><span class="sdot" id="store-dot"></span><span id="store-label">Браузер</span></button>
-    <div class="seg" role="group" aria-label="Тема">
-      <button data-t="light">Светлая</button>
-      <button data-t="dark">Тёмная</button>
-    </div>
+    <button type="button" class="btn set-btn" id="set-btn" title="Настройки: внешний вид, меню, справка и команды" aria-label="Настройки">⚙<span class="set-lbl"> Настройки</span></button>
     <button type="button" class="me-ava" id="me-ava" aria-label="Личный кабинет" title="Личный кабинет"></button>
   </header>
 
@@ -694,6 +760,19 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       </div>
     </div>
     <p class="note" id="tree-note">Клавиши в списке: <kbd>↑</kbd><kbd>↓</kbd> выбор, <kbd>→</kbd><kbd>←</kbd> раскрыть или свернуть, <kbd>Tab</kbd> сделать подзадачей предыдущей, <kbd>Shift</kbd>+<kbd>Tab</kbd> поднять уровнем выше, <kbd>Enter</kbd> открыть. Перетаскивание строки: на середину другой — подзадача, на верх или низ — рядом.</p>
+  </main>
+
+  <main id="v-proj" class="stack" hidden>
+    <div class="panel-h"><h2>Проекты</h2><span class="count" id="proj-count"></span></div>
+    <div id="proj-tools"></div>
+    <div class="proj-grid" id="proj-list"></div>
+    <div id="proj-arch"></div>
+  </main>
+
+  <main id="v-tpl" class="stack" hidden>
+    <div class="panel-h"><h2>Шаблоны задач</h2><span class="count" id="tpl-count"></span><button class="btn small primary" id="tpl-new" type="button">+ Шаблон</button></div>
+    <p class="note">Шаблон заполняет новую задачу: название, приоритет, тег, оценку, проект, описание и чек-лист. Его можно выбрать в окне создания задачи, в палитре команд или кнопкой «Создать задачу» здесь. Ещё шаблон сохраняется из меню ⋯ любой задачи.</p>
+    <div class="proj-grid" id="tpl-list"></div>
   </main>
 
   <main id="v-cab" class="cab" hidden>
@@ -755,7 +834,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <dialog id="d-conflict"></dialog>
 <dialog id="d-pal" aria-label="Команды"></dialog>
 <dialog id="d-return"></dialog>
-<dialog id="d-dict"></dialog>
+<dialog id="d-tpl"></dialog>
+<dialog id="d-set" aria-label="Настройки"></dialog>
 <dialog id="d-archive"></dialog>
 <dialog id="d-close"></dialog>
 <dialog id="d-cabdone"></dialog>
@@ -786,6 +866,9 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <dt>Загрузка <kbd>4</kbd></dt><dd>Сколько часов у каждого сотрудника на каждой неделе.</dd>
           <dt>Журнал <kbd>5</kbd></dt><dd>Все действия по дням.</dd>
           <dt>Отчёты <kbd>6</kbd></dt><dd>Итоги за период, графики, выгрузка в CSV.</dd>
+          <dt>Проекты <kbd>7</kbd></dt><dd>Все проекты с прогрессом и людьми. Создаёт и меняет проекты только руководитель.</dd>
+          <dt>Шаблоны <kbd>8</kbd></dt><dd>Шаблоны задач: создать, изменить, удалить, создать задачу из шаблона.</dd>
+          <dt>Настройки ⚙</dt><dd>Кнопка в шапке: внешний вид, меню, справка и команды. См. раздел «Настройки».</dd>
           <dt>Личный кабинет <kbd>M</kbd></dt><dd>Круглый аватар в правом верхнем углу шапки. См. раздел «Личный кабинет».</dd>
         </dl>
         <p>Выбранный вид, тема и фильтры запоминаются в этом браузере и не попадают в файл данных.</p>
@@ -904,10 +987,23 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       </section>
 
       <section id="h-dict"><h3>Проекты и шаблоны</h3>
-        <p>Кнопка «Проекты и шаблоны» в шапке.</p>
+        <p><b>Вкладка «Проекты».</b> Карточка проекта показывает, сколько задач открыто, готово и просрочено, сколько часов впереди, полосу готовности и людей с открытыми задачами. Кнопки «Дерево» и «Задачи на доске» открывают проект в дереве или на канбане с фильтром.</p>
+        <p><b>Создавать, переименовывать, перекрашивать и убирать проекты в архив может только руководитель</b> — когда в «Я: …» выбран «Руководитель». Сотрудники видят проекты, но без кнопок изменения. Входа с паролем в Планёрке нет, поэтому это ограничение интерфейса: оно защищает от случайных правок, а не от намеренных.</p>
+        <p>Проект задаётся задаче в её карточке или через <code>+проект</code> в быстром вводе.</p>
+        <p><b>Вкладка «Шаблоны».</b> «+ Шаблон» открывает редактор: название шаблона, название будущей задачи, приоритет, тег, оценка, проект, описание и чек-лист по пункту в строке. У каждого шаблона есть «Создать задачу», «Изменить» и «Удалить» (удаление можно отменить). Ещё шаблон сохраняется из меню ⋯ любой задачи, а выбирается в окне создания задачи или в палитре команд («Задача из шаблона: …»).</p>
+      </section>
+
+      <section id="h-settings"><h3>Настройки</h3>
+        <p>Кнопка ⚙ в шапке. Настройки хранятся в этом браузере, и у каждого свои: у руководителя и у каждого сотрудника из «Я: …». Смена человека сразу меняет и вид Планёрки.</p>
         <ul>
-          <li><b>Проекты</b>: добавить, переименовать (изменить название и выйти из поля), убрать в архив. Проект задаётся в карточке задачи или через <code>+проект</code> в быстром вводе.</li>
-          <li><b>Шаблоны</b>: в карточке задачи нажмите «Сохранить как шаблон». Сохранятся название, приоритет, тег, оценка, проект, описание и пункты чек-листа. Новую задачу из шаблона можно создать через поле «Шаблон» в новой задаче, через кнопку «Создать задачу» в справочнике или через палитру команд («Задача из шаблона: …»).</li>
+          <li><b>Тема:</b> светлая, тёмная или как в системе.</li>
+          <li><b>Цвет акцента:</b> синий, зелёный, фиолетовый, оранжевый, графит.</li>
+          <li><b>Плотность:</b> обычная или компактная — меньше отступов, больше задач на экране.</li>
+          <li><b>Расположение меню:</b> сверху или сбоку. Сбоку меню становится колонкой слева, кнопки «+ Задача», «Я: …» и хранение — внизу колонки. На телефоне меню всегда сверху.</li>
+          <li><b>Вкладки в меню:</b> лишние можно скрыть. Скрытая вкладка открывается из палитры команд и цифрой на клавиатуре.</li>
+          <li><b>Открывать при запуске:</b> последний открытый вид или конкретный, например личный кабинет.</li>
+          <li><b>Справка и команды</b> — здесь же; <kbd>F1</kbd> и <kbd>Ctrl</kbd> <kbd>K</kbd> работают как раньше.</li>
+          <li><b>Сбросить мои настройки</b> возвращает всё как было.</li>
         </ul>
       </section>
 
@@ -987,7 +1083,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <tr><td><kbd>N</kbd></td><td>Новая задача</td></tr>
           <tr><td><kbd>Q</kbd></td><td>Быстрый ввод</td></tr>
           <tr><td><kbd>/</kbd></td><td>Поиск</td></tr>
-          <tr><td><kbd>1</kbd>…<kbd>6</kbd></td><td>Распределение, Канбан, Дерево, Загрузка, Журнал, Отчёты</td></tr>
+          <tr><td><kbd>1</kbd>…<kbd>8</kbd></td><td>Распределение, Канбан, Дерево, Загрузка, Журнал, Отчёты, Проекты, Шаблоны</td></tr>
           <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd> <kbd>Tab</kbd></td><td>В дереве: сделать подзадачей предыдущей / поднять уровнем выше</td></tr>
           <tr><td><kbd>M</kbd></td><td>Личный кабинет</td></tr>
           <tr><td><kbd>Esc</kbd></td><td>Закрыть окно, очистить поиск</td></tr>
@@ -1580,6 +1676,8 @@ function render(){
   renderMe();
   if (inlineAt){ const i = $('#inl-input'); if (i && !document.querySelector('dialog[open]')){ i.value = inlineAt.draft; i.focus(); } }
   if (view === 'cab') renderCab();
+  if (view === 'proj') renderProj();
+  if (view === 'tpl') renderTpl();
   if (view === 'load') renderLoad();
   if (view === 'log') renderLog();
   if (view === 'report') renderReport();
@@ -1915,6 +2013,7 @@ function renderMe(){
 }
 $('#me-sel').onchange = e => {
   meId = e.target.value || null; savePref(LS_ME, meId || '');
+  loadPrefs(); // each person has their own look and menu
   if (meId) openCab(meId); else { if (view === 'cab') setView('team'); else render(); }
   toast(meId ? `Вы работаете как ${person(meId).name}. Действия в истории подписываются этим именем.` : 'Вы работаете как руководитель.');
 };
@@ -2644,49 +2743,180 @@ function openReturn(id){
   d.showModal(); d.querySelector('#ret-why').focus();
 }
 
-/* ---------- projects & templates ---------- */
-function openDict(){ drawDict(); $('#d-dict').showModal(); }
-function drawDict(){
-  const d = $('#d-dict');
-  const projRow = p => `<div class="dict-row"><span class="pdot" style="background:${p.hue}"></span>
-    <input id="pj-${esc(p.id)}" data-pj="${esc(p.id)}" value="${esc(p.name)}" maxlength="80" aria-label="Название проекта" ${p.archived ? 'disabled' : ''}>
-    <span class="muted">${db.tasks.filter(t => t.project === p.id && t.status !== 'done').length} откр.</span>
-    <button type="button" class="btn small" data-pj-arch="${esc(p.id)}">${p.archived ? 'Вернуть' : 'В архив'}</button></div>`;
-  d.innerHTML = `<div class="d-head"><h2>Проекты и шаблоны</h2><button class="close" aria-label="Закрыть">✕</button></div>
-  <div class="d-body">
-    <div><h4 class="sec-t">Проекты</h4>${db.projects.map(projRow).join('') || '<p class="note">Проектов пока нет.</p>'}
-      <form class="add-row" id="pj-add"><input id="pj-new" maxlength="80" placeholder="Новый проект" aria-label="Название нового проекта"><button class="btn small">Добавить</button></form>
-      <p class="note" style="margin-top:6px">В быстром вводе проект указывают через плюс: <b>+сайт</b>.</p></div>
-    <div><h4 class="sec-t">Шаблоны задач</h4>${db.templates.map(tp => `<div class="dict-row"><span class="grow"><b>${esc(tp.name)}</b> <span class="muted">· ${PRIO[tp.prio]}${tp.tag ? ' · #' + esc(tp.tag) : ''}${tp.est ? ` · ${tp.est} ч` : ''}${tp.checklist.length ? ` · чек-лист ${tp.checklist.length}` : ''}</span></span>
-      <button type="button" class="btn small" data-tp-use="${esc(tp.id)}">Создать задачу</button><button type="button" class="btn small danger" data-tp-del="${esc(tp.id)}">Удалить</button></div>`).join('')
-      || '<p class="note">Шаблонов пока нет.</p>'}
-      <p class="note" style="margin-top:6px">Шаблон создаётся кнопкой «Сохранить как шаблон» в карточке задачи.</p></div>
-  </div>`;
-  d.querySelector('#pj-add').onsubmit = e => {
-    e.preventDefault();
-    const name = d.querySelector('#pj-new').value.trim(); if (!name) return d.querySelector('#pj-new').focus();
-    const p = normProject({name, hue: HUES[db.projects.length % HUES.length]});
-    change(() => { db.projects.push(p); addEvent(`${actor()} создал проект «${name}»`); }, `Проект «${name}» создан`);
-    drawDict(); d.querySelector('#pj-new').focus();
+/* ---------- projects: everyone sees them, only the manager creates and changes them ---------- */
+// «manager» = nobody chosen in «Я: …»; there is no login, so this guards the interface, not the data file
+const isBoss = () => !meId;
+const bossOnly = () => { if (isBoss()) return true; toast('Проекты может менять только руководитель. Выберите «Я: Руководитель» в шапке.'); return false; };
+function renderProj(){
+  const boss = isBoss(), list = db.projects.filter(p => !p.archived), arch = db.projects.filter(p => p.archived), today = addDays(0);
+  $('#proj-count').textContent = list.length;
+  if (!document.activeElement?.closest('#proj-tools')) $('#proj-tools').innerHTML = boss
+    ? `<form id="pj-add" class="proj-add"><input id="pj-new" maxlength="80" placeholder="Название нового проекта" aria-label="Название нового проекта"><button class="btn primary small">Создать проект</button></form>`
+    : `<p class="note">Создавать, переименовывать и убирать проекты в архив может только руководитель. Сейчас вы работаете как ${esc(person(meId)?.name || '')}.</p>`;
+  const card = p => {
+    const ts = db.tasks.filter(t => t.project === p.id), open = ts.filter(t => t.status !== 'done'), done = ts.length - open.length;
+    const over = open.filter(t => t.due && t.due < today).length, hours = open.reduce((s, t) => s + t.est, 0);
+    const people = [...new Set(open.map(t => t.assignee).filter(Boolean))].map(person).filter(Boolean), id = esc(p.id);
+    return `<article class="proj-card${p.archived ? ' arch' : ''}">
+      <div class="proj-top"><span class="pdot big" style="background:${p.hue}"></span>${boss && !p.archived ? `<input class="proj-name" data-pj="${id}" value="${esc(p.name)}" maxlength="80" aria-label="Название проекта" title="Нажмите, чтобы переименовать">` : `<b class="proj-name">${esc(p.name)}</b>`}</div>
+      <div class="proj-stats"><span><b>${open.length}</b> открыто</span><span><b>${done}</b> готово</span><span><b>${f1(hours)}</b> ч впереди</span>${over ? `<span class="due-over"><b>${over}</b> просрочено</span>` : ''}</div>
+      <span class="cab-gauge" title="Готово ${done} из ${ts.length}"><i style="width:${ts.length ? done / ts.length * 100 : 0}%;background:${p.hue}"></i></span>
+      <div class="proj-people">${people.map(x => ava(x, true)).join('') || '<span class="note">Открытых задач нет</span>'}</div>
+      <div class="proj-actions"><button type="button" class="btn small" data-pj-tree="${id}">Дерево</button><button type="button" class="btn small" data-pj-board="${id}">Задачи на доске</button>
+        ${boss ? `<span class="spacer"></span>${p.archived ? '' : `<span class="proj-hues">${HUES.map(h => `<button type="button" data-pj-hue="${id}" data-hue="${h}" style="background:${h}" aria-label="Цвет проекта" aria-pressed="${h === p.hue}"></button>`).join('')}</span>`}
+          <button type="button" class="btn small" data-pj-arch="${id}">${p.archived ? 'Вернуть' : 'В архив'}</button>` : ''}</div>
+    </article>`;
   };
-  d.querySelectorAll('[data-pj]').forEach(inp => inp.onchange = () => {
-    const p = project(inp.dataset.pj), name = inp.value.trim();
-    if (!name){ inp.value = p.name; return; }
-    if (name !== p.name) change(() => { addEvent(`${actor()} переименовал проект «${p.name}» в «${name}»`); p.name = name; }, `Проект переименован: ${name}`);
-  });
-  d.querySelectorAll('[data-pj-arch]').forEach(b => b.onclick = () => {
-    const p = project(b.dataset.pjArch);
-    change(() => { p.archived = !p.archived; addEvent(`${actor()} ${p.archived ? 'убрал в архив' : 'вернул из архива'} проект «${p.name}»`); }, `Проект «${p.name}» ${p.archived ? 'в архиве' : 'снова активен'}`);
-    drawDict();
-  });
-  d.querySelectorAll('[data-tp-use]').forEach(b => b.onclick = () => { d.close(); openTask(null, {template: b.dataset.tpUse}); });
-  d.querySelectorAll('[data-tp-del]').forEach(b => b.onclick = () => {
-    const tp = db.templates.find(x => x.id === b.dataset.tpDel);
-    change(() => { db.templates = db.templates.filter(x => x !== tp); addEvent(`${actor()} удалил шаблон «${tp.name}»`); }, `Шаблон «${tp.name}» удалён`);
-    drawDict();
-  });
+  $('#proj-list').innerHTML = list.map(card).join('') || `<p class="note">Проектов пока нет.${boss ? ' Создайте первый выше.' : ''}</p>`;
+  $('#proj-arch').innerHTML = arch.length ? `<details class="archive"><summary>Архив проектов (${arch.length})</summary><div class="proj-grid" style="margin-top:10px">${arch.map(card).join('')}</div></details>` : '';
 }
-$('#dict-btn').onclick = openDict;
+$('#v-proj').addEventListener('submit', e => {
+  if (e.target.id !== 'pj-add') return;
+  e.preventDefault(); if (!bossOnly()) return;
+  const inp = $('#pj-new'), name = inp.value.trim(); if (!name) return inp.focus();
+  const p = normProject({name, hue: HUES[db.projects.length % HUES.length]});
+  inp.value = ''; inp.blur();
+  change(() => { db.projects.push(p); addEvent(`${actor()} создал проект «${name}»`); }, `Проект «${name}» создан`);
+});
+$('#v-proj').addEventListener('change', e => {
+  const inp = e.target.closest('[data-pj]'); if (!inp || !bossOnly()) return;
+  const p = project(inp.dataset.pj), name = inp.value.trim();
+  if (!name){ inp.value = p.name; return; }
+  if (name !== p.name) change(() => { addEvent(`${actor()} переименовал проект «${p.name}» в «${name}»`); p.name = name; }, `Проект переименован: ${name}`);
+});
+$('#v-proj').addEventListener('click', e => {
+  let b;
+  if ((b = e.target.closest('[data-pj-tree]'))){ ui.treeProj = b.dataset.pjTree; saveUi(); return setView('tree'); }
+  if ((b = e.target.closest('[data-pj-board]'))){ Object.assign(ui, {proj: b.dataset.pjBoard, who: '', q: '', prio: '', tag: '', overdue: false, top: false}); saveUi(); initFilters(); return setView('board'); }
+  if ((b = e.target.closest('[data-pj-hue]'))){ if (!bossOnly()) return; const p = project(b.dataset.pjHue); return change(() => { p.hue = b.dataset.hue; }, `Цвет проекта «${p.name}» изменён`); }
+  if ((b = e.target.closest('[data-pj-arch]'))){ if (!bossOnly()) return; const p = project(b.dataset.pjArch);
+    return change(() => { p.archived = !p.archived; addEvent(`${actor()} ${p.archived ? 'убрал в архив' : 'вернул из архива'} проект «${p.name}»`); }, `Проект «${p.name}» ${p.archived ? 'в архиве' : 'снова активен'}`); }
+});
+
+/* ---------- templates ---------- */
+function renderTpl(){
+  $('#tpl-count').textContent = db.templates.length;
+  $('#tpl-list').innerHTML = db.templates.map(tp => { const pr = project(tp.project), id = esc(tp.id);
+    return `<article class="proj-card">
+      <div class="proj-top"><b class="proj-name">${esc(tp.name)}</b></div>
+      <div class="meta"><span class="chip p-${tp.prio}"><span class="dot"></span>${PRIO[tp.prio]}</span>${tp.tag ? `<span class="chip">#${esc(tp.tag)}</span>` : ''}${tp.est ? `<span>${f1(tp.est)} ч</span>` : ''}${pr ? `<span class="chip"><span class="pdot" style="background:${pr.hue}"></span>${esc(pr.name)}</span>` : ''}</div>
+      ${tp.title ? `<p class="note">Название новой задачи: «${esc(tp.title)}»</p>` : ''}
+      ${tp.checklist.length ? `<ul class="tpl-check">${tp.checklist.slice(0, 5).map(c => `<li>${esc(c)}</li>`).join('')}${tp.checklist.length > 5 ? `<li class="muted">и ещё ${tp.checklist.length - 5}</li>` : ''}</ul>` : ''}
+      <div class="proj-actions"><button type="button" class="btn small primary" data-tp-use="${id}">Создать задачу</button><span class="spacer"></span>
+        <button type="button" class="btn small" data-tp-edit="${id}">Изменить</button><button type="button" class="btn small danger" data-tp-del="${id}">Удалить</button></div>
+    </article>`; }).join('') || '<p class="note">Шаблонов пока нет. Создайте первый кнопкой «+ Шаблон».</p>';
+}
+$('#tpl-new').onclick = () => openTplEditor(null);
+$('#v-tpl').addEventListener('click', e => {
+  let b;
+  if ((b = e.target.closest('[data-tp-use]'))) return openTask(null, {template: b.dataset.tpUse});
+  if ((b = e.target.closest('[data-tp-edit]'))) return openTplEditor(b.dataset.tpEdit);
+  if ((b = e.target.closest('[data-tp-del]'))){ const tp = db.templates.find(x => x.id === b.dataset.tpDel);
+    return change(() => { db.templates = db.templates.filter(x => x !== tp); addEvent(`${actor()} удалил шаблон «${tp.name}»`); }, `Шаблон «${tp.name}» удалён`); }
+});
+function openTplEditor(id){
+  const old = id && db.templates.find(x => x.id === id), tp = old || normTemplate({name: ''}), d = $('#d-tpl');
+  if (!old) tp.name = '';
+  const opt = (map, cur) => Object.entries(map).map(([k, v]) => `<option value="${esc(k)}" ${k === cur ? 'selected' : ''}>${esc(v)}</option>`).join('');
+  d.innerHTML = `<form id="tp-form" novalidate><div class="d-head"><h2>${old ? 'Шаблон' : 'Новый шаблон'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
+    <div class="d-body">
+      <div class="field"><label for="tp-name">Название шаблона</label><input id="tp-name" maxlength="80" value="${esc(tp.name)}" placeholder="Например: Баг-репорт"><span class="err" id="tp-err" hidden>Введите название шаблона</span></div>
+      <div class="field"><label for="tp-title">Название новой задачи</label><input id="tp-title" maxlength="200" value="${esc(tp.title)}" placeholder="Например: Баг: "></div>
+      <div class="fields">
+        <div class="field"><label for="tp-prio">Приоритет</label><select id="tp-prio">${opt(PRIO, tp.prio)}</select></div>
+        <div class="field"><label for="tp-tag">Тег</label><input id="tp-tag" maxlength="40" value="${esc(tp.tag)}"></div>
+        <div class="field"><label for="tp-est">Оценка, ч</label><input id="tp-est" type="number" min="0" step="0.5" value="${tp.est || ''}"></div>
+        <div class="field"><label for="tp-proj">Проект</label><select id="tp-proj"><option value="">Без проекта</option>${opt(Object.fromEntries(activeProjects().map(p => [p.id, p.name])), tp.project)}</select></div>
+      </div>
+      <div class="field"><label for="tp-desc">Описание</label><textarea id="tp-desc" maxlength="5000">${esc(tp.desc)}</textarea></div>
+      <div class="field"><label for="tp-check">Чек-лист, по пункту в строке</label><textarea id="tp-check" maxlength="5000">${esc(tp.checklist.join('\n'))}</textarea></div>
+    </div>
+    <div class="d-foot"><span class="spacer"></span><button type="button" class="btn" id="tp-cancel">Отмена</button><button class="btn primary">${old ? 'Сохранить' : 'Создать шаблон'}</button></div></form>`;
+  const v = s => d.querySelector(s).value;
+  d.querySelector('#tp-cancel').onclick = () => d.close();
+  d.querySelector('#tp-form').onsubmit = e => {
+    e.preventDefault();
+    const name = v('#tp-name').trim(); if (!name){ d.querySelector('#tp-err').hidden = false; return d.querySelector('#tp-name').focus(); }
+    const next = normTemplate({id: tp.id, name, title: v('#tp-title'), prio: v('#tp-prio'), tag: v('#tp-tag').trim(), est: v('#tp-est'), project: v('#tp-proj') || null, desc: v('#tp-desc'),
+      checklist: v('#tp-check').split('\n').map(x => x.trim()).filter(Boolean)});
+    d.close();
+    change(() => { const i = db.templates.findIndex(x => x.id === tp.id); if (i >= 0) db.templates[i] = next; else db.templates.push(next); addEvent(`${actor()} ${old ? 'изменил' : 'создал'} шаблон «${name}»`); },
+      `Шаблон «${name}» ${old ? 'сохранён' : 'создан'}`);
+  };
+  d.showModal(); d.querySelector('#tp-name').focus();
+}
+
+/* ---------- personal settings: kept in this browser, separately for each person chosen in «Я: …» ---------- */
+const PREF_DEFAULT = {theme: 'system', accent: 'blue', density: 'normal', nav: 'top', hidden: [], start: 'last'};
+const VIEW_NAMES = {team: 'Распределение', board: 'Канбан', tree: 'Дерево', proj: 'Проекты', tpl: 'Шаблоны', load: 'Загрузка', log: 'Журнал', report: 'Отчёты'};
+const ACCENTS = {blue: ['Синий', '#2B54E0'], green: ['Зелёный', '#0F7A55'], violet: ['Фиолетовый', '#6A4BC4'], orange: ['Оранжевый', '#C2570C'], graphite: ['Графит', '#3D4451']};
+const prefKey = () => 'planerka.prefs.' + (meId || 'boss');
+const sysDark = matchMedia('(prefers-color-scheme: dark)');
+let prefs = {...PREF_DEFAULT};
+function loadPrefs(){
+  let p = {};
+  try { p = JSON.parse(localStorage.getItem(prefKey()) || 'null') || {}; } catch {}
+  if (!p.theme){ try { const old = localStorage.getItem(LS_THEME); if (old) p.theme = old; } catch {} } // theme saved by older versions
+  prefs = {...PREF_DEFAULT, ...p};
+  if (!Array.isArray(prefs.hidden)) prefs.hidden = [];
+  if (!ACCENTS[prefs.accent]) prefs.accent = 'blue';
+  applyPrefs();
+}
+const savePrefs = () => { try { localStorage.setItem(prefKey(), JSON.stringify(prefs)); } catch {} };
+function applyPrefs(){
+  const r = document.documentElement;
+  r.dataset.theme = prefs.theme === 'system' ? (sysDark.matches ? 'dark' : 'light') : prefs.theme;
+  r.dataset.accent = prefs.accent;
+  document.body.classList.toggle('nav-side', prefs.nav === 'side');
+  document.body.classList.toggle('compact', prefs.density === 'compact');
+  document.querySelectorAll('header [data-view]').forEach(b => b.hidden = prefs.hidden.includes(b.dataset.view));
+}
+sysDark.addEventListener?.('change', () => { if (prefs.theme === 'system') applyPrefs(); });
+function setTheme(t){ prefs.theme = t; savePrefs(); applyPrefs(); if ($('#d-set').open) drawSettings(); }
+function openSettings(){ drawSettings(); $('#d-set').showModal(); }
+function drawSettings(){
+  const d = $('#d-set');
+  const seg = (key, opts) => `<div class="seg" role="group">${Object.entries(opts).map(([v, l]) => `<button type="button" data-pref="${key}" data-val="${v}" aria-pressed="${prefs[key] === v}">${l}</button>`).join('')}</div>`;
+  d.innerHTML = `<div class="d-head"><h2>Настройки</h2><button class="close" aria-label="Закрыть">✕</button></div>
+  <div class="d-body set-body">
+    <p class="note">Настройки хранятся в этом браузере, у каждого свои. Сейчас это настройки: <b>${esc(person(meId)?.name || ME)}</b>. Другой человек выбирается в списке «Я: …».</p>
+    <section><h4 class="sec-t">Внешний вид</h4>
+      <div class="set-row"><span>Тема</span>${seg('theme', {light: 'Светлая', dark: 'Тёмная', system: 'Как в системе'})}</div>
+      <div class="set-row"><span>Цвет акцента</span><div class="set-acc">${Object.entries(ACCENTS).map(([k, [l, c]]) => `<button type="button" data-pref="accent" data-val="${k}" aria-pressed="${prefs.accent === k}" title="${l}" aria-label="${l}" style="background:${c}"></button>`).join('')}</div></div>
+      <div class="set-row"><span>Плотность</span>${seg('density', {normal: 'Обычная', compact: 'Компактная'})}</div>
+    </section>
+    <section><h4 class="sec-t">Меню</h4>
+      <div class="set-row"><span>Расположение</span>${seg('nav', {top: 'Сверху', side: 'Сбоку'})}</div>
+      <div class="set-row top"><span>Вкладки в меню</span><div class="set-checks">${Object.entries(VIEW_NAMES).map(([v, l]) => `<label class="chk"><input type="checkbox" data-vis="${v}" ${prefs.hidden.includes(v) ? '' : 'checked'}> ${l}</label>`).join('')}</div></div>
+      <div class="set-row"><span>Открывать при запуске</span><select id="set-start" class="sel"><option value="last">Последний открытый вид</option>${Object.entries({...VIEW_NAMES, cab: 'Личный кабинет'}).map(([v, l]) => `<option value="${v}" ${prefs.start === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <p class="note">На телефоне меню всегда сверху. Скрытые вкладки по-прежнему открываются из палитры команд и цифрами на клавиатуре.</p>
+    </section>
+    <section><h4 class="sec-t">Справка и команды</h4><div class="row">
+      <button type="button" class="btn" data-set-act="help">Справка <kbd>F1</kbd></button>
+      <button type="button" class="btn" data-set-act="pal">Команды <kbd>${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K'}</kbd></button>
+      <button type="button" class="btn" data-set-act="keys">Горячие клавиши</button></div></section>
+    <section><button type="button" class="btn danger" data-set-act="reset">Сбросить мои настройки</button></section>
+  </div>`;
+  d.onclick = e => {
+    let b;
+    if ((b = e.target.closest('[data-pref]'))){ prefs[b.dataset.pref] = b.dataset.val; savePrefs(); applyPrefs(); return drawSettings(); }
+    if ((b = e.target.closest('[data-set-act]'))){
+      const a = b.dataset.setAct;
+      if (a === 'reset'){ prefs = {...PREF_DEFAULT}; savePrefs(); applyPrefs(); return drawSettings(); }
+      d.close();
+      if (a === 'help') openHelp(); if (a === 'pal') openPalette(); if (a === 'keys') openHelp('h-keys');
+    }
+  };
+  d.onchange = e => {
+    if (e.target.dataset.vis){
+      const hidden = [...d.querySelectorAll('[data-vis]')].filter(x => !x.checked).map(x => x.dataset.vis);
+      if (hidden.length === Object.keys(VIEW_NAMES).length){ e.target.checked = true; return toast('В меню должна остаться хотя бы одна вкладка'); }
+      prefs.hidden = hidden; savePrefs(); applyPrefs();
+    }
+    if (e.target.id === 'set-start'){ prefs.start = e.target.value; savePrefs(); }
+  };
+}
+$('#set-btn').onclick = openSettings;
 
 function openPerson(id){
   const existing = id ? person(id) : null, d = $('#d-person');
@@ -2865,7 +3095,11 @@ const COMMANDS = [
   ['Фильтр: только верхний уровень', '', () => { ui.top = true; saveUi(); initFilters(); render(); }],
   ['Мой кабинет', 'M', () => meId ? openCab(meId) : $('#me-ava').click()],
   ['Новый сотрудник', '', () => openPerson(null)],
-  ['Проекты и шаблоны', '', openDict],
+  ['Вид: Проекты', '7', () => setView('proj')],
+  ['Вид: Шаблоны', '8', () => setView('tpl')],
+  ['Новый шаблон', '', () => openTplEditor(null)],
+  ['Настройки', '', openSettings],
+  ['Меню сбоку / сверху', '', () => { prefs.nav = prefs.nav === 'side' ? 'top' : 'side'; savePrefs(); applyPrefs(); }],
   ['Архив выполненных', '', openArchive],
   ['Печать отчёта / PDF', '', () => { setView('report'); $('#rep-print').click(); }],
   ['Скачать CSV задач', '', () => $('#rep-csv').click()],
@@ -2905,7 +3139,6 @@ function openPalette(){
   list.onclick = e => { const it = e.target.closest('[data-i]'); if (it) run(+it.dataset.i); };
   draw(); d.showModal(); input.focus();
 }
-$('#pal-btn').onclick = openPalette;
 
 /* ---------- help ---------- */
 const helpSections = [...document.querySelectorAll('#help-body section')];
@@ -2918,7 +3151,6 @@ function openHelp(section){
   if (section){ $('#help-q').value = ''; filterHelp(); helpGo(section); }
   $('#help-q').focus({preventScroll: true});
 }
-$('#help-btn').onclick = () => openHelp();
 $('#help-nav').onclick = e => {
   const b = e.target.closest('[data-help-go]'); if (!b) return;
   if ($('#help-q').value){ $('#help-q').value = ''; filterHelp(); }
@@ -2940,7 +3172,6 @@ $('#help-body').onscroll = () => {
   const cur = helpSections.filter(s => !s.hidden && s.getBoundingClientRect().top <= top).pop() || helpSections.find(s => !s.hidden);
   [...$('#help-nav').children].forEach(b => b.classList.toggle('on', b.dataset.helpGo === cur?.id));
 };
-if (/Mac|iPhone|iPad/.test(navigator.platform)) $('#pal-kbd').textContent = '⌘K';
 document.addEventListener('keydown', e => {
   // e.code is the physical key, so shortcuts work on the Russian layout too
   // F1 works everywhere, also over an open window (it stays open with its unsaved edits); preventDefault stops the browser's own help
@@ -2952,7 +3183,7 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.target.closest('input,textarea,select,[contenteditable]') || document.querySelector('dialog[open]')) return;
   const f = {KeyN: () => openTask(null), KeyQ: focusQuick, Slash: focusSearch, Digit1: () => setView('team'), Digit2: () => setView('board'),
-    Digit3: () => setView('tree'), Digit4: () => setView('load'), Digit5: () => setView('log'), Digit6: () => setView('report'), KeyM: () => meId ? openCab(meId) : $('#me-ava').click()}[e.code];
+    Digit3: () => setView('tree'), Digit4: () => setView('load'), Digit5: () => setView('log'), Digit6: () => setView('report'), Digit7: () => setView('proj'), Digit8: () => setView('tpl'), KeyM: () => meId ? openCab(meId) : $('#me-ava').click()}[e.code];
   if (f){ e.preventDefault(); f(); }
 });
 
@@ -3017,7 +3248,6 @@ document.addEventListener('click', e => {
   if ((el = q('[data-task-link]'))) return openTask(el.dataset.taskLink);
   if ((el = q('[data-cell]'))) { Object.assign(ui, {who: el.dataset.cell, q: '', proj: '', prio: '', tag: '', overdue: false}); saveUi(); initFilters(); return setView('team'); }
   if ((el = q('[data-view]'))) return setView(el.dataset.view);
-  if ((el = q('[data-t]'))) return setTheme(el.dataset.t);
   if (q('#open-archive')) return openArchive();
   if ((el = q('.task')) && !q('dialog')) return coarse.matches ? openActions(el.dataset.id) : openTask(el.dataset.id);
 });
@@ -3026,7 +3256,7 @@ $('#new-person').onclick = () => openPerson(null);
 $('#store-btn').onclick = openStore;
 
 /* ---------- view & theme (per browser, not part of the data) ---------- */
-const VIEWS = ['team', 'board', 'tree', 'cab', 'load', 'log', 'report'];
+const VIEWS = ['team', 'board', 'tree', 'proj', 'tpl', 'cab', 'load', 'log', 'report'];
 let view = 'team';
 function setView(v){
   if (v === 'my') v = 'cab'; // saved by older versions
@@ -3040,12 +3270,7 @@ function setView(v){
   if (db) render();
 }
 const savePref = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
-function setTheme(t){
-  document.documentElement.dataset.theme = t;
-  document.querySelectorAll('[data-t]').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t));
-  try { localStorage.setItem(LS_THEME, t); } catch {}
-}
-const pref = k => { try { return localStorage.getItem(k); } catch { return null; } };
+const pref =k => { try { return localStorage.getItem(k); } catch { return null; } };
 
 // another tab of this page changed the browser copy
 addEventListener('storage', e => {
@@ -3108,13 +3333,14 @@ addEventListener('storage', e => {
 
 /* ---------- boot ---------- */
 (async function boot(){
-  setTheme(pref(LS_THEME) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  loadPrefs(); // manager's look first, so the page doesn't flash; again below once «Я» is known
   initFilters();
   db = loadLocal();
   if (!pref(LS_KEY)) saveLocal();
   const me = pref(LS_ME);
   meId = me && person(me) && !person(me).archived ? me : null;
-  setView(pref(LS_VIEW) || 'team'); // renders
+  loadPrefs();
+  setView(prefs.start === 'last' ? (pref(LS_VIEW) || 'team') : prefs.start); // renders
   dailySnapshot();
   if (!FS_OK) return;
   const h = await idbGet('handle');
