@@ -451,9 +451,13 @@ button.chip{font:inherit;font-size:13px;padding:4px 10px;gap:6px}
 @media (pointer:coarse){.nw-keys{display:none}}
 /* avatar in the header: the way into the personal cabinet; last on a wide screen, top-right on a phone */
 /* pinned to the header's top-right corner at any width; the header keeps room for it */
-header{position:relative;padding-right:52px}
+header{position:relative;padding-right:98px}
 .me-ava{position:absolute;top:2px;right:0;width:38px;height:38px;border-radius:50%;border:2px solid var(--line);padding:0;cursor:pointer;display:grid;place-items:center;font:600 13px var(--f-display)}
 .me-ava:hover{border-color:var(--accent)}
+.bell-btn{position:absolute;top:2px;right:46px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);padding:0;cursor:pointer;display:grid;place-items:center;background:var(--surface);color:var(--fg)}
+.bell-btn:hover{border-color:var(--accent)}
+.bell-btn .badge{position:absolute;top:-5px;right:-6px}
+.bell-btn .badge[hidden]{display:none}
 .me-ava[aria-current]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .p-name.linkish{font-weight:600;cursor:pointer}
 /* personal cabinet */
@@ -620,6 +624,7 @@ input.proj-name:focus{outline:none;border-color:var(--line);background:var(--sun
   body.nav-side header .spacer{flex:1}
   body.nav-side header .sel,body.nav-side header .btn{width:100%;text-align:left}
   body.nav-side .me-ava{top:14px;right:14px}
+  body.nav-side .bell-btn{position:relative;top:0;right:0;flex:none;align-self:flex-start}
   body.nav-side .toast{left:calc(50% + 118px)}
 }
 /* compact density */
@@ -736,7 +741,14 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .ch-note[hidden]{display:none}
 .ch-wrap{display:grid;grid-template-columns:280px minmax(0,1fr);height:max(440px,calc(100vh - 150px));border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
 #ch-note:not([hidden]) + .ch-wrap{height:max(400px,calc(100vh - 230px))}
-.ch-side{overflow-y:auto;border-right:1px solid var(--line);padding:6px}
+.ch-left{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--line)}
+.ch-left .ch-q{flex:none;width:auto;margin:8px 8px 2px}
+.ch-side{flex:1;min-height:0;overflow-y:auto;padding:6px}
+.ch-side mark{background:var(--accent-soft);color:inherit;border-radius:3px}
+.ch-side .ch-none{margin:16px auto}
+.ch-hits{margin:10px 10px 4px;font-size:12px;color:var(--muted)}
+.ch-off{display:inline-flex;vertical-align:-2px;margin-left:4px;color:var(--muted)}
+.ch-row .badge.quiet{background:var(--line);color:var(--fg)}
 .ch-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;width:100%;padding:8px 10px;border:0;border-radius:10px;background:none;color:var(--fg);text-align:left;cursor:pointer}
 .ch-row:hover{background:var(--sunken)}
 .ch-row[aria-current="true"]{background:var(--accent-soft)}
@@ -779,21 +791,72 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .ch-msgs{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:16px}
 .ch-day{align-self:center;margin:8px 0;font-size:12px;color:var(--muted)}
 .ch-m{display:flex;gap:8px;align-items:flex-end;max-width:min(72ch,85%)}
-.ch-m.mine{align-self:flex-end}
+.ch-m.mine{align-self:flex-end;flex-direction:row-reverse}
+.ch-m.flash .ch-bub{outline:2px solid var(--accent);outline-offset:1px}
+.ch-col{display:grid;gap:4px;min-width:0}
+.ch-m.mine .ch-col{justify-items:end}
+.ch-res{display:flex;flex-wrap:wrap;gap:4px}
+.ch-re{display:inline-flex;gap:4px;align-items:center;padding:1px 7px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);font-size:13px;cursor:pointer}
+.ch-re span{font:11px var(--f-mono)}
+.ch-re.on{border-color:var(--accent);background:var(--accent-soft)}
+.ch-add{flex:none;width:26px;height:26px;padding:0;border:0;border-radius:50%;background:none;color:var(--muted);font-size:15px;cursor:pointer;opacity:0}
+.ch-m:hover .ch-add,.ch-add:focus-visible{opacity:1}
+.ch-add:hover{background:var(--sunken)}
+@media (hover:none){.ch-add{opacity:.7}}
+.ch-img{display:block;width:min(260px,100%);margin:2px 0 4px;padding:0;border:0;border-radius:8px;overflow:hidden;background:var(--line);cursor:zoom-in}
+/* a fixed size: pictures load after the text and must not shift the scroll position */
+.ch-img img{display:block;width:100%;height:180px;object-fit:cover}
+.ch-file{display:flex;gap:8px;align-items:center;width:100%;margin:2px 0 4px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);font-size:13px;text-align:left;cursor:pointer}
+.ch-file:hover{border-color:var(--accent)}
+.ch-file small{display:block;color:var(--muted)}
+.ch-tick{margin-left:4px;color:var(--muted)}
+.ch-tick.read{color:var(--accent);font-weight:700}
+.ch-tool{flex:none;width:36px;height:36px;padding:0;border:1px solid transparent;border-radius:10px;background:none;color:var(--fg);font-size:17px;cursor:pointer;display:inline-grid;place-items:center}
+.ch-tool:hover{background:var(--sunken)}
+.ch-mute{margin-left:auto}
+.ch-mute[aria-pressed="true"]{color:var(--muted)}
+.ch-pend{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:6px}
+.ch-pend[hidden]{display:none}
+.ch-chip{display:inline-flex;gap:6px;align-items:center;max-width:240px;padding:3px 4px 3px 8px;border:1px solid var(--line);border-radius:8px;background:var(--sunken);font-size:12px}
+.ch-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-chip img{width:26px;height:26px;object-fit:cover;border-radius:4px}
+.ch-chip button{padding:0 4px;border:0;background:none;color:var(--muted);cursor:pointer}
+.ch-drop{outline:2px dashed var(--accent);outline-offset:-4px}
+.ch-emoji{position:fixed;z-index:30;display:grid;grid-template-columns:repeat(6,36px);gap:2px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:0 12px 32px rgba(0,0,0,.25)}
+.ch-emoji[hidden]{display:none}
+.ch-emoji button{width:36px;height:36px;padding:0;border:0;border-radius:8px;background:none;font-size:19px;cursor:pointer}
+.ch-emoji button:hover,.ch-emoji button:focus-visible{background:var(--sunken)}
+.ch-mute-opt{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px}
+#d-bell{margin:64px 16px auto auto;width:min(440px,calc(100vw - 24px));max-height:calc(100dvh - 88px)}
+#d-bell[open]{display:flex;flex-direction:column}
+.bl-list{display:grid;gap:2px;overflow-y:auto;padding:6px}
+.bl-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:start;width:100%;padding:9px 10px;border:0;border-radius:10px;background:none;color:var(--fg);text-align:left;cursor:pointer}
+.bl-row:hover{background:var(--sunken)}
+.bl-row.new{background:var(--accent-soft)}
+.bl-row > .ava{grid-row:1/3;width:32px;height:32px;font-size:11px}
+.bl-t{font-size:14px;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.bl-at{font:11px var(--f-mono);color:var(--muted);white-space:nowrap;padding-top:2px}
+.bl-s{grid-column:2/4;font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+#d-img{width:min(1000px,calc(100vw - 32px))}
+#d-img img{display:block;max-width:100%;max-height:calc(100dvh - 190px);margin:auto}
 .ch-bub{padding:7px 11px;border-radius:12px;background:var(--sunken);font-size:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
 .ch-m.mine .ch-bub{background:var(--accent-soft)}
 .ch-from{display:block;font-size:12px;font-weight:600;color:var(--muted)}
 .ch-at{display:block;margin-top:2px;font:11px var(--f-mono);color:var(--muted);text-align:right}
 .ch-none{margin:auto;max-width:42ch;text-align:center;font-size:13px;color:var(--muted)}
-.ch-form{display:flex;gap:8px;align-items:flex-end;padding:10px 12px;border-top:1px solid var(--line)}
-#chat-in{flex:1;min-width:0;max-height:140px;resize:none;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sunken);color:var(--fg);font:inherit;font-size:14px}
+.ch-form{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:flex-end;padding:10px 12px;border-top:1px solid var(--line)}
+#chat-in{flex:1 1 120px;min-width:0;max-height:140px;resize:none;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sunken);color:var(--fg);font:inherit;font-size:14px}
 @media (max-width:760px){
   .ch-wrap{grid-template-columns:minmax(0,1fr);height:max(420px,calc(100dvh - 190px))}
   #ch-note:not([hidden]) + .ch-wrap{height:max(360px,calc(100dvh - 300px))}
-  .ch-side{border-right:0}
-  .ch-wrap.open .ch-side,.ch-wrap:not(.open) .ch-main{display:none}
+  .ch-left{border-right:0}
+  .ch-wrap.open .ch-left,.ch-wrap:not(.open) .ch-main{display:none}
+  #d-bell{margin:56px auto auto}
   .ch-back{display:inline-flex}
   .ch-m{max-width:92%}
+  .ch-pend{order:-2}
+  #chat-in{order:-1;flex-basis:100%}
+  #ch-send{margin-left:auto}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -818,6 +881,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
     <button class="btn primary" id="new-task">+ Задача</button>
     <select class="sel" id="me-sel" aria-label="Кто работает" title="Кто сейчас работает в Планёрке"></select>
     <button class="btn store-btn" id="store-btn" title="Где хранятся данные"><span class="sdot" id="store-dot"></span><span id="store-label">Браузер</span></button>
+    <button type="button" class="bell-btn" id="bell-btn" aria-label="Уведомления" title="Уведомления"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2.2 2.2 0 0 0 4 0"/></svg><span class="badge" id="bell-badge" hidden></span></button>
     <button type="button" class="btn set-btn" id="set-btn" title="Настройки: внешний вид, меню, справка и команды" aria-label="Настройки">⚙<span class="set-lbl"> Настройки</span></button>
     <button type="button" class="me-ava" id="me-ava" aria-label="Личный кабинет" title="Личный кабинет"></button>
   </header>
@@ -941,13 +1005,19 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
   <main id="v-chat" hidden>
     <div class="ch-note" id="ch-note" hidden><span>Сообщения сейчас лежат только в этом браузере. Чтобы переписываться с разных компьютеров, подключите всем один JSON-файл в общей папке.</span><button type="button" class="btn small" id="ch-store">Подключить файл</button></div>
     <div class="ch-wrap" id="ch-wrap">
-      <nav class="ch-side" id="ch-side" aria-label="Диалоги"></nav>
+      <div class="ch-left">
+        <input type="search" class="ch-search ch-q" id="ch-q" placeholder="Поиск по сообщениям и людям" aria-label="Поиск в чате" autocomplete="off">
+        <nav class="ch-side" id="ch-side" aria-label="Диалоги"></nav>
+      </div>
       <section class="ch-main">
-        <div class="ch-head"><button type="button" class="btn small ch-back" id="ch-back" aria-label="К списку диалогов">‹</button><div id="ch-title"></div></div>
+        <div class="ch-head"><button type="button" class="btn small ch-back" id="ch-back" aria-label="К списку диалогов">‹</button><div id="ch-title"></div><button type="button" class="ch-tool ch-mute" id="ch-mute"></button></div>
         <div class="ch-msgs" id="ch-msgs" role="log" aria-live="polite" tabindex="0"></div>
         <form class="ch-form" id="ch-form" autocomplete="off">
+          <div class="ch-pend" id="ch-pend" hidden></div>
+          <button type="button" class="ch-tool" id="ch-attach" aria-label="Прикрепить файл или фото" title="Прикрепить файл или фото">📎</button><input type="file" id="ch-file" multiple hidden>
+          <button type="button" class="ch-tool" id="ch-emo" aria-label="Эмодзи" title="Эмодзи">🙂</button>
           <textarea id="chat-in" rows="1" maxlength="2000" aria-label="Сообщение" placeholder="Напишите сообщение"></textarea>
-          <button type="submit" class="btn primary">Отправить</button>
+          <button type="submit" class="btn primary" id="ch-send">Отправить</button>
         </form>
       </section>
     </div>
@@ -984,6 +1054,9 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <dialog id="d-close"></dialog>
 <dialog id="d-cabdone"></dialog>
 <dialog id="d-chatm"></dialog>
+<dialog id="d-bell"></dialog>
+<dialog id="d-img"></dialog>
+<div class="ch-emoji" id="ch-emoji" role="group" aria-label="Эмодзи" hidden></div>
 <dialog id="d-act" class="sheet"></dialog>
 <dialog id="d-help" aria-labelledby="help-h">
   <div class="d-head"><h2 id="help-h">Справка</h2>
@@ -1153,10 +1226,15 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <li><b>Состав.</b> Нажмите на название чата над перепиской: откроется список участников, из него можно перейти в профиль сотрудника. Там же «Изменить чат и состав»: новое название, добавить или убрать людей, выйти из чата.</li>
           <li><b>Аватар.</b> Нажатие на аватар сотрудника в переписке, в списке диалогов или над чатом открывает его профиль.</li>
           <li><b>Контекстное меню.</b> Правая кнопка мыши на диалоге: открыть, отметить прочитанным, участники, профиль, изменить чат, выйти. На сообщении: копировать текст, открыть задачу из текста, профиль автора, написать лично. На участнике в списке состава: профиль и личный диалог.</li>
+          <li><b>Файлы и фото.</b> Кнопка 📎, перетаскивание в переписку или вставка из буфера (Ctrl+V). До 10 файлов в сообщении, каждый до 5 МБ. Большие фото уменьшаются до 1920 пикселей. Нужна база данных или общий JSON-файл: в браузере для файлов нет места.</li>
+          <li><b>Эмодзи и реакции.</b> Кнопка 🙂 вставляет эмодзи в текст. Значок ☺ рядом с сообщением ставит реакцию, повторное нажатие на реакцию снимает её.</li>
+          <li><b>Прочитано.</b> В личных диалогах одна галочка значит «отправлено», две значат, что собеседник открыл диалог и увидел сообщение.</li>
+          <li><b>Поиск.</b> Поле над списком диалогов ищет по людям, чатам, тексту сообщений и именам файлов. Нажатие на результат открывает сообщение в переписке.</li>
           <li><b>Написать из профиля.</b> В кабинете сотрудника кнопка «Отправить сообщение» открывает личный диалог с ним.</li>
           <li><b>С разных компьютеров.</b> Сервера у Планёрки нет, поэтому сообщения передаются через общий JSON-файл: все подключают один файл из сетевой или облачной папки (Chrome, Edge). Планёрка проверяет его каждые 5 секунд. Без такого файла чат работает только внутри одного браузера.</li>
+          <li><b>Уведомления.</b> Колокольчик в шапке показывает назначенные вам задачи со временем назначения, комментарии к задачам, где вы исполнитель, новые сообщения и приглашения в чаты. Отключить уведомления конкретного чата можно значком колокольчика над перепиской, в меню диалога или в списке участников. Сообщения такого чата остаются в нём, но не попадают в колокольчик и в число на вкладке.</li>
           <li><b>Не секретно.</b> Входа по паролю нет: любой может выбрать чужое имя в «Я: …», а файл с данными могут прочитать все, у кого к нему есть доступ. Не пишите в чат пароли и личные данные.</li>
-          <li><b>Хранение.</b> Хранятся последние 2000 сообщений. Удаления и правки сообщений нет.</li>
+          <li><b>Хранение.</b> Хранятся последние 2000 сообщений. Удаления и правки сообщений нет. Файлы старых сообщений уходят вместе с ними.</li>
         </ul>
       </section>
 
@@ -1289,7 +1367,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 10;
+const SCHEMA = 11;
 const CHAT_MAX = 2000, CHAT_TEXT_MAX = 2000; // localStorage holds about 5 MB per site, so old messages drop off
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
@@ -1315,6 +1393,7 @@ const isoDay = d => d.toLocaleDateString('sv-SE'); // local YYYY-MM-DD
 const addDays = n => { const d = new Date(); d.setDate(d.getDate() + n); return isoDay(d); };
 const stamp = () => new Date().toISOString();
 const daysAgo = n => new Date(Date.now() - n * 864e5).toISOString();
+const pl = (n, f) => f[n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2];
 const fmtStamp = s => { const d = new Date(s); return isNaN(d) ? s : d.toLocaleString('ru-RU', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}); };
 const initials = n => n.trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
 const fmtSize = n => n < 1024 ? `${n} Б` : n < 1048576 ? `${Math.round(n / 1024)} КБ` : `${(n / 1048576).toLocaleString('ru-RU', {maximumFractionDigits: 1})} МБ`;
@@ -1340,6 +1419,7 @@ function normTask(t){
     due: /^\d{4}-\d{2}-\d{2}$/.test(t.due) ? t.due : '',
     est: Math.max(0, Number(t.est) || 0), tag: s(t.tag, 40),
     assignee: t.assignee ? s(t.assignee, 40) : null, seen: t.seen !== false,
+    assignedTo: (t.assignedTo === undefined ? t.assignee : t.assignedTo) ? s(t.assignedTo === undefined ? t.assignee : t.assignedTo, 40) : null, assignedAt: s(t.assignedAt, 40), assignedBy: s(t.assignedBy, 40),
     checklist: (Array.isArray(t.checklist) ? t.checklist : []).map(c => ({text: s(c?.text, 300), done: !!c?.done})).filter(c => c.text),
     log: (Array.isArray(t.log) ? t.log : []).map(l => ({at: s(l?.at, 40), text: s(l?.text, 300)})),
     comments: (Array.isArray(t.comments) ? t.comments : []).map(c => ({at: s(c?.at, 40), author: s(c?.author, 80), text: s(c?.text, 3000)})).filter(c => c.text),
@@ -1382,29 +1462,39 @@ function normTemplate(p){
     desc: s(p.desc, 5000), checklist: (Array.isArray(p.checklist) ? p.checklist : []).map(c => s(typeof c === 'string' ? c : c?.text, 300)).filter(Boolean)};
 }
 /* chat messages: to = 'all' or the other person's id; the manager is 'boss' */
-const normMsg = m => ({id: String(m?.id ?? '').slice(0, 40), from: String(m?.from ?? '').slice(0, 40), to: String(m?.to ?? '').slice(0, 40) || 'all', text: String(m?.text ?? '').slice(0, CHAT_TEXT_MAX), at: String(m?.at ?? '').slice(0, 40)});
-// messages are only ever added, so two copies of the chat merge by id without conflicts
+// key -> {at, v}: each person writes only their own keys, the later write wins, so two copies merge without conflicts
+const normMarks = o => Object.fromEntries(Object.entries(o && typeof o === 'object' ? o : {}).filter(([, x]) => typeof x?.at === 'string').map(([k, x]) => [k.slice(0, 120), {at: x.at.slice(0, 40), v: typeof x.v === 'boolean' ? x.v : String(x.v ?? '').slice(0, 40)}]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
+function mergeMarks(a, b){
+  const out = {...a}, rank = x => x.at + JSON.stringify(x.v); // the same winner on every computer
+  for (const [k, x] of Object.entries(b || {})) if (!out[k] || rank(x) > rank(out[k])) out[k] = x;
+  return normMarks(out);
+}
+const normMsg = m => ({id: String(m?.id ?? '').slice(0, 40), from: String(m?.from ?? '').slice(0, 40), to: String(m?.to ?? '').slice(0, 40) || 'all', text: String(m?.text ?? '').slice(0, CHAT_TEXT_MAX), at: String(m?.at ?? '').slice(0, 40),
+  files: (Array.isArray(m?.files) ? m.files : []).map(f => ({id: String(f?.id ?? '').slice(0, 40), name: String(f?.name ?? '').slice(0, 200), type: String(f?.type ?? '').slice(0, 100), size: Number(f?.size) || 0})).filter(f => f.id), reacts: normMarks(m?.reacts)});
+// messages are only ever added and reactions merge per person, so two copies of the chat merge by id without conflicts
 function mergeChat(a, b){
-  const byId = new Map([...a, ...b].map(m => [m.id, m]));
-  return [...byId.values()].sort((x, y) => x.at.localeCompare(y.at)).slice(-CHAT_MAX);
+  const byId = new Map();
+  for (const m of [...a, ...b]){ const o = byId.get(m.id); byId.set(m.id, o ? {...m, reacts: mergeMarks(o.reacts, m.reacts)} : m); }
+  return [...byId.values()].sort((x, y) => x.at.localeCompare(y.at) || x.id.localeCompare(y.id)).slice(-CHAT_MAX);
 }
 /* group chats: messages go to = room id; members hold person ids and 'boss' */
-const normRoom = r => ({id: String(r?.id ?? '').slice(0, 40), name: String(r?.name ?? '').trim().slice(0, 80), members: [...new Set(Array.isArray(r?.members) ? r.members.map(String) : [])], at: String(r?.at ?? '').slice(0, 40)});
+const normRoom = r => ({id: String(r?.id ?? '').slice(0, 40), name: String(r?.name ?? '').trim().slice(0, 80), members: [...new Set(Array.isArray(r?.members) ? r.members.map(String) : [])], at: String(r?.at ?? '').slice(0, 40),
+  added: Object.fromEntries(Object.entries(r?.added && typeof r.added === 'object' ? r.added : {}).filter(([, a]) => typeof a?.at === 'string').map(([k, a]) => [k, {at: a.at.slice(0, 40), by: String(a.by ?? '').slice(0, 40)}]))});
 // shortcut: of two simultaneous edits of a room the later one wins; merge the member lists if people start losing edits
 function mergeRooms(a, b){
   const byId = new Map(), rank = r => r.at + JSON.stringify(r); // the same winner on every computer
   for (const r of [...a, ...b]) if (!byId.has(r.id) || rank(r) > rank(byId.get(r.id))) byId.set(r.id, r);
   return [...byId.values()].sort((x, y) => x.id.localeCompare(y.id));
 }
-const chatOf = (a, b) => ({chat: mergeChat(a.chat, b.chat), rooms: mergeRooms(a.rooms, b.rooms)});
+const chatOf = (a, b) => ({chat: mergeChat(a.chat, b.chat), rooms: mergeRooms(a.rooms, b.rooms), marks: mergeMarks(a.marks, b.marks)});
 // everything except the chat, in a form that doesn't depend on who wrote it
-const workKey = d => JSON.stringify({...migrate(d), savedAt: 0, blobs: 0, chat: 0, rooms: 0, revs: 0});
+const workKey = d => JSON.stringify({...migrate(d), savedAt: 0, blobs: 0, chat: 0, rooms: 0, marks: 0, revs: 0});
 
 /* shared file: my copy and the file are compared with the version both started from, so only real clashes reach the user */
 const REVS_MAX = 20;
 const eqJ = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 // fields that change together are merged as one
-const MERGE_GROUPS = {tasks: [['status', 'doneAt', 'startedAt'], ['stages', 'assignee', 'est']]};
+const MERGE_GROUPS = {tasks: [['status', 'doneAt', 'startedAt'], ['stages', 'assignee', 'est', 'assignedTo', 'assignedAt', 'assignedBy']]};
 const MERGE_SILENT = new Set(['order', 'seen']); // nobody needs to be asked about card order
 const MERGE_LISTS = {tasks: {log: JSON.stringify, comments: JSON.stringify, links: x => x.url, files: x => x.id, checklist: x => x.text}};
 // a list where each side added or removed its own items; null when both changed one item differently
@@ -1506,16 +1596,18 @@ function migrate(raw){
   const templates = (Array.isArray(raw.templates) ? raw.templates : []).filter(p => p && typeof p === 'object').map(normTemplate);
   templates.forEach(p => { if (p.project && !prids.has(p.project)) p.project = null; });
   const events = (Array.isArray(raw.events) ? raw.events : []).slice(-500).map(e => ({at: String(e?.at ?? '').slice(0, 40), text: String(e?.text ?? '').slice(0, 300)}));
+  // v10 -> v11: when a task was assigned, for the notifications
+  if (v < 11) tasks.forEach(t => { if (t.assignee) t.assignedAt = t.log.findLast(l => l.text.includes('назначил:'))?.at || t.createdAt; });
+  // v7 -> v8: chat
+  const chat = mergeChat((Array.isArray(raw.chat) ? raw.chat : []).map(normMsg).filter(m => m.id && (m.text || m.files.length)), []);
   // v3 -> v4: links/files on tasks, file contents in blobs; blobs nobody refers to are dropped
-  const used = new Set(tasks.flatMap(t => t.files.map(f => f.id)));
+  const used = new Set([...tasks.flatMap(t => t.files.map(f => f.id)), ...chat.flatMap(m => m.files.map(f => f.id))]);
   const blobs = {};
   for (const [id, b] of Object.entries(raw.blobs && typeof raw.blobs === 'object' ? raw.blobs : {}))
     if (used.has(id) && typeof b?.data === 'string' && b.data.startsWith('data:')) blobs[id] = {data: b.data};
-  // v7 -> v8: chat
-  const chat = mergeChat((Array.isArray(raw.chat) ? raw.chat : []).map(normMsg).filter(m => m.id && m.text), []);
   // v8 -> v9: group chats; people who no longer exist leave them
   const rooms = mergeRooms((Array.isArray(raw.rooms) ? raw.rooms : []).map(normRoom).filter(r => r.id && r.name).map(r => ({...r, members: r.members.filter(m => m === 'boss' || pids.has(m))})), []);
-  return {version: SCHEMA, nextId, people, tasks, projects, templates, events, chat, rooms, blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null, revs: (Array.isArray(raw.revs) ? raw.revs : []).map(String).slice(-REVS_MAX)};
+  return {version: SCHEMA, nextId, people, tasks, projects, templates, events, chat, rooms, marks: normMarks(raw.marks), blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null, revs: (Array.isArray(raw.revs) ? raw.revs : []).map(String).slice(-REVS_MAX)};
 }
 
 function demo(){
@@ -1562,6 +1654,7 @@ function demo(){
 const FS_OK = 'showSaveFilePicker' in window;
 const file = {handle: null, name: '', mtime: 0, work: null, rev: '', history: new Map(), behind: false, needsPermission: false, error: ''}; // work = workKey of what the file held at the last read or write; history = the same for recent revs
 const canAttach = () => !!file.handle && !file.needsPermission;
+const fileData = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(f); });
 let db, saveTimer, writing = Promise.resolve();
 
 function idb(mode, fn){
@@ -1581,7 +1674,7 @@ function saveLocal(){
   try { localStorage.setItem(LS_KEY, JSON.stringify({...db, blobs: {}})); return true; }
   catch { toast('Браузер не дал сохранить данные: место закончилось или хранилище заблокировано. Сохраните экспорт в файл.'); return false; }
 }
-const sameData = (a, b) => JSON.stringify({...a, savedAt: 0, blobs: 0, revs: 0}) === JSON.stringify({...b, savedAt: 0, blobs: 0, revs: 0});
+const sameData = (a, b) => JSON.stringify({...a, savedAt: 0, blobs: 0, marks: 0, revs: 0}) === JSON.stringify({...b, savedAt: 0, blobs: 0, marks: 0, revs: 0});
 
 /* backups: the last SNAP_MAX copies in IndexedDB (much more room than localStorage) */
 const SNAP_MAX = 15;
@@ -1611,6 +1704,8 @@ function loadLocal(){
 
 // every change goes through here
 function commit(){
+  // every way of assigning a task ends here, so the notification time can't be forgotten
+  for (const t of db.tasks) if (t.assignee !== t.assignedTo || (t.assignee && !t.assignedAt)){ t.assignedTo = t.assignee; t.assignedAt = stamp(); t.assignedBy = chatMe(); }
   db.savedAt = stamp();
   saveLocal();
   if (file.handle && !file.needsPermission){ clearTimeout(saveTimer); saveTimer = setTimeout(() => writeFile(), 400); }
@@ -1650,7 +1745,7 @@ const typingElsewhere = () => document.querySelector('dialog[open]') || (/^(INPU
 // false = not merged yet: the user is busy or has to choose
 async function pullFile(f){
   if (f.lastModified === file.mtime) return true;
-  const data = await parseFile(f), k = workKey(data), base = baseFor(data), lost = (a, b) => a.chat.length > b.chat.length || !eqJ(a.rooms, b.rooms);
+  const data = await parseFile(f), k = workKey(data), base = baseFor(data), lost = (a, b) => !eqJ(a.chat, b.chat) || !eqJ(a.rooms, b.rooms) || !eqJ(a.marks, b.marks);
   Object.assign(db, chatOf(db, data)); db.blobs = {...data.blobs, ...db.blobs}; saveLocal(); renderChatBits();
   if (k !== base && k !== workKey(db)){
     if (typingElsewhere()) return false;
@@ -1703,6 +1798,7 @@ const serverHandle = {
   async load(){
     const {data} = await api('load'), d = JSON.parse(data);
     d.blobs = {};
+    for (const m of d.chat || []) for (const {id} of m.files || []) this.known.add(id); // chat files load when their message is on screen
     for (const t of d.tasks) for (const {id} of t.files || []){
       this.known.add(id);
       if (!db.blobs[id]) await api('blob&id=' + encodeURIComponent(id)).then(b => { d.blobs[id] = b; }).catch(() => {});
@@ -1914,7 +2010,7 @@ function askClashes(r, data, k, mtime){
 let pending = null;
 function conflict(data, mtime, reason){
   pending = {data, mtime};
-  Object.assign(data, chatOf(db, data)); db.chat = data.chat; db.rooms = data.rooms; // messages survive whichever version wins
+  Object.assign(data, chatOf(db, data)); db.chat = data.chat; db.rooms = data.rooms; db.marks = data.marks; // messages survive whichever version wins
   const d = $('#d-conflict');
   d.innerHTML = `<div class="d-head"><h2>Данные ${onServer() ? 'на сервере' : 'в файле'} и в браузере различаются</h2></div>
     <div class="d-body"><p class="note">${esc(reason)}</p>
@@ -1982,7 +2078,7 @@ function change(fn, msg, action){
   commit();
   if (typeof msg === 'function') msg = msg();
   if (typeof action === 'function') action = action();
-  if (msg) toast(msg, () => { db = {...JSON.parse(before), chat: db.chat, rooms: db.rooms}; commit(); }, action || undefined);
+  if (msg) toast(msg, () => { db = {...JSON.parse(before), chat: db.chat, rooms: db.rooms, marks: db.marks}; commit(); }, action || undefined);
 }
 const addEvent = text => { db.events.push({at: stamp(), text}); if (db.events.length > 500) db.events.splice(0, db.events.length - 500); };
 
@@ -2057,7 +2153,7 @@ function applyStatus(t, s, who){
   const today = addDays(0);
   let due = addInterval(t.repeat.from === 'done' || !t.due ? today : t.due, t.repeat);
   while (due < today) due = addInterval(due, t.repeat); // closed late: jump to the next future date
-  const n = normTask({...structuredClone(t), status: 'new', due, comments: [], seen: !t.assignee, startedAt: '',
+  const n = normTask({...structuredClone(t), status: 'new', due, comments: [], seen: !t.assignee, startedAt: '', assignedAt: '',
     stages: t.stages.map(s => ({...s, done: false, doneAt: ''})), assignee: t.stages.length ? t.stages[0].assignee : t.assignee,
     checklist: t.checklist.map(c => ({text: c.text, done: false})), createdAt: stamp(), log: [{at: stamp(), text: `Создана повтором после ${t.id}`}]});
   n.id = 'PLN-' + db.nextId++; n.order = t.order + 0.5;
@@ -2134,7 +2230,7 @@ function deleteTask(id){
     `${id} удалена${up ? `, подзадачи (${up}) подняты на уровень выше` : ''}`);
 }
 function addNewTask(t){
-  t.id = 'PLN-' + db.nextId++; t.createdAt = stamp(); t.seen = !t.assignee;
+  t.id = 'PLN-' + db.nextId++; t.createdAt = stamp(); t.seen = !t.assignee; t.assignedAt = '';
   // a subtask goes to the end of its siblings, a new top-level task to the top of the board
   t.order = t.parent ? Math.max(0, ...kids(t.parent).map(x => x.order)) + 1 : Math.min(0, ...db.tasks.map(x => x.order)) - 1;
   if (t.parent && byId(t.parent)) t.project = rootTask(byId(t.parent)).project;
@@ -3173,7 +3269,7 @@ function openTask(id, opts = {}){
   q('#tw-file')?.addEventListener('change', async e => {
     const big = [...e.target.files].filter(f => f.size > FILE_MAX).map(f => f.name);
     for (const f of [...e.target.files].filter(f => f.size <= FILE_MAX)){
-      const data = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(f); });
+      const data = await fileData(f);
       const meta = {id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: f.name.slice(0, 200), type: f.type.slice(0, 100), size: f.size, at: stamp()};
       db.blobs[meta.id] = {data};
       save(x => x.files.push(meta), `${author} прикрепил файл ${meta.name}`);
@@ -3191,7 +3287,6 @@ function openTask(id, opts = {}){
   const drawFeed = () => {
     const t = live(), onlyC = ui.twFeed === 'comments';
     d.querySelectorAll('[data-feed]').forEach(b => b.setAttribute('aria-pressed', b.dataset.feed === (onlyC ? 'comments' : 'all')));
-    const pl = (n, f) => f[n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2];
     q('#tw-cnt-talk').textContent = `${t.comments.length} ${pl(t.comments.length, ['комментарий', 'комментария', 'комментариев'])} · ${t.log.length} ${pl(t.log.length, ['событие', 'события', 'событий'])}`;
     const items = [...t.comments.map(c => ({at: c.at, c})), ...(onlyC ? [] : t.log.map(l => ({at: l.at, l})))].sort((a, b) => a.at.localeCompare(b.at));
     const shown = feedAll ? items : items.slice(-25);
@@ -3772,6 +3867,7 @@ const COMMANDS = [
   ['Вид: Проекты', '7', () => setView('proj')],
   ['Вид: Шаблоны', '8', () => setView('tpl')],
   ['Вид: Чат', '9', () => setView('chat')],
+  ['Уведомления', '', openBell],
   ['Новый шаблон', '', () => openTplEditor(null)],
   ['Настройки', '', openSettings],
   ['Меню сбоку / сверху', '', () => { prefs.nav = prefs.nav === 'side' ? 'top' : 'side'; savePrefs(); applyPrefs(); }],
@@ -3933,7 +4029,7 @@ $('#new-person').onclick = () => openPerson(null);
 $('#store-btn').onclick = openStore;
 
 /* ---------- chat ---------- */
-let chatWith = 'all', chatOpen = false;
+let chatWith = 'all', chatOpen = false, chatHtml = '';
 const chatDrafts = {};
 const chatMe = () => meId || 'boss';
 const chatDraftKey = () => chatMe() + ':' + chatWith;
@@ -3943,8 +4039,26 @@ const chatPeer = m => { const r = chatRoom(m.to); return m.to === 'all' ? 'all' 
 const chatName = id => id === 'all' ? 'Общий чат' : chatRoom(id)?.name || (id === 'boss' ? ME : person(id)?.name || 'Бывший сотрудник');
 const chatAva = id => id === 'all' ? '<span class="ava ch-all" aria-hidden="true">#</span>' : chatRoom(id) ? `<span class="ava ch-all" aria-hidden="true">${esc(initials(chatRoom(id).name))}</span>` : person(id) ? ava(person(id)) : `<span class="ava ch-all" aria-hidden="true">${id === 'boss' ? 'Р' : '?'}</span>`;
 const chatReadKey = () => 'planerka.chatread.' + chatMe();
-// reading marks are per person and per browser: reading must not write to the shared file
-function chatRead(){ try { return JSON.parse(pref(chatReadKey())) || {}; } catch { return {}; } }
+// group chats keep reading marks per person and per browser, so reading there doesn't write to the shared data; private dialogs also share theirs (see shareRead)
+function chatRead(){
+  let read; try { read = JSON.parse(pref(chatReadKey())) || {}; } catch { read = {}; }
+  const p = `read|${chatMe()}|`;
+  for (const k in db.marks) if (k.startsWith(p) && db.marks[k].v > (read[k.slice(p.length)] || '')) read[k.slice(p.length)] = db.marks[k].v;
+  return read;
+}
+const setMark = (k, v, at = stamp()) => { db.marks = mergeMarks(db.marks, {[k]: {at, v}}); };
+// only private dialogs show «прочитано», so only they write to the shared data; the mark holds the sender's own time, so a wrong clock on the reader's computer can't fake it
+function shareRead(c){
+  if (c === 'all' || chatRoom(c)) return;
+  const me = chatMe(), m = db.chat.findLast(x => chatPeer(x) === c && x.from !== me), k = `read|${me}|${c}`;
+  if (m && !(db.marks[k]?.v >= m.at)){ setMark(k, m.at, m.at); setTimeout(commit); } // not now: this runs inside render
+}
+const chatMuted = c => db.marks[`mute|${chatMe()}|${c}`]?.v === true;
+function toggleMute(c){
+  setMark(`mute|${chatMe()}|${c}`, !chatMuted(c));
+  commit();
+  toast(chatMuted(c) ? `Уведомления из чата «${chatName(c)}» выключены` : `Уведомления из чата «${chatName(c)}» включены`);
+}
 // shortcut: compares message times, so a computer with a clock far behind can miss the mark; store message ids if that shows up
 const chatUnread = (peer, read) => db.chat.filter(m => m.from !== chatMe() && chatPeer(m) === peer && m.at > (read[peer] || '')).length;
 const chatLast = peer => db.chat.findLast(m => chatPeer(m) === peer);
@@ -3952,15 +4066,51 @@ const chatNarrow = () => matchMedia('(max-width:760px)').matches;
 function renderChatBits(toBottom = false){
   const read = chatRead(), last = chatLast(chatWith);
   // the open dialog counts as read only while it is really on screen
-  if (view === 'chat' && (chatOpen || !chatNarrow()) && !document.hidden && last && last.at > (read[chatWith] || '')){
-    read[chatWith] = last.at; savePref(chatReadKey(), JSON.stringify(read));
+  if (view === 'chat' && (chatOpen || !chatNarrow()) && !document.hidden){
+    if (last && last.at > (read[chatWith] || '')){ read[chatWith] = last.at; savePref(chatReadKey(), JSON.stringify(read)); }
+    shareRead(chatWith);
   }
-  const n = [...new Set(db.chat.map(chatPeer))].filter(Boolean).reduce((a, c) => a + chatUnread(c, read), 0), b = $('#chat-badge');
+  const n = [...new Set(db.chat.map(chatPeer))].filter(c => c && !chatMuted(c)).reduce((a, c) => a + chatUnread(c, read), 0), b = $('#chat-badge');
   b.hidden = !n; b.textContent = n;
+  renderBell(read);
   if (view === 'chat') renderChat(read, toBottom);
 }
 const chatText = t => esc(t).replace(/\bPLN-\d+\b/g, id => db.tasks.some(x => x.id === id) ? `<button type="button" class="link" data-task-link="${id}">${id}</button>` : id);
 const chatTime = d => d.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+const chatNorm = t => t.toLowerCase().replace(/ё/g, 'е');
+const chatIsImg = f => /^image\/(png|jpeg|gif|webp)$/.test(f.type);
+const chatPreview = m => m.text.slice(0, 80) || (m.files[0] ? '📎 ' + m.files[0].name : '');
+const bellIcon = (off, size = 18) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2.2 2.2 0 0 0 4 0"/>${off ? '<path d="M3 3l18 18"/>' : ''}</svg>`;
+// the server sends a chat file only when its message is on screen
+const blobWait = new Map();
+function chatBlob(id){
+  if (db.blobs[id]) return Promise.resolve(db.blobs[id]);
+  if (!onServer()) return Promise.resolve(null);
+  if (!blobWait.has(id)) blobWait.set(id, api('blob&id=' + encodeURIComponent(id)).then(b => { db.blobs[id] = b; serverHandle.known.add(id); return b; }, () => null).finally(() => blobWait.delete(id)));
+  return blobWait.get(id);
+}
+const chatFilesHtml = m => m.files.map((f, i) => chatIsImg(f)
+  ? `<button type="button" class="ch-img" data-ch-file="${i}" aria-label="Открыть: ${esc(f.name)}"><img ${db.blobs[f.id] ? `src="${esc(db.blobs[f.id].data)}"` : `data-blob="${esc(f.id)}"`} alt="${esc(f.name)}"></button>`
+  : `<button type="button" class="ch-file" data-ch-file="${i}" title="Скачать"><span aria-hidden="true">📄</span><span>${esc(f.name)}<small>${fmtSize(f.size)}</small></span></button>`).join('');
+function chatReactsHtml(m){
+  const by = {}, me = chatMe();
+  for (const [k, x] of Object.entries(m.reacts)) if (x.v){ const i = k.lastIndexOf('|'); (by[k.slice(0, i)] ||= []).push(k.slice(i + 1)); }
+  const html = Object.entries(by).map(([e, who]) => `<button type="button" class="ch-re${who.includes(me) ? ' on' : ''}" data-re="${esc(e)}" aria-pressed="${who.includes(me)}" title="${esc(who.map(chatName).join(', '))}">${esc(e)}<span>${who.length}</span></button>`).join('');
+  return html ? `<div class="ch-res">${html}</div>` : '';
+}
+function chatSearchHtml(q, peers, row){
+  const hits = [];
+  for (let i = db.chat.length - 1; i >= 0 && hits.length < 50; i--){
+    const m = db.chat[i], c = chatPeer(m); if (!c) continue;
+    const hay = [m.text, ...m.files.map(f => f.name)].filter(Boolean).join(' · '), at = chatNorm(hay).indexOf(q);
+    if (at >= 0) hits.push({m, c, hay, at});
+  }
+  hits.sort((a, b) => (b.c === chatWith) - (a.c === chatWith)); // the open chat first, newest first within each
+  const names = peers.filter(c => chatNorm(chatName(c)).includes(q)).map(row).join('');
+  const found = hits.map(({m, c, hay, at}) => `<button type="button" class="ch-row" data-jump="${esc(m.id)}">${chatAva(c)}<span class="ch-who">${esc(chatName(c))}</span><span class="ch-time">${fmtDay(isoDay(new Date(m.at)))}</span>
+    <span class="ch-prev">${at > 24 ? '…' : ''}${esc(hay.slice(Math.max(0, at - 24), at))}<mark>${esc(hay.slice(at, at + q.length))}</mark>${esc(hay.slice(at + q.length, at + q.length + 60))}</span></button>`).join('');
+  return names + (found ? `<p class="ch-hits">Сообщения: ${hits.length}${hits.length === 50 ? ' (показаны последние)' : ''}</p>${found}` : '') || '<p class="ch-none">Ничего не нашлось.</p>';
+}
 function renderChat(read, toBottom){
   const me = chatMe();
   if (chatWith === me || (chatRoom(chatWith) && !inRoom(chatRoom(chatWith)))) chatWith = 'all';
@@ -3974,22 +4124,32 @@ function renderChat(read, toBottom){
   // a span, not a button: the whole row is a button already; the context menu offers the same action from the keyboard
   const rowAva = c => person(c) ? `<span class="ch-ava-link" data-cab="${esc(c)}" title="Открыть профиль">${chatAva(c)}</span>` : chatAva(c);
   const msgAva = id => person(id) ? `<button type="button" class="ch-ava-btn" data-cab="${esc(id)}" title="Открыть профиль" aria-label="Профиль: ${esc(chatName(id))}">${chatAva(id)}</button>` : chatAva(id);
-  $('#ch-side').innerHTML = '<button type="button" class="btn small ch-new" data-room-new>+ Новый чат</button>' + ['all', ...peers].map(c => {
-    const m = last[c], u = chatUnread(c, read), d = m && new Date(m.at);
+  const row = c => {
+    const m = last[c], u = chatUnread(c, read), d = m && new Date(m.at), off = chatMuted(c);
     return `<button type="button" class="ch-row" data-chat="${esc(c)}" aria-current="${c === chatWith}">${rowAva(c)}
-      <span class="ch-who">${esc(chatName(c))}</span><span class="ch-time">${!m ? '' : isoDay(d) === addDays(0) ? chatTime(d) : fmtDay(isoDay(d))}</span>
-      <span class="ch-prev">${m ? `${m.from === me ? 'Вы: ' : c === 'all' || chatRoom(c) ? esc(chatName(m.from).split(' ')[0]) + ': ' : ''}${esc(m.text.slice(0, 80))}` : 'Нет сообщений'}</span>${u ? `<span class="badge">${u}</span>` : ''}</button>`;
-  }).join('');
+      <span class="ch-who">${esc(chatName(c))}${off ? `<span class="ch-off" title="Уведомления выключены">${bellIcon(true, 13)}</span>` : ''}</span><span class="ch-time">${!m ? '' : isoDay(d) === addDays(0) ? chatTime(d) : fmtDay(isoDay(d))}</span>
+      <span class="ch-prev">${m ? `${m.from === me ? 'Вы: ' : c === 'all' || chatRoom(c) ? esc(chatName(m.from).split(' ')[0]) + ': ' : ''}${esc(chatPreview(m))}` : 'Нет сообщений'}</span>${u ? `<span class="badge${off ? ' quiet' : ''}">${u}</span>` : ''}</button>`;
+  };
+  const q = chatNorm($('#ch-q').value.trim());
+  $('#ch-side').innerHTML = q ? chatSearchHtml(q, ['all', ...peers], row) : '<button type="button" class="btn small ch-new" data-room-new>+ Новый чат</button>' + ['all', ...peers].map(row).join('');
+  const mb = $('#ch-mute'), off = chatMuted(chatWith);
+  mb.innerHTML = bellIcon(off); mb.setAttribute('aria-pressed', off); mb.title = off ? 'Уведомления из этого чата выключены. Включить' : 'Уведомления из этого чата включены. Выключить'; mb.setAttribute('aria-label', mb.title);
   $('#ch-title').innerHTML = group ? `<button type="button" class="ch-members" data-members aria-label="Участники: ${esc(chatName(chatWith))}">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">Участников: ${chatMembers(chatWith).length}</span></span></button>`
     : person(chatWith) ? `<button type="button" class="ch-members" data-cab="${esc(chatWith)}" aria-label="Профиль: ${esc(chatName(chatWith))}">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">${esc(person(chatWith).role || 'Открыть профиль')}</span></span></button>`
     : `<div class="ch-members">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">${chatWith === 'boss' ? '' : 'Нет в команде'}</span></span></div>`;
   const box = $('#ch-msgs'), bottom = toBottom || box.scrollHeight - box.scrollTop - box.clientHeight < 60, top = box.scrollTop;
   let day = '';
-  box.innerHTML = db.chat.filter(m => chatPeer(m) === chatWith).map(m => {
+  const readUpTo = group ? '' : db.marks[`read|${chatWith}|${me}`]?.v || '';
+  const html = db.chat.filter(m => chatPeer(m) === chatWith).map(m => {
     const d = new Date(m.at), dk = isoDay(d), plain = m.from === me || !group; // the name is only needed where several people write
     const head = dk !== day ? `<div class="ch-day">${(day = dk, d.toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'}))}</div>` : '';
-    return `${head}<div class="ch-m${m.from === me ? ' mine' : ''}" data-mid="${esc(m.id)}">${plain ? '' : msgAva(m.from)}<div class="ch-bub">${plain ? '' : `<span class="ch-from">${esc(chatName(m.from))}</span>`}${chatText(m.text)}<time class="ch-at">${chatTime(d)}</time></div></div>`;
+    return `${head}<div class="ch-m${m.from === me ? ' mine' : ''}" data-mid="${esc(m.id)}">${plain ? '' : msgAva(m.from)}<div class="ch-col"><div class="ch-bub">${plain ? '' : `<span class="ch-from">${esc(chatName(m.from))}</span>`}${chatFilesHtml(m)}${chatText(m.text)}<time class="ch-at">${chatTime(d)}${!group && m.from === me ? (m.at <= readUpTo ? '<span class="ch-tick read" title="Прочитано" aria-label="Прочитано">✓✓</span>' : '<span class="ch-tick" title="Отправлено, ещё не прочитано" aria-label="Не прочитано">✓</span>') : ''}</time></div>${chatReactsHtml(m)}</div><button type="button" class="ch-add" data-re-add aria-label="Поставить реакцию" title="Поставить реакцию">☺</button></div>`;
   }).join('') || `<p class="ch-none">${chatWith === 'all' ? 'Здесь пишут всей командой. Номер задачи вроде PLN-101 становится ссылкой.' : room ? 'Сообщений пока нет. Этот чат показывается только участникам, но входа по паролю в Планёрке нет, поэтому переписка не секретна.' : 'Сообщений пока нет. Входа по паролю в Планёрке нет, поэтому личная переписка не секретна: её может открыть любой, у кого есть доступ к данным.'}</p>`;
+  // an unchanged list is left alone: a new poll must not drop the selection or make pictures blink
+  if (html !== chatHtml){
+    box.innerHTML = chatHtml = html;
+    box.querySelectorAll('img[data-blob]').forEach(img => chatBlob(img.dataset.blob).then(b => { if (b) img.src = b.data; }));
+  }
   box.scrollTop = bottom ? box.scrollHeight : top;
 }
 const chatMembers = id => chatRoom(id)?.members || ['boss', ...active().map(p => p.id)];
@@ -3999,12 +4159,13 @@ function openMembers(id = chatWith){
     <div class="d-body"><div class="ch-list">${chatMembers(id).map(m => {
       const p = person(m), inner = `${chatAva(m)}<span class="ch-who">${esc(chatName(m))}${m === chatMe() ? ' (вы)' : ''}</span><span class="ch-prev">${esc(p ? p.role || 'Открыть профиль' : '')}</span>`;
       return p ? `<button type="button" class="ch-row" data-cab="${esc(m)}">${inner}</button>` : `<div class="ch-row ch-row-static">${inner}</div>`;
-    }).join('')}</div></div>
+    }).join('')}</div><label class="ch-mute-opt"><input type="checkbox" id="chm-mute" ${chatMuted(id) ? '' : 'checked'}> Уведомления из этого чата</label></div>
     ${room ? '<div class="d-foot"><span class="spacer"></span><button type="button" class="btn" id="chm-edit">Изменить чат и состав</button></div>' : ''}`;
   d.onclick = e => {
     if (e.target.closest('[data-cab]')) d.close(); // the page-wide handler opens the profile
     if (e.target.closest('#chm-edit')){ d.close(); openRoomEditor(id); }
   };
+  d.onchange = e => { if (e.target.id === 'chm-mute') toggleMute(id); };
   d.oncontextmenu = e => {
     const row = e.target.closest('[data-cab]'); if (!row) return;
     e.preventDefault();
@@ -4021,8 +4182,8 @@ function openRoomEditor(id){
   // you first, then those already in the chat, then by name
   const rank = m => m === me ? 0 : picked(m) ? 1 : 2;
   const everyone = [...new Set(['boss', ...active().map(p => p.id), ...(room?.members || [])])].sort((a, b) => rank(a) - rank(b) || chatName(a).localeCompare(chatName(b), 'ru'));
-  const norm = t => t.toLowerCase().replace(/ё/g, 'е');
-  d.onclick = d.oncontextmenu = null;
+  const norm = chatNorm;
+  d.onclick = d.oncontextmenu = d.onchange = null;
   d.innerHTML = `<form id="rm-form" novalidate>
     <div class="d-head"><h2>${room ? 'Чат и участники' : 'Новый чат'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
     <div class="d-body">
@@ -4058,7 +4219,9 @@ function openRoomEditor(id){
     d.querySelector('#rm-name-err').hidden = !!name;
     d.querySelector('#rm-mem-err').hidden = members.length > 1;
     if (!name || members.length < 2) return;
-    const next = normRoom({id: room?.id || 'room-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, members, at: stamp()});
+    // who added whom and when: the invitation in the notifications
+    const added = Object.fromEntries(members.map(m => [m, room?.members.includes(m) ? room.added[m] : {at: stamp(), by: me}]).filter(([m, a]) => a && m !== me));
+    const next = normRoom({id: room?.id || 'room-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, members, at: stamp(), added});
     db.rooms = mergeRooms(db.rooms, [next]);
     d.close();
     commit();
@@ -4071,17 +4234,160 @@ function openChat(peer){
   chatDrafts[chatDraftKey()] = $('#chat-in').value;
   chatWith = peer; chatOpen = true;
   $('#chat-in').value = chatDrafts[chatDraftKey()] || '';
+  renderPend();
   renderChatBits(true);
   $('#chat-in').focus();
 }
-function sendChat(){
-  const inp = $('#chat-in'), text = inp.value.trim();
-  if (!text) return;
-  db.chat = mergeChat(db.chat, [normMsg({id: 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), from: chatMe(), to: chatWith, text, at: stamp()})]);
-  inp.value = ''; inp.style.height = ''; chatDrafts[chatDraftKey()] = '';
+/* files wait here until the message is sent; one draft per chat, like the text */
+const chatPend = {}, CHAT_FILES_MAX = 10, CHAT_NO_FILES = 'Файлы можно отправлять при работе с базой данных или общим JSON-файлом: в браузере для них нет места.';
+function renderPend(){
+  const list = chatPend[chatDraftKey()] || [], box = $('#ch-pend');
+  box.hidden = !list.length;
+  box.innerHTML = list.map((f, i) => `<span class="ch-chip">${chatIsImg(f) ? `<img src="${esc(f.data)}" alt="">` : '📄'}<span>${esc(f.name)}</span><button type="button" data-pend-rm="${i}" aria-label="Убрать файл ${esc(f.name)}">✕</button></span>`).join('');
+}
+// phone photos often exceed the limit, and 1920 px is plenty for a chat
+async function shrinkImage(f){
+  if (!/^image\/(jpeg|png|webp)$/.test(f.type) || f.size < 1048576) return f;
+  try {
+    const img = await createImageBitmap(f), k = Math.min(1, 1920 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    const x = c.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+    const b = await new Promise(r => c.toBlob(r, 'image/jpeg', .85));
+    return b && b.size < f.size ? new File([b], f.name.replace(/\.\w+$/, '') + '.jpg', {type: 'image/jpeg'}) : f;
+  } catch { return f; }
+}
+async function addChatFiles(files){
+  if (!files.length) return;
+  if (!canAttach()) return toast(CHAT_NO_FILES);
+  const key = chatDraftKey(), list = chatPend[key] ||= [], big = [];
+  for (const raw of files){
+    if (list.length >= CHAT_FILES_MAX){ toast(`В одном сообщении не больше ${CHAT_FILES_MAX} файлов`); break; }
+    const f = await shrinkImage(raw);
+    if (f.size > FILE_MAX){ big.push(f.name); continue; }
+    try { list.push({id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: f.name.slice(0, 200) || 'Файл', type: f.type.slice(0, 100), size: f.size, data: await fileData(f)}); }
+    catch { toast(`Не удалось прочитать файл ${f.name}`); }
+  }
+  if (big.length) toast(`Не прикреплены, больше ${fmtSize(FILE_MAX)}: ${big.join(', ')}`);
+  renderPend();
+}
+let chatSending = false;
+async function sendChat(){
+  const inp = $('#chat-in'), text = inp.value.trim(), key = chatDraftKey(), to = chatWith, pend = chatPend[key] || [];
+  if (chatSending || (!text && !pend.length)) return;
+  if (pend.length){
+    // uploaded before the message exists: a file the hosting refuses must not block saving everything else
+    chatSending = inp.readOnly = $('#ch-send').disabled = true;
+    try {
+      for (const f of pend){
+        if (onServer() && !serverHandle.known.has(f.id)){ await api('blob', {id: f.id, data: f.data}); serverHandle.known.add(f.id); }
+        db.blobs[f.id] = {data: f.data};
+      }
+    } catch (e) { return toast(`Файл не отправлен: ${e.status ? e.message : 'возможно, он больше лимита хостинга'}`); }
+    finally { chatSending = inp.readOnly = $('#ch-send').disabled = false; }
+  }
+  db.chat = mergeChat(db.chat, [normMsg({id: 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), from: chatMe(), to, text, at: stamp(), files: pend.map(({data, ...meta}) => meta)})]);
+  delete chatPend[key]; chatDrafts[key] = '';
+  if (chatDraftKey() === key){ inp.value = ''; inp.style.height = ''; renderPend(); }
   commit();
   renderChatBits(true);
 }
+function toggleReact(id, emoji){
+  const m = db.chat.find(x => x.id === id), k = `${emoji}|${chatMe()}`; if (!m) return;
+  m.reacts = mergeMarks(m.reacts, {[k]: {at: stamp(), v: !m.reacts[k]?.v}});
+  commit();
+}
+const EMOJI = '👍 👎 ❤️ 🔥 ✅ ❌ 😀 😂 😊 😍 😎 😉 🤔 😮 😢 😡 😅 🤯 🙏 👏 🎉 💪 👌 🤝 👀 🚀 ⭐ 💡 ⚠️ 📌 ⏰ ☕'.split(' ');
+function openEmoji(el, pick){
+  const p = $('#ch-emoji');
+  const close = () => { p.hidden = true; document.removeEventListener('pointerdown', outside, true); };
+  const outside = e => { if (!p.contains(e.target)) close(); };
+  p.innerHTML = EMOJI.map(e => `<button type="button" data-emoji="${e}" aria-label="${e}">${e}</button>`).join('');
+  p.hidden = false;
+  const r = el.getBoundingClientRect(), {offsetWidth: w, offsetHeight: h} = p;
+  p.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+  p.style.top = (r.top - h - 6 < 8 ? r.bottom + 6 : r.top - h - 6) + 'px';
+  p.onclick = e => { const b = e.target.closest('[data-emoji]'); if (b){ close(); pick(b.dataset.emoji); } };
+  p.onkeydown = e => { if (e.key === 'Escape'){ e.stopPropagation(); close(); el.focus(); } };
+  document.addEventListener('pointerdown', outside, true);
+  p.querySelector('button').focus();
+}
+async function openChatFile(f){
+  const b = await chatBlob(f.id);
+  if (!b) return toast(`Файл ${f.name} сейчас недоступен`);
+  const save = async () => download(f.name, await (await fetch(b.data)).blob());
+  if (!chatIsImg(f)) return save();
+  const d = $('#d-img');
+  d.innerHTML = `<div class="d-head"><h2>${esc(f.name)}</h2><span class="spacer"></span><button type="button" class="close" aria-label="Закрыть">✕</button></div><div class="d-body"><img src="${esc(b.data)}" alt="${esc(f.name)}"></div><div class="d-foot"><span class="note">${fmtSize(f.size)}</span><span class="spacer"></span><button type="button" class="btn" id="img-dl">Скачать</button></div>`;
+  d.querySelector('#img-dl').onclick = save;
+  d.showModal();
+}
+function jumpToMsg(id){
+  const m = db.chat.find(x => x.id === id); if (!m) return;
+  openChat(chatPeer(m));
+  const el = $('#ch-msgs').querySelector(`[data-mid="${CSS.escape(id)}"]`); if (!el) return;
+  el.scrollIntoView({block: 'center'}); el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 1600);
+}
+
+/* ---------- notifications: worked out from the data, so nothing extra has to be stored or sent ---------- */
+function bellItems(read){
+  const me = chatMe(), name = actor(), out = [], clip = t => t.length > 120 ? t.slice(0, 120) + '…' : t;
+  for (const t of db.tasks){
+    if (t.assignee === me && t.assignedAt && t.assignedBy !== me) out.push({at: t.assignedAt, ava: t.assignedBy, title: `Вам назначили задачу ${t.id}`, text: `${t.title}${t.assignedBy ? ` · назначил(а): ${chatName(t.assignedBy)}` : ''}`, run: () => openTask(t.id, {asEmployee: true})});
+    if (t.assignee === me || t.stages.some(s => s.assignee === me)) for (const c of t.comments) if (c.author !== name) out.push({at: c.at, name: c.author, title: `Комментарий в ${t.id}: ${t.title}`, text: `${c.author}: ${clip(c.text)}`, run: () => openTask(t.id, {focus: 'comment', asEmployee: t.assignee === me})});
+  }
+  for (const r of db.rooms){
+    const a = r.members.includes(me) && r.added[me];
+    if (a && a.by !== me) out.push({at: a.at, ava: a.by, title: `Вас добавили в чат «${r.name}»`, text: `Добавил(а): ${chatName(a.by)}`, run: () => chatTo(r.id)});
+  }
+  for (const c of new Set(db.chat.map(chatPeer))){
+    if (!c || chatMuted(c)) continue;
+    const n = chatUnread(c, read); if (!n) continue;
+    const m = db.chat.findLast(x => chatPeer(x) === c && x.from !== me);
+    out.push({at: m.at, ava: c, title: `${chatName(c)}: ${n} ${pl(n, ['новое сообщение', 'новых сообщения', 'новых сообщений'])}`, text: `${c === m.from ? '' : chatName(m.from) + ': '}${clip(chatPreview(m))}`, run: () => chatTo(c)});
+  }
+  return out.sort((a, b) => b.at.localeCompare(a.at)).slice(0, 100);
+}
+// a person's first visit starts from now, so the old history doesn't arrive as hundreds of new events
+function bellSeen(){
+  const me = chatMe(), k = 'planerka.bellstart.' + me, v = db.marks['bell|' + me]?.v;
+  if (v) return v;
+  let start = pref(k);
+  if (!start){ start = stamp(); savePref(k, start); }
+  return start;
+}
+let bellShown = [], bellSince = '';
+function renderBell(read){
+  const items = bellItems(read), seen = bellSeen(), n = items.filter(x => x.at > seen).length, b = $('#bell-badge');
+  b.hidden = !n; b.textContent = n > 99 ? '99+' : n;
+  $('#bell-btn').setAttribute('aria-label', n ? `Уведомления, новых: ${n}` : 'Уведомления');
+  if ($('#d-bell').open) drawBell(items);
+}
+function drawBell(items){
+  bellShown = items;
+  $('#bell-list').innerHTML = items.map((x, i) => `<button type="button" class="bl-row${x.at > bellSince ? ' new' : ''}" data-bell="${i}">${x.ava ? chatAva(x.ava) : authorAva(x.name || '')}<span class="bl-t">${esc(x.title)}</span><span class="bl-at">${fmtStamp(x.at)}</span><span class="bl-s">${esc(x.text)}</span></button>`).join('') || '<p class="ch-none" style="padding:24px 0">Пока ничего нет. Здесь появятся назначенные вам задачи, комментарии к ним, сообщения и приглашения в чаты.</p>';
+}
+function bellMarkSeen(){
+  const seen = bellSeen(), newest = bellItems(chatRead())[0]?.at;
+  if (newest > seen){ setMark('bell|' + chatMe(), newest); commit(); }
+}
+function openBell(){
+  const d = $('#d-bell');
+  bellSince = bellSeen();
+  d.innerHTML = '<div class="d-head"><h2>Уведомления</h2><span class="spacer"></span><button type="button" class="close" aria-label="Закрыть">✕</button></div><div class="bl-list" id="bell-list"></div>';
+  drawBell(bellItems(chatRead()));
+  d.onclick = e => {
+    if (e.target === d) return d.close();
+    const b = e.target.closest('[data-bell]'); if (!b) return;
+    const it = bellShown[+b.dataset.bell];
+    d.close(); it.run();
+  };
+  d.onclose = bellMarkSeen;
+  d.showModal();
+  bellMarkSeen();
+}
+$('#bell-btn').onclick = openBell;
 function chatTo(peer){ setView('chat'); scrollTo(0, 0); openChat(peer); }
 // the Menu key and Shift+F10 report no pointer position
 const ctxAt = (e, el) => e.clientX || e.clientY ? [e.clientX, e.clientY] : anchor(el);
@@ -4093,13 +4399,14 @@ function leaveRoom(id){
 }
 function markChatRead(c){
   const read = chatRead(), last = chatLast(c);
-  if (last){ read[c] = last.at; savePref(chatReadKey(), JSON.stringify(read)); renderChatBits(); }
+  if (last){ read[c] = last.at; savePref(chatReadKey(), JSON.stringify(read)); shareRead(c); renderChatBits(); }
 }
 function chatMenu(c){
   const group = c === 'all' || chatRoom(c);
   return [
     {label: 'Открыть чат', run: () => openChat(c)},
     ...(chatUnread(c, chatRead()) ? [{label: 'Отметить прочитанным', run: () => markChatRead(c)}] : []),
+    {label: chatMuted(c) ? 'Включить уведомления' : 'Выключить уведомления', run: () => toggleMute(c)},
     ...(group ? [{label: 'Участники', run: () => openMembers(c)}] : []),
     ...(person(c) ? [{label: 'Открыть профиль', run: () => openCab(c)}] : []),
     ...(chatRoom(c) ? ['-', {label: 'Изменить чат и состав', run: () => openRoomEditor(c)}, {label: 'Выйти из чата', danger: true, run: () => leaveRoom(c)}] : []),
@@ -4108,7 +4415,9 @@ function chatMenu(c){
 function msgMenu(m){
   const tasks = [...new Set(m.text.match(/\bPLN-\d+\b/g) || [])].filter(id => db.tasks.some(t => t.id === id));
   return [
-    {label: 'Копировать текст', run: () => navigator.clipboard.writeText(m.text).then(() => toast('Текст скопирован'), () => toast('Браузер не дал скопировать текст'))},
+    {label: 'Поставить реакцию', run: () => { const el = $('#ch-msgs').querySelector(`[data-mid="${CSS.escape(m.id)}"]`); if (el) openEmoji(el, e => toggleReact(m.id, e)); }},
+    ...m.files.map(f => ({label: `Скачать ${f.name.slice(0, 40)}`, run: async () => { const b = await chatBlob(f.id); if (b) download(f.name, await (await fetch(b.data)).blob()); else toast(`Файл ${f.name} сейчас недоступен`); }})),
+    ...(!m.text ? [] : [{label: 'Копировать текст', run: () => navigator.clipboard.writeText(m.text).then(() => toast('Текст скопирован'), () => toast('Браузер не дал скопировать текст'))}]),
     ...tasks.map(id => ({label: `Открыть ${id}`, run: () => openTask(id)})),
     ...(m.from !== chatMe() ? ['-', ...(person(m.from) ? [{label: `Профиль: ${chatName(m.from)}`, run: () => openCab(m.from)}] : []), ...(m.to === 'all' || chatRoom(m.to) ? [{label: 'Написать лично', run: () => openChat(m.from)}] : [])] : []),
   ];
@@ -4124,10 +4433,31 @@ $('#v-chat').addEventListener('contextmenu', e => {
 $('#ch-side').onclick = e => {
   if (e.target.closest('[data-cab]')) return; // the avatar: the page-wide handler opens the profile
   if (e.target.closest('[data-room-new]')) return openRoomEditor(null);
+  const hit = e.target.closest('[data-jump]'); if (hit) return jumpToMsg(hit.dataset.jump);
   const b = e.target.closest('[data-chat]'); if (b) openChat(b.dataset.chat);
 };
 $('#ch-title').onclick = e => { if (e.target.closest('[data-members]')) openMembers(); };
 $('#ch-back').onclick = () => { chatOpen = false; renderChatBits(); };
+$('#ch-q').oninput = () => renderChatBits();
+$('#ch-mute').onclick = () => toggleMute(chatWith);
+$('#ch-attach').onclick = () => canAttach() ? $('#ch-file').click() : toast(CHAT_NO_FILES);
+$('#ch-file').onchange = e => { const list = [...e.target.files]; e.target.value = ''; addChatFiles(list); };
+$('#ch-emo').onclick = e => openEmoji(e.currentTarget, x => { const i = $('#chat-in'); i.focus(); i.setRangeText(x, i.selectionStart, i.selectionEnd, 'end'); i.oninput({target: i}); });
+$('#ch-pend').onclick = e => { const b = e.target.closest('[data-pend-rm]'); if (b){ chatPend[chatDraftKey()].splice(+b.dataset.pendRm, 1); renderPend(); } };
+$('#chat-in').onpaste = e => { const list = [...e.clipboardData.files]; if (list.length){ e.preventDefault(); addChatFiles(list); } };
+$('#ch-msgs').onclick = e => {
+  const id = e.target.closest('[data-mid]')?.dataset.mid; if (!id) return;
+  let b;
+  if ((b = e.target.closest('[data-re]'))) toggleReact(id, b.dataset.re);
+  else if ((b = e.target.closest('[data-re-add]'))) openEmoji(b, x => toggleReact(id, x));
+  else if ((b = e.target.closest('[data-ch-file]'))) openChatFile(db.chat.find(m => m.id === id).files[+b.dataset.chFile]);
+};
+{
+  const main = document.querySelector('.ch-main'), hasFiles = e => [...e.dataTransfer.types].includes('Files');
+  main.ondragover = e => { if (hasFiles(e)){ e.preventDefault(); main.classList.add('ch-drop'); } };
+  main.ondragleave = e => { if (!main.contains(e.relatedTarget)) main.classList.remove('ch-drop'); };
+  main.ondrop = e => { if (hasFiles(e)){ e.preventDefault(); main.classList.remove('ch-drop'); addChatFiles([...e.dataTransfer.files]); } };
+}
 $('#ch-store').onclick = openStore;
 $('#ch-form').onsubmit = e => { e.preventDefault(); sendChat(); $('#chat-in').focus(); };
 $('#chat-in').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); sendChat(); } };
@@ -4164,6 +4494,15 @@ addEventListener('storage', e => {
   const msg = (id, at) => ({id, from: 'a', to: 'all', text: 't', at});
   console.assert(migrate({version: 8, people: [], tasks: [], chat: [msg('x', '2'), null, {id: 'y', text: ''}]}).chat.map(m => m.id).join() === 'x', 'chat: bad messages dropped');
   console.assert(mergeChat([msg('b', '2'), msg('a', '1')], [msg('b', '2'), msg('c', '3')]).map(m => m.id).join() === 'a,b,c', 'chat: merge by id, in time order');
+  const rx = (r, at, v) => ({...normMsg(msg('r', '1')), reacts: {[r]: {at, v}}});
+  let rm = mergeChat([rx('👍|a', '2', true)], [rx('🔥|b', '3', true)])[0].reacts;
+  console.assert(rm['👍|a'].v && rm['🔥|b'].v, 'chat: reactions of two people both survive a merge');
+  console.assert(mergeChat([rx('👍|a', '2', true)], [rx('👍|a', '3', false)])[0].reacts['👍|a'].v === false && mergeChat([rx('👍|a', '3', false)], [rx('👍|a', '2', true)])[0].reacts['👍|a'].v === false, 'chat: the later reaction wins in either order');
+  console.assert(eqJ(mergeMarks({b: {at: '1', v: 'x'}}, {a: {at: '1', v: 'y'}}), mergeMarks({a: {at: '1', v: 'y'}}, {b: {at: '1', v: 'x'}})), 'marks: same result in either order');
+  console.assert(mergeMarks({a: {at: '2', v: true}}, {a: {at: '1', v: false}}).a.v === true, 'marks: the later one wins');
+  const c10 = migrate({version: 10, people: [{id: 'p', name: 'P'}], tasks: [{id: 'PLN-1', title: 'x', assignee: 'p', createdAt: 'c', log: [{at: 'l1', text: 'Р назначил: P'}]}, {id: 'PLN-2', title: 'y', assignee: 'p', createdAt: 'c'}], chat: [{id: 'f', from: 'p', to: 'all', at: '1', text: '', files: [{id: 'b1', name: 'a.png'}]}], blobs: {b1: {data: 'data:x'}, b2: {data: 'data:y'}}});
+  console.assert(c10.version === SCHEMA && c10.tasks[0].assignedTo === 'p' && c10.tasks[0].assignedAt === 'l1' && c10.tasks[1].assignedAt === 'c', 'v10 -> v11: assignment time from the log or the creation');
+  console.assert(c10.chat.length === 1 && Object.keys(c10.blobs).join() === 'b1', 'v10 -> v11: a message with only a file stays, its blob is kept, others are dropped');
   console.assert(workKey({version: 8, people: [], tasks: [], chat: [msg('x', '2')], rooms: [{id: 'r', name: 'n', at: '1'}], savedAt: '1'}) === workKey({version: 8, people: [], tasks: [], savedAt: '2'}), 'workKey ignores chat and save time');
   console.assert(['constructor', 'x', undefined].every(access => normPerson({access}).access === 'employee') && normPerson({access: 'manager'}).access === 'manager', 'unknown roles become employee');
   const c8 = migrate({version: 8, people: [{id: 'a', name: 'A'}], tasks: [], rooms: [{id: 'r', name: 'n', members: ['a', 'boss', 'ghost', 'a'], at: '1'}, {id: 'nameless', members: []}, null]});
