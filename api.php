@@ -1,6 +1,6 @@
 <?php
 // Планёрка: хранение в MySQL. Страница работает с базой как с общим JSON-файлом, объединение правок происходит в браузере.
-// shortcut: все данные одним документом, поэтому вход определяет, кто работает, но любой вошедший технически может прочитать и записать весь документ; отдельные таблицы понадобятся для прав на сервере
+// shortcut: все данные одним документом: сервер защищает только сотрудников и роли, а задачи и чаты технически доступны любому вошедшему; для прав на них понадобятся отдельные таблицы
 ini_set('display_errors', '0');
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -86,8 +86,32 @@ if ($action === 'logout' && $isPost) { setToken('', time() - 3600); reply(['ok' 
 $me = currentUser($pdo, $key);
 if (!$me) fail('Нужно войти.', 401);
 
+// сотрудники и роли из документа; браузер хранит их в том же виде
+function peopleOf($doc) {
+  $map = [];
+  foreach ($doc['people'] ?? [] as $p) {
+    if (!is_array($p) || !is_scalar($p['id'] ?? null)) continue;
+    $map[(string) $p['id']] = ['name' => $p['name'] ?? '', 'role' => $p['role'] ?? '', 'cap' => $p['cap'] ?? 0, 'hue' => $p['hue'] ?? '', 'archived' => !empty($p['archived']), 'access' => $p['access'] ?? 'employee'];
+  }
+  return $map;
+}
+function storedPeople($pdo) { return peopleOf(json_decode((string) $pdo->query('SELECT data FROM planerka_doc WHERE id = 1')->fetchColumn(), true) ?: []); }
+function accessOf($me, $people) {
+  if ($me['admin']) return 'admin';
+  $p = $people[$me['person']] ?? null;
+  return $p && !$p['archived'] ? $p['access'] : 'employee';
+}
+// руководитель меняет сотрудников, но не роли и не карточки администраторов; сотрудник не меняет ничего
+function peopleChangeError($old, $new, $access) {
+  if ($access === 'admin') return null;
+  if ($access !== 'manager') return $old == $new ? null : 'Менять сотрудников может только руководитель или администратор.';
+  foreach ($new as $id => $p) if ($p['access'] !== ($old[$id]['access'] ?? 'employee')) return 'Выдавать роли может только администратор.';
+  foreach ($old as $id => $p) if ($p['access'] === 'admin' && ($new[$id] ?? null) != $p) return 'Карточку администратора может менять только администратор.';
+  return null;
+}
+
 if (in_array($action, ['users', 'user_save', 'user_del'], true)) {
-  if (!$me['admin']) fail('Это может только администратор.', 403);
+  if (accessOf($me, storedPeople($pdo)) !== 'admin') fail('Это может только администратор.', 403);
   if ($action === 'users') reply(['users' => $pdo->query('SELECT login, person FROM planerka_users ORDER BY login')->fetchAll(PDO::FETCH_ASSOC)]);
   if (!$isPost) fail('Неверный запрос.', 405);
   $login = is_string($body['login'] ?? null) ? strtolower(trim($body['login'])) : '';
@@ -123,6 +147,12 @@ if ($action === 'save' && $isPost) {
   $data = $body['data'] ?? null;
   $doc = is_string($data) && strlen($data) <= DOC_MAX ? json_decode($data, true) : null;
   if (!is_array($doc) || !is_array($doc['tasks'] ?? null) || !is_array($doc['people'] ?? null)) fail('Это не данные Планёрки или они слишком большие.', 400);
+  // shortcut: если правка отклонена, браузер показывает ошибку и повторяет запись; нужна кнопка «взять данные с сервера», если права будут часто меняться во время работы
+  if ((int) ($body['base'] ?? -1) > 0) {
+    $old = storedPeople($pdo);
+    $why = peopleChangeError($old, peopleOf($doc), accessOf($me, $old));
+    if ($why) fail($why, 403);
+  }
   // записать можно только поверх той версии, что видел браузер; иначе он сначала объединит чужие правки
   $q = $pdo->prepare('UPDATE planerka_doc SET data = ?, version = version + 1 WHERE id = 1 AND version = ?');
   $q->execute([$data, (int) ($body['base'] ?? -1)]);
