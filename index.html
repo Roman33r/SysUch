@@ -716,7 +716,10 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .ch-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;width:100%;padding:8px 10px;border:0;border-radius:10px;background:none;color:var(--fg);text-align:left;cursor:pointer}
 .ch-row:hover{background:var(--sunken)}
 .ch-row[aria-current="true"]{background:var(--accent-soft)}
-.ch-row .ava{grid-row:1/3}
+.ch-row > .ava,.ch-ava-link{grid-row:1/3}
+.ch-ava-link{display:flex;border-radius:50%}
+.ch-ava-btn{flex:none;display:flex;padding:0;border:0;border-radius:50%;background:none;cursor:pointer}
+.ch-ava-link:hover .ava,.ch-ava-btn:hover .ava,.ch-ava-btn:focus-visible .ava{outline:2px solid var(--accent);outline-offset:1px}
 .ch-who{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ch-time{font:11px var(--f-mono);color:var(--muted)}
 .ch-prev{grid-column:2;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -725,16 +728,30 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .ch-main{display:flex;flex-direction:column;min-width:0;min-height:0}
 .ch-head{display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
 .ch-head b{display:block;font-size:15px}
-.ch-head span{font-size:12px;color:var(--muted)}
+.ch-sub{display:block;font-size:12px;color:var(--muted)}
+.ch-head .ava{width:36px;height:36px;font-size:12px}
 .ch-back{display:none}
 .ch-new{width:100%;margin-bottom:6px}
-.ch-members{display:block;padding:0;border:0;background:none;color:var(--fg);text-align:left;cursor:pointer}
+.ch-members{display:flex;gap:10px;align-items:center;padding:0;border:0;background:none;color:var(--fg);text-align:left;cursor:pointer}
 .ch-members:hover b{color:var(--accent)}
 .ch-list{display:grid;gap:2px}
 .ch-row-static{cursor:default}
 .ch-row-static:hover{background:none}
-.ch-pick{display:grid;gap:8px}
-.ch-pick .chk{padding:2px 0}
+.ch-pick-box{display:grid;gap:8px}
+.ch-pick-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ch-pick-n{font-size:12px;color:var(--muted)}
+.ch-search{width:100%;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--sunken)}
+.ch-pick{display:grid;gap:2px;align-content:start;max-height:min(280px,40vh);overflow-y:auto}
+.ch-opt{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:10px;cursor:pointer}
+.ch-opt[hidden]{display:none}
+.ch-opt:hover{background:var(--sunken)}
+.ch-opt:has(input:checked){background:var(--accent-soft)}
+.ch-opt:has(input:disabled){cursor:default}
+.ch-opt .ava{width:32px;height:32px;font-size:11px}
+.ch-opt-t{flex:1;min-width:0}
+.ch-opt-t b{display:block;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-opt-t small{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-opt input{flex:none;width:18px;height:18px;margin:0;accent-color:var(--accent)}
 .ch-msgs{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:16px}
 .ch-day{align-self:center;margin:8px 0;font-size:12px;color:var(--muted)}
 .ch-m{display:flex;gap:8px;align-items:flex-end;max-width:min(72ch,85%)}
@@ -1091,8 +1108,10 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       <section id="h-chat"><h3>Чат</h3>
         <p>Вкладка «Чат» (клавиша <kbd>9</kbd>): «Общий чат» для всей команды, чаты с несколькими участниками и личные диалоги с каждым сотрудником и руководителем. Сообщения подписываются именем, выбранным в «Я: …». Enter отправляет, Shift+Enter переносит строку. Номер задачи в тексте (например, PLN-101) становится ссылкой. Число на вкладке показывает непрочитанные.</p>
         <ul>
-          <li><b>Чат с несколькими участниками.</b> «+ Новый чат» в списке диалогов: название и отметки у участников. Чат видят только те, кто в него добавлен.</li>
+          <li><b>Чат с несколькими участниками.</b> «+ Новый чат» в списке диалогов: название и участники. Поиск находит сотрудника по имени или роли, Enter в поиске отмечает первого найденного. Чат видят только те, кто в него добавлен.</li>
           <li><b>Состав.</b> Нажмите на название чата над перепиской: откроется список участников, из него можно перейти в профиль сотрудника. Там же «Изменить чат и состав»: новое название, добавить или убрать людей, выйти из чата.</li>
+          <li><b>Аватар.</b> Нажатие на аватар сотрудника в переписке, в списке диалогов или над чатом открывает его профиль.</li>
+          <li><b>Контекстное меню.</b> Правая кнопка мыши на диалоге: открыть, отметить прочитанным, участники, профиль, изменить чат, выйти. На сообщении: копировать текст, открыть задачу из текста, профиль автора, написать лично. На участнике в списке состава: профиль и личный диалог.</li>
           <li><b>Написать из профиля.</b> В кабинете сотрудника кнопка «Отправить сообщение» открывает личный диалог с ним.</li>
           <li><b>С разных компьютеров.</b> Сервера у Планёрки нет, поэтому сообщения передаются через общий JSON-файл: все подключают один файл из сетевой или облачной папки (Chrome, Edge). Планёрка проверяет его каждые 5 секунд. Без такого файла чат работает только внутри одного браузера.</li>
           <li><b>Не секретно.</b> Входа по паролю нет: любой может выбрать чужое имя в «Я: …», а файл с данными могут прочитать все, у кого к нему есть доступ. Не пишите в чат пароли и личные данные.</li>
@@ -3524,7 +3543,7 @@ document.addEventListener('click', e => {
   const q = s => e.target.closest(s);
   let el;
   if (q('.close')) return q('dialog').close();
-  if ((el = q('[data-chat-to]'))){ setView('chat'); scrollTo(0, 0); return openChat(el.dataset.chatTo); }
+  if ((el = q('[data-chat-to]'))) return chatTo(el.dataset.chatTo);
   if ((el = q('[data-cab]'))) return openCab(el.dataset.cab);
   if ((el = q('[data-inbox]'))) return openInbox(el.dataset.inbox);
   if ((el = q('[data-person]'))) return openPerson(el.dataset.person);
@@ -3583,27 +3602,30 @@ function renderChat(read, toBottom){
   const peers = [...(me === 'boss' ? [] : ['boss']), ...active().filter(p => p.id !== me).map(p => p.id), ...gone, ...db.rooms.filter(inRoom).map(r => r.id)].sort((a, b) => (last[b]?.at || chatRoom(b)?.at || '').localeCompare(last[a]?.at || chatRoom(a)?.at || ''));
   $('#ch-note').hidden = !!file.handle;
   $('#ch-wrap').classList.toggle('open', chatOpen);
+  // a span, not a button: the whole row is a button already; the context menu offers the same action from the keyboard
+  const rowAva = c => person(c) ? `<span class="ch-ava-link" data-cab="${esc(c)}" title="Открыть профиль">${chatAva(c)}</span>` : chatAva(c);
+  const msgAva = id => person(id) ? `<button type="button" class="ch-ava-btn" data-cab="${esc(id)}" title="Открыть профиль" aria-label="Профиль: ${esc(chatName(id))}">${chatAva(id)}</button>` : chatAva(id);
   $('#ch-side').innerHTML = '<button type="button" class="btn small ch-new" data-room-new>+ Новый чат</button>' + ['all', ...peers].map(c => {
     const m = last[c], u = chatUnread(c, read), d = m && new Date(m.at);
-    return `<button type="button" class="ch-row" data-chat="${esc(c)}" aria-current="${c === chatWith}">${chatAva(c)}
+    return `<button type="button" class="ch-row" data-chat="${esc(c)}" aria-current="${c === chatWith}">${rowAva(c)}
       <span class="ch-who">${esc(chatName(c))}</span><span class="ch-time">${!m ? '' : isoDay(d) === addDays(0) ? chatTime(d) : fmtDay(isoDay(d))}</span>
       <span class="ch-prev">${m ? `${m.from === me ? 'Вы: ' : c === 'all' || chatRoom(c) ? esc(chatName(m.from).split(' ')[0]) + ': ' : ''}${esc(m.text.slice(0, 80))}` : 'Нет сообщений'}</span>${u ? `<span class="badge">${u}</span>` : ''}</button>`;
   }).join('');
-  $('#ch-title').innerHTML = group ? `<button type="button" class="ch-members" data-members aria-label="Участники: ${esc(chatName(chatWith))}"><b>${esc(chatName(chatWith))}</b><span>Участников: ${chatMembers(chatWith).length}</span></button>`
-    : person(chatWith) ? `<button type="button" class="ch-members" data-cab="${esc(chatWith)}" aria-label="Профиль: ${esc(chatName(chatWith))}"><b>${esc(chatName(chatWith))}</b><span>${esc(person(chatWith).role || 'Открыть профиль')}</span></button>`
-    : `<b>${esc(chatName(chatWith))}</b><span>${chatWith === 'boss' ? '' : 'Нет в команде'}</span>`;
+  $('#ch-title').innerHTML = group ? `<button type="button" class="ch-members" data-members aria-label="Участники: ${esc(chatName(chatWith))}">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">Участников: ${chatMembers(chatWith).length}</span></span></button>`
+    : person(chatWith) ? `<button type="button" class="ch-members" data-cab="${esc(chatWith)}" aria-label="Профиль: ${esc(chatName(chatWith))}">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">${esc(person(chatWith).role || 'Открыть профиль')}</span></span></button>`
+    : `<div class="ch-members">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">${chatWith === 'boss' ? '' : 'Нет в команде'}</span></span></div>`;
   const box = $('#ch-msgs'), bottom = toBottom || box.scrollHeight - box.scrollTop - box.clientHeight < 60, top = box.scrollTop;
   let day = '';
   box.innerHTML = db.chat.filter(m => chatPeer(m) === chatWith).map(m => {
     const d = new Date(m.at), dk = isoDay(d), plain = m.from === me || !group; // the name is only needed where several people write
     const head = dk !== day ? `<div class="ch-day">${(day = dk, d.toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'}))}</div>` : '';
-    return `${head}<div class="ch-m${m.from === me ? ' mine' : ''}">${plain ? '' : chatAva(m.from)}<div class="ch-bub">${plain ? '' : `<span class="ch-from">${esc(chatName(m.from))}</span>`}${chatText(m.text)}<time class="ch-at">${chatTime(d)}</time></div></div>`;
+    return `${head}<div class="ch-m${m.from === me ? ' mine' : ''}" data-mid="${esc(m.id)}">${plain ? '' : msgAva(m.from)}<div class="ch-bub">${plain ? '' : `<span class="ch-from">${esc(chatName(m.from))}</span>`}${chatText(m.text)}<time class="ch-at">${chatTime(d)}</time></div></div>`;
   }).join('') || `<p class="ch-none">${chatWith === 'all' ? 'Здесь пишут всей командой. Номер задачи вроде PLN-101 становится ссылкой.' : room ? 'Сообщений пока нет. Этот чат показывается только участникам, но входа по паролю в Планёрке нет, поэтому переписка не секретна.' : 'Сообщений пока нет. Входа по паролю в Планёрке нет, поэтому личная переписка не секретна: её может открыть любой, у кого есть доступ к данным.'}</p>`;
   box.scrollTop = bottom ? box.scrollHeight : top;
 }
 const chatMembers = id => chatRoom(id)?.members || ['boss', ...active().map(p => p.id)];
-function openMembers(){
-  const id = chatWith, room = chatRoom(id), d = $('#d-chatm');
+function openMembers(id = chatWith){
+  const room = chatRoom(id), d = $('#d-chatm');
   d.innerHTML = `<div class="d-head"><h2>${esc(chatName(id))}</h2><button class="close" aria-label="Закрыть">✕</button></div>
     <div class="d-body"><div class="ch-list">${chatMembers(id).map(m => {
       const p = person(m), inner = `${chatAva(m)}<span class="ch-who">${esc(chatName(m))}${m === chatMe() ? ' (вы)' : ''}</span><span class="ch-prev">${esc(p ? p.role || 'Открыть профиль' : '')}</span>`;
@@ -3614,23 +3636,56 @@ function openMembers(){
     if (e.target.closest('[data-cab]')) d.close(); // the page-wide handler opens the profile
     if (e.target.closest('#chm-edit')){ d.close(); openRoomEditor(id); }
   };
+  d.oncontextmenu = e => {
+    const row = e.target.closest('[data-cab]'); if (!row) return;
+    e.preventDefault();
+    openCtx(...ctxAt(e, row), [
+      {label: 'Открыть профиль', run: () => { d.close(); openCab(row.dataset.cab); }},
+      ...(row.dataset.cab === chatMe() ? [] : [{label: 'Написать лично', run: () => { d.close(); chatTo(row.dataset.cab); }}]),
+    ], d);
+  };
   d.showModal();
 }
 function openRoomEditor(id){
   const room = id ? chatRoom(id) : null, d = $('#d-chatm'), me = chatMe();
-  const everyone = [...new Set(['boss', ...active().map(p => p.id), ...(room?.members || [])])];
-  d.onclick = null;
+  const picked = m => room ? room.members.includes(m) : m === me;
+  // you first, then those already in the chat, then by name
+  const rank = m => m === me ? 0 : picked(m) ? 1 : 2;
+  const everyone = [...new Set(['boss', ...active().map(p => p.id), ...(room?.members || [])])].sort((a, b) => rank(a) - rank(b) || chatName(a).localeCompare(chatName(b), 'ru'));
+  const norm = t => t.toLowerCase().replace(/ё/g, 'е');
+  d.onclick = d.oncontextmenu = null;
   d.innerHTML = `<form id="rm-form" novalidate>
     <div class="d-head"><h2>${room ? 'Чат и участники' : 'Новый чат'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
     <div class="d-body">
       <div class="field"><label for="rm-name">Название</label><input id="rm-name" maxlength="80" value="${esc(room?.name || '')}" placeholder="Например, Запуск сайта"><span class="err" id="rm-name-err" hidden>Введите название</span></div>
-      <div class="field"><span class="k">Участники</span><div class="ch-pick">${everyone.map(m => `<label class="chk"><input type="checkbox" value="${esc(m)}" ${(room ? room.members.includes(m) : m === me) ? 'checked' : ''} ${!room && m === me ? 'disabled' : ''}> ${esc(chatName(m))}${m === me ? ' (вы)' : ''}</label>`).join('')}</div><span class="err" id="rm-mem-err" hidden>Нужно хотя бы два участника</span></div>
+      <div class="ch-pick-box">
+        <div class="ch-pick-h"><span class="k">Участники</span><span class="ch-pick-n" id="rm-n" aria-live="polite"></span></div>
+        <input type="search" class="ch-search" id="rm-q" placeholder="Поиск по имени или роли" aria-label="Поиск сотрудника" autocomplete="off">
+        <div class="ch-pick" id="rm-list">${everyone.map(m => `<label class="ch-opt" data-q="${esc(norm(chatName(m) + ' ' + (person(m)?.role || '')))}">${chatAva(m)}<span class="ch-opt-t"><b>${esc(chatName(m))}${m === me ? ' (вы)' : ''}</b><small>${esc(person(m)?.role || '')}</small></span><input type="checkbox" value="${esc(m)}" ${picked(m) ? 'checked' : ''} ${!room && m === me ? 'disabled' : ''}></label>`).join('')}</div>
+        <p class="note" id="rm-none" hidden>Никого не нашлось.</p>
+        <span class="err" id="rm-mem-err" hidden>Нужно хотя бы два участника</span>
+      </div>
       ${room ? '<p class="note">Если снять отметку с себя, вы выйдете из чата. Новые участники увидят всю переписку.</p>' : ''}
     </div>
     <div class="d-foot"><span class="spacer"></span><button class="btn primary">${room ? 'Сохранить' : 'Создать чат'}</button></div></form>`;
+  const list = d.querySelector('#rm-list'), search = d.querySelector('#rm-q');
+  const count = () => { d.querySelector('#rm-n').textContent = `Выбрано: ${list.querySelectorAll('input:checked').length}`; };
+  const filter = () => {
+    const q = norm(search.value.trim());
+    list.querySelectorAll('.ch-opt').forEach(o => { o.hidden = !o.dataset.q.includes(q); });
+    d.querySelector('#rm-none').hidden = !!list.querySelector('.ch-opt:not([hidden])');
+  };
+  list.onchange = count; search.oninput = filter; count();
+  // Enter in the search ticks the first match instead of submitting the form
+  search.onkeydown = e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const box = list.querySelector('.ch-opt:not([hidden]) input:not(:disabled)');
+    if (box && search.value.trim()){ box.checked = !box.checked; search.value = ''; filter(); count(); }
+  };
   d.querySelector('#rm-form').onsubmit = e => {
     e.preventDefault();
-    const name = d.querySelector('#rm-name').value.trim(), members = [...d.querySelectorAll('.ch-pick input:checked')].map(x => x.value);
+    const name = d.querySelector('#rm-name').value.trim(), members = [...list.querySelectorAll('input:checked')].map(x => x.value);
     d.querySelector('#rm-name-err').hidden = !!name;
     d.querySelector('#rm-mem-err').hidden = members.length > 1;
     if (!name || members.length < 2) return;
@@ -3658,7 +3713,47 @@ function sendChat(){
   commit();
   renderChatBits(true);
 }
+function chatTo(peer){ setView('chat'); scrollTo(0, 0); openChat(peer); }
+// the Menu key and Shift+F10 report no pointer position
+const ctxAt = (e, el) => e.clientX || e.clientY ? [e.clientX, e.clientY] : anchor(el);
+function leaveRoom(id){
+  const room = chatRoom(id);
+  db.rooms = mergeRooms(db.rooms, [{...room, members: room.members.filter(m => m !== chatMe()), at: stamp()}]);
+  commit();
+  toast(`Вы вышли из чата «${room.name}»`, () => { db.rooms = mergeRooms(db.rooms, [{...room, at: stamp()}]); commit(); });
+}
+function markChatRead(c){
+  const read = chatRead(), last = chatLast(c);
+  if (last){ read[c] = last.at; savePref(chatReadKey(), JSON.stringify(read)); renderChatBits(); }
+}
+function chatMenu(c){
+  const group = c === 'all' || chatRoom(c);
+  return [
+    {label: 'Открыть чат', run: () => openChat(c)},
+    ...(chatUnread(c, chatRead()) ? [{label: 'Отметить прочитанным', run: () => markChatRead(c)}] : []),
+    ...(group ? [{label: 'Участники', run: () => openMembers(c)}] : []),
+    ...(person(c) ? [{label: 'Открыть профиль', run: () => openCab(c)}] : []),
+    ...(chatRoom(c) ? ['-', {label: 'Изменить чат и состав', run: () => openRoomEditor(c)}, {label: 'Выйти из чата', danger: true, run: () => leaveRoom(c)}] : []),
+  ];
+}
+function msgMenu(m){
+  const tasks = [...new Set(m.text.match(/\bPLN-\d+\b/g) || [])].filter(id => db.tasks.some(t => t.id === id));
+  return [
+    {label: 'Копировать текст', run: () => navigator.clipboard.writeText(m.text).then(() => toast('Текст скопирован'), () => toast('Браузер не дал скопировать текст'))},
+    ...tasks.map(id => ({label: `Открыть ${id}`, run: () => openTask(id)})),
+    ...(m.from !== chatMe() ? ['-', ...(person(m.from) ? [{label: `Профиль: ${chatName(m.from)}`, run: () => openCab(m.from)}] : []), ...(m.to === 'all' || chatRoom(m.to) ? [{label: 'Написать лично', run: () => openChat(m.from)}] : [])] : []),
+  ];
+}
+$('#v-chat').addEventListener('contextmenu', e => {
+  if (e.target.closest('#chat-in') || String(getSelection())) return; // the browser's own menu: paste, copy the selection
+  const row = e.target.closest('[data-chat]'), msg = e.target.closest('[data-mid]'), head = e.target.closest('#ch-title');
+  const items = row ? chatMenu(row.dataset.chat) : head ? chatMenu(chatWith) : msg ? msgMenu(db.chat.find(m => m.id === msg.dataset.mid)) : null;
+  if (!items) return;
+  e.preventDefault();
+  openCtx(...ctxAt(e, row || head || msg), items);
+});
 $('#ch-side').onclick = e => {
+  if (e.target.closest('[data-cab]')) return; // the avatar: the page-wide handler opens the profile
   if (e.target.closest('[data-room-new]')) return openRoomEditor(null);
   const b = e.target.closest('[data-chat]'); if (b) openChat(b.dataset.chat);
 };
