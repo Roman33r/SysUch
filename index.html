@@ -141,6 +141,9 @@ dialog::backdrop{background:rgba(10,12,10,.45)}
 .d-head h2{margin:0;font:600 18px/1.25 var(--f-body);text-wrap:balance;min-width:0;overflow-wrap:anywhere}
 .close{margin-left:auto;border:0;background:var(--sunken);width:32px;height:32px;border-radius:8px;cursor:pointer;flex:none}
 .d-body{padding:18px 20px;display:grid;gap:16px;max-height:68vh;overflow:auto}
+.mg-row{display:grid;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
+.mg-opt{display:flex;gap:8px;align-items:flex-start;cursor:pointer;overflow-wrap:anywhere}
+.mg-opt i{font-style:normal;opacity:.7}
 .d-foot{display:flex;flex-wrap:wrap;gap:8px;padding:14px 20px;border-top:1px solid var(--line)}
 .d-foot .spacer{flex:1}
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
@@ -1200,8 +1203,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         <dl>
           <dt>Браузер</dt><dd>Каждое изменение сохраняется в браузере сразу. Если очистить данные сайта или открыть файл в другом браузере, данных там не будет.</dd>
           <dt>JSON-файл (Chrome, Edge)</dt><dd>«Сохранять в новый файл» или «Открыть файл»: после этого каждое изменение записывается в файл. Файл можно положить в облачную папку. После перезапуска браузера появится плашка «Разрешить доступ» — так браузер защищает файлы.</dd>
-          <dt>Общий файл</dt><dd>Если один файл подключён у нескольких человек, Планёрка каждые 5 секунд подхватывает чужие изменения и сообщения чата. Изменения задач применяются, когда не открыто окно и вы не печатаете в поле. Сообщения чата объединяются сами.</dd>
-          <dt>Расхождение данных</dt><dd>Если файл изменили снаружи или в браузере есть правки новее файла, Планёрка спросит, какую версию оставить. Другая версия сохранится в резервную копию.</dd>
+          <dt>Общий файл</dt><dd>Если один файл подключён у нескольких человек, Планёрка каждые 5 секунд подхватывает чужие изменения и сообщения чата. Можно работать одновременно: правки разных задач и разных полей одной задачи, новые задачи, комментарии и пункты чек-листа объединяются сами. Изменения применяются, когда не открыто окно и вы не печатаете в поле. Если двое изменили одно и то же поле, Планёрка спросит, что оставить. Если задачу удалили с одной стороны и изменили с другой, она останется.</dd>
+          <dt>Расхождение данных</dt><dd>Если Планёрка не знает, от какой версии файла начались правки (например, файл подключён впервые, а в браузере есть данные новее), она спросит, какую версию оставить. Другая версия сохранится в резервную копию.</dd>
           <dt>Экспорт и импорт</dt><dd>«Скачать JSON» и «Импортировать JSON». Работает в любом браузере.</dd>
           <dt>Резервные копии</dt><dd>Последние 15 копий хранятся в этом браузере. Копия создаётся раз в день при запуске, при каждом открытии JSON-файла, а также перед импортом, сбросом, восстановлением и выбором версии при расхождении. В меню хранения у каждой копии есть «Скачать» и «Восстановить» (второе требует двух нажатий). Восстановление тоже можно откатить: текущие данные перед ним попадают в копии.</dd>
           <dt>Сброс</dt><dd>«Начать с нуля» и «Загрузить пример» требуют двух нажатий.</dd>
@@ -1349,7 +1352,71 @@ function mergeRooms(a, b){
 }
 const chatOf = (a, b) => ({chat: mergeChat(a.chat, b.chat), rooms: mergeRooms(a.rooms, b.rooms)});
 // everything except the chat, in a form that doesn't depend on who wrote it
-const workKey = d => JSON.stringify({...migrate(d), savedAt: 0, blobs: 0, chat: 0, rooms: 0});
+const workKey = d => JSON.stringify({...migrate(d), savedAt: 0, blobs: 0, chat: 0, rooms: 0, revs: 0});
+
+/* shared file: my copy and the file are compared with the version both started from, so only real clashes reach the user */
+const REVS_MAX = 20;
+const eqJ = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// fields that change together are merged as one
+const MERGE_GROUPS = {tasks: [['status', 'doneAt', 'startedAt'], ['stages', 'assignee', 'est']]};
+const MERGE_SILENT = new Set(['order', 'seen']); // nobody needs to be asked about card order
+const MERGE_LISTS = {tasks: {log: JSON.stringify, comments: JSON.stringify, links: x => x.url, files: x => x.id, checklist: x => x.text}};
+// a list where each side added or removed its own items; null when both changed one item differently
+function mergeList(b, m, t, key = JSON.stringify){
+  const index = l => { const seen = new Map(), out = new Map(); for (const x of l){ const k = key(x), n = seen.get(k) || 0; seen.set(k, n + 1); out.set(k + '#' + n, x); } return out; };
+  const B = index(b), M = index(m), T = index(t), out = [];
+  for (const [k, x] of T){
+    const o = B.get(k), y = M.get(k);
+    if (!M.has(k)){ if (!o || !eqJ(o, x)) out.push(x); continue; }
+    if (eqJ(x, y) || eqJ(o, y)) out.push(x);
+    else if (eqJ(o, x)) out.push(y);
+    else return null;
+  }
+  for (const [k, y] of M) if (!T.has(k) && (!B.has(k) || !eqJ(B.get(k), y))) out.push(y);
+  return out;
+}
+const byAt = l => [...l].sort((a, b) => String(a.at ?? '').localeCompare(String(b.at ?? '')));
+function mergeRecord(coll, b, m, t, clashes){
+  const out = {...m}, groups = MERGE_GROUPS[coll] || [], inGroup = new Set(groups.flat());
+  const all = [...groups, ...[...new Set([...Object.keys(m), ...Object.keys(t)])].filter(k => !inGroup.has(k)).map(k => [k])];
+  for (const keys of all){
+    const pick = o => keys.map(k => o[k]), k = keys[0], key = MERGE_LISTS[coll]?.[k];
+    if (eqJ(pick(m), pick(t)) || eqJ(pick(b), pick(t))) continue;
+    if (eqJ(pick(b), pick(m)) || MERGE_SILENT.has(k)){ keys.forEach(x => { out[x] = t[x]; }); continue; }
+    const list = key && mergeList(b[k] || [], m[k], t[k], key);
+    if (list) out[k] = k === 'log' || k === 'comments' ? byAt(list) : list;
+    else clashes.push({coll, id: m.id, keys, mine: pick(m), theirs: pick(t)});
+  }
+  return out;
+}
+// mine and theirs are full data, base is a parsed workKey. Pure: the result goes to the caller
+function merge3(base, mine, theirs){
+  const m = JSON.parse(workKey(mine)), t = JSON.parse(workKey(theirs)), clashes = [], notes = [];
+  // both created a task while the counter was the same: theirs keeps the number
+  let next = Math.max(m.nextId, t.nextId);
+  const baseIds = new Set(base.tasks.map(x => x.id)), tById = new Map(t.tasks.map(x => [x.id, x]));
+  for (const x of m.tasks){
+    if (baseIds.has(x.id) || !tById.has(x.id) || eqJ(x, tById.get(x.id))) continue;
+    const old = x.id, id = 'PLN-' + next++;
+    m.tasks.forEach(y => { if (y.parent === old) y.parent = id; });
+    x.id = id;
+    notes.push(`Номер ${old} одновременно заняли двое, ваша задача теперь ${id}.`);
+  }
+  const data = {...t, nextId: next, ...chatOf(mine, theirs), blobs: {...theirs.blobs, ...mine.blobs}, savedAt: mine.savedAt};
+  for (const coll of ['people', 'tasks', 'projects', 'templates']){
+    const B = new Map(base[coll].map(x => [x.id, x])), M = new Map(m[coll].map(x => [x.id, x])), T = new Map(t[coll].map(x => [x.id, x]));
+    data[coll] = [];
+    const kept = x => { if (coll === 'tasks') notes.push(`${x.id} удалили с одной стороны и изменили с другой: задача оставлена.`); data[coll].push(x); };
+    for (const [id, x] of T){
+      if (M.has(id)) data[coll].push(mergeRecord(coll, B.get(id) || {}, M.get(id), x, clashes));
+      else if (!B.has(id)) data[coll].push(x);
+      else if (!eqJ(B.get(id), x)) kept(x); // one side's work outweighs the other's delete
+    }
+    for (const [id, x] of M) if (!T.has(id)){ if (!B.has(id)) data[coll].push(x); else if (!eqJ(B.get(id), x)) kept(x); }
+  }
+  data.events = byAt(mergeList(base.events, m.events, t.events)).slice(-500);
+  return {data, clashes, notes};
+}
 
 // Validates anything loaded from storage or a file and upgrades older versions to SCHEMA.
 function migrate(raw){
@@ -1402,7 +1469,7 @@ function migrate(raw){
   const chat = mergeChat((Array.isArray(raw.chat) ? raw.chat : []).map(normMsg).filter(m => m.id && m.text), []);
   // v8 -> v9: group chats; people who no longer exist leave them
   const rooms = mergeRooms((Array.isArray(raw.rooms) ? raw.rooms : []).map(normRoom).filter(r => r.id && r.name).map(r => ({...r, members: r.members.filter(m => m === 'boss' || pids.has(m))})), []);
-  return {version: SCHEMA, nextId, people, tasks, projects, templates, events, chat, rooms, blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null};
+  return {version: SCHEMA, nextId, people, tasks, projects, templates, events, chat, rooms, blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null, revs: (Array.isArray(raw.revs) ? raw.revs : []).map(String).slice(-REVS_MAX)};
 }
 
 function demo(){
@@ -1447,7 +1514,7 @@ function demo(){
 
 /* ---------- storage: localStorage always, JSON file optionally ---------- */
 const FS_OK = 'showSaveFilePicker' in window;
-const file = {handle: null, name: '', mtime: 0, work: null, needsPermission: false, error: ''}; // work = workKey of what the file held at the last read or write
+const file = {handle: null, name: '', mtime: 0, work: null, rev: '', history: new Map(), behind: false, needsPermission: false, error: ''}; // work = workKey of what the file held at the last read or write; history = the same for recent revs
 const canAttach = () => !!file.handle && !file.needsPermission;
 let db, saveTimer, writing = Promise.resolve();
 
@@ -1468,7 +1535,7 @@ function saveLocal(){
   try { localStorage.setItem(LS_KEY, JSON.stringify({...db, blobs: {}})); return true; }
   catch { toast('Браузер не дал сохранить данные: место закончилось или хранилище заблокировано. Сохраните экспорт в файл.'); return false; }
 }
-const sameData = (a, b) => JSON.stringify({...a, savedAt: 0, blobs: 0}) === JSON.stringify({...b, savedAt: 0, blobs: 0});
+const sameData = (a, b) => JSON.stringify({...a, savedAt: 0, blobs: 0, revs: 0}) === JSON.stringify({...b, savedAt: 0, blobs: 0, revs: 0});
 
 /* backups: the last SNAP_MAX copies in IndexedDB (much more room than localStorage) */
 const SNAP_MAX = 15;
@@ -1507,56 +1574,84 @@ function writeFile(force = false){
   writing = writing.then(async () => {
     const h = file.handle; if (!h) return;
     try {
-      if (!force && file.mtime){
-        const f = await h.getFile();
-        if (f.lastModified !== file.mtime){
-          const data = await parseFile(f), k = workKey(data);
-          // someone only added messages (or has the same data): merge them and write on
-          if (k !== file.work && k !== workKey(db)) return conflict(data, f.lastModified, 'Файл изменили вне этой вкладки: в другой вкладке, другой программой или на другом компьютере.');
-          Object.assign(db, chatOf(db, data)); saveLocal(); renderChatBits();
-        }
-      }
-      const w = await h.createWritable(); await w.write(JSON.stringify(db, null, 2)); await w.close();
-      file.mtime = (await h.getFile()).lastModified; file.work = workKey(db); file.error = '';
+      if (!force && file.mtime && !await pullFile(await h.getFile())) return renderStore(); // the next poll finishes this write
+      db.revs = [...db.revs, 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)].slice(-REVS_MAX);
+      const json = JSON.stringify(db, null, 2), work = workKey(db), revs = db.revs;
+      const w = await h.createWritable(); await w.write(json); await w.close();
+      remember(work, revs, (await h.getFile()).lastModified); file.error = '';
     } catch (e) { file.error = 'Не удалось записать файл: ' + e.message; }
     renderStore();
   });
   return writing;
 }
 async function parseFile(f){ return migrate(JSON.parse(await f.text())); }
+function remember(work, revs, mtime){
+  file.work = work; file.mtime = mtime; file.rev = revs.at(-1) || '';
+  file.history.set(file.rev, work);
+  if (file.history.size > REVS_MAX) file.history.delete(file.history.keys().next().value);
+  idbSet('base', {name: file.name, work, rev: file.rev});
+}
+// the newest version of ours the file's author had seen. Older than file.work when two people wrote at the same moment and one write overwrote the other
+function baseFor(data){
+  for (const r of [...data.revs].reverse()) if (file.history.has(r)) return file.history.get(r);
+  return file.work;
+}
 // picks up what others wrote to a shared file. Changes to tasks wait while a window is open or a field is being typed in, so nothing is pulled out from under the user
 const typingElsewhere = () => document.querySelector('dialog[open]') || (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName) && document.activeElement.id !== 'chat-in');
+// false = not merged yet: the user is busy or has to choose
+async function pullFile(f){
+  if (f.lastModified === file.mtime) return true;
+  const data = await parseFile(f), k = workKey(data), base = baseFor(data), lost = (a, b) => a.chat.length > b.chat.length || !eqJ(a.rooms, b.rooms);
+  Object.assign(db, chatOf(db, data)); db.blobs = {...data.blobs, ...db.blobs}; saveLocal(); renderChatBits();
+  if (k !== base && k !== workKey(db)){
+    if (typingElsewhere()) return false;
+    const r = merge3(JSON.parse(base), db, data);
+    if (r.clashes.length){ askClashes(r, data, k, f.lastModified); return false; }
+    acceptMerge(r.data, data, k, f.lastModified);
+    if (r.notes.length) toast(r.notes.join(' '));
+  } else { db.revs = [...new Set([...data.revs, ...db.revs])].slice(-REVS_MAX); remember(k, data.revs, f.lastModified); }
+  file.behind = workKey(db) !== k || lost(db, data);
+  return true;
+}
+function acceptMerge(merged, data, k, mtime){
+  const revs = db.revs;
+  db = migrate(merged); db.revs = [...new Set([...data.revs, ...revs])].slice(-REVS_MAX);
+  remember(k, data.revs, mtime); saveLocal(); render();
+}
 function pollFile(){
   const h = file.handle;
-  if (!h || file.needsPermission || file.error || file.work == null) return;
+  if (!h || file.needsPermission || file.work == null) return;
   writing = writing.then(async () => {
     if (file.handle !== h || $('#d-conflict').open) return;
+    if (file.error){ writeFile(); return; } // a network folder may just be busy for a moment
     const f = await h.getFile();
-    if (f.lastModified === file.mtime) return;
-    const data = await parseFile(f), k = workKey(data), merged = chatOf(db, data);
-    const fresh = k !== file.work && k !== workKey(db);
-    // our own unsaved edits meet theirs in writeFile, which asks which version to keep
-    if (fresh && (workKey(db) !== file.work || typingElsewhere())) return;
-    if (fresh) db = {...data, ...merged}; else Object.assign(db, merged);
-    file.mtime = f.lastModified; file.work = k; saveLocal();
-    if (fresh) render(); else renderChatBits();
-    if (merged.chat.length > data.chat.length || JSON.stringify(merged.rooms) !== JSON.stringify(data.rooms)) writeFile(); // the file lost our part to a simultaneous write
+    if (f.lastModified !== file.mtime && await pullFile(f) && file.behind) writeFile(); // the file lacks our part
   }).catch(() => {});
 }
 setInterval(pollFile, 5000);
 
 async function useHandle(h){
-  file.handle = h; file.name = h.name; file.needsPermission = false; file.error = '';
+  file.handle = h; file.name = h.name; file.needsPermission = false; file.error = ''; file.history.clear();
   await idbSet('handle', h);
 }
 async function loadFromHandle(){
   const f = await file.handle.getFile();
+  const saved = await idbGet('base');
+  if (saved?.name === file.name && saved.work){
+    // what changed on both sides while the file was closed is merged like any other change
+    file.work = saved.work; file.rev = saved.rev || ''; file.history.set(file.rev, saved.work); file.mtime = 0;
+    const merged = await pullFile(f);
+    render();
+    snapshot(await parseFile(f), `При открытии ${file.name}`);
+    if (merged && file.behind) writeFile();
+    return;
+  }
   const data = await parseFile(f);
   // local edits made while the file was unreachable must not vanish silently
   if (db.savedAt && data.savedAt && db.savedAt > data.savedAt && !sameData(db, data))
     return conflict(data, f.lastModified, 'В браузере есть изменения новее, чем в файле.');
   Object.assign(data, chatOf(db, data));
-  db = data; file.mtime = f.lastModified; file.work = workKey(data); saveLocal(); render();
+  db = data; remember(workKey(data), data.revs, f.lastModified); saveLocal(); render();
   snapshot(data, `При открытии ${file.name}`);
 }
 async function createFile(){
@@ -1571,7 +1666,7 @@ async function openFile(){
   try {
     const [h] = await showOpenFilePicker({types: [{description: 'Данные Планёрки', accept: {'application/json': ['.json']}}]});
     const f = await h.getFile(), data = await parseFile(f);
-    backupLocal('Перед открытием файла'); db = data; await useHandle(h); file.mtime = f.lastModified; file.work = workKey(data); saveLocal();
+    backupLocal('Перед открытием файла'); db = data; await useHandle(h); remember(workKey(data), data.revs, f.lastModified); saveLocal();
     snapshot(data, `При открытии ${h.name}`);
     toast(`Открыт ${h.name}. Прежние данные браузера сохранены в резервную копию.`);
   } catch (e) { if (e.name !== 'AbortError') toast('Не удалось открыть файл: ' + e.message); }
@@ -1587,9 +1682,43 @@ async function grantAccess(){
 async function detachFile(){
   const hadFiles = Object.keys(db.blobs).length;
   file.handle = null; file.name = ''; file.mtime = 0; file.needsPermission = false; file.error = '';
-  await idbDel('handle');
+  await idbDel('handle'); await idbDel('base');
   toast(hadFiles ? 'Файл отключён. Вложенные файлы остались в нём, в браузере они будут недоступны после перезагрузки.' : 'Файл отключён. Данные хранятся в браузере.');
   render();
+}
+
+const MERGE_LABELS = {title: 'Название', desc: 'Описание', prio: 'Приоритет', status: 'Статус', due: 'Срок', tag: 'Тег', stages: 'Исполнитель и этапы', checklist: 'Чек-лист', comments: 'Комментарии', links: 'Ссылки', files: 'Файлы', project: 'Проект', parent: 'Родительская задача', repeat: 'Повтор', name: 'Название', role: 'Должность', cap: 'Часов в неделю', hue: 'Цвет', archived: 'В архиве'};
+function clashValue(c, vals){
+  const k = c.keys[0], v = vals[0];
+  if (k === 'status') return STATUS[v] || v;
+  if (k === 'prio') return PRIO[v] || v;
+  if (k === 'stages') return v.length ? v.map(x => `${x.title}: ${person(x.assignee)?.name || 'не назначен'}`).join(', ') : `${person(vals[1])?.name || 'Не назначен'}, ${vals[2]} ч`;
+  if (k === 'project') return project(v)?.name || 'Без проекта';
+  if (k === 'repeat') return v ? repeatLabel(v) : 'Не повторяется';
+  if (k === 'due') return v ? fmtDay(v) : 'Без срока';
+  if (Array.isArray(v)) return v.length ? v.map(x => x.text || x.title || x.name || x.url || '').filter(Boolean).join(', ') : 'Пусто';
+  if (typeof v === 'boolean') return v ? 'Да' : 'Нет';
+  return v === null || v === undefined || v === '' ? 'Пусто' : String(v);
+}
+// two people changed the same field: only here the user is asked
+function askClashes(r, data, k, mtime){
+  const d = $('#d-conflict');
+  const rec = c => r.data[c.coll].find(x => x.id === c.id) || {};
+  d.innerHTML = `<div class="d-head"><h2>Двое изменили одно и то же</h2></div>
+    <div class="d-body"><p class="note">Остальное уже объединено. Выберите, что оставить в этих полях. Версия файла сохранится в резервную копию.</p>
+    ${r.clashes.map((c, i) => `<div class="mg-row"><b>${esc(c.coll === 'tasks' ? `${c.id} · ${rec(c).title || ''}` : rec(c).name || c.id)}</b> <span class="note">${esc(MERGE_LABELS[c.keys[0]] || c.keys[0])}</span>
+      <label class="mg-opt"><input type="radio" name="mg-${i}" value="mine" checked> <span><i>Моё:</i> ${esc(clashValue(c, c.mine).slice(0, 200))}</span></label>
+      <label class="mg-opt"><input type="radio" name="mg-${i}" value="theirs"> <span><i>В файле:</i> ${esc(clashValue(c, c.theirs).slice(0, 200))}</span></label></div>`).join('')}</div>
+    <div class="d-foot"><span class="spacer"></span><button class="btn primary" id="mg-ok">Применить</button></div>`;
+  d.querySelector('#mg-ok').onclick = () => {
+    r.clashes.forEach((c, i) => { if (d.querySelector(`[name="mg-${i}"]:checked`).value === 'theirs') c.keys.forEach((x, j) => { rec(c)[x] = c.theirs[j]; }); });
+    snapshot(data, 'Версия файла при расхождении');
+    d.close();
+    acceptMerge(r.data, data, k, mtime);
+    if (r.notes.length) toast(r.notes.join(' '));
+    writeFile();
+  };
+  if (!d.open) d.showModal();
 }
 
 let pending = null;
@@ -1601,10 +1730,11 @@ function conflict(data, mtime, reason){
     <div class="d-body"><p class="note">${esc(reason)}</p>
     <p class="note">Файл сохранён: ${data.savedAt ? fmtStamp(data.savedAt) : 'неизвестно'} · в браузере: ${db.savedAt ? fmtStamp(db.savedAt) : 'неизвестно'}. Вторую версию сохраню в резервную копию, её можно будет восстановить в меню хранения.</p></div>
     <div class="d-foot"><button class="btn" id="cf-file">Взять данные из файла</button><span class="spacer"></span><button class="btn primary" id="cf-local">Записать в файл данные браузера</button></div>`;
-  d.querySelector('#cf-file').onclick = () => { backupLocal('Версия браузера при расхождении'); db = pending.data; file.mtime = pending.mtime; file.work = workKey(db); saveLocal(); d.close(); render(); };
+  d.querySelector('#cf-file').onclick = () => { backupLocal('Версия браузера при расхождении'); db = pending.data; remember(workKey(db), db.revs, pending.mtime); saveLocal(); d.close(); render(); };
   d.querySelector('#cf-local').onclick = async () => {
     snapshot(pending.data, 'Версия файла при расхождении');
     db.blobs = {...pending.data.blobs, ...db.blobs}; // the browser copy has no attachment contents; keep the file's
+    db.revs = pending.data.revs;
     d.close(); await writeFile(true);
   };
   if (!d.open) d.showModal();
@@ -2558,7 +2688,7 @@ function renderStore(){
       ? `<span>${esc(file.error)} Изменения сохраняются в браузере.</span><button class="btn small" id="bn-retry">Повторить запись</button>`
       : `<span>Подключён файл <b>${esc(file.name)}</b>. Браузер просит подтвердить доступ после перезапуска.</span><button class="btn small primary" id="bn-grant">Разрешить доступ</button>`;
     $('#bn-grant') && ($('#bn-grant').onclick = grantAccess);
-    $('#bn-retry') && ($('#bn-retry').onclick = () => writeFile(true));
+    $('#bn-retry') && ($('#bn-retry').onclick = () => writeFile());
   } else banner.hidden = true;
   if ($('#d-store').open) drawStore();
 }
@@ -3807,6 +3937,38 @@ addEventListener('storage', e => {
   threw = false; try { migrate({version: 99, tasks: [], people: []}); } catch { threw = true; } console.assert(threw, 'rejects newer schema');
   const v1 = migrate({version: 1, tasks: [{id: 'PLN-1', title: 'low', prio: 'low'}, {id: 'PLN-2', title: 'high', prio: 'high'}], people: []});
   console.assert(v1.tasks[0].id === 'PLN-2' && v1.tasks[0].order === 0 && v1.tasks[1].order === 1 && Array.isArray(v1.tasks[0].comments), 'v1 -> v2 order');
+})();
+(function selfTestMerge(){
+  const task = (id, x = {}) => ({id, title: id, createdAt: '1', log: [], ...x});
+  const data = (tasks, x = {}) => migrate({version: SCHEMA, nextId: 10, people: [], tasks, ...x});
+  const run = (b, m, t) => merge3(JSON.parse(workKey(data(b))), data(m), data(t));
+  const get = (r, id) => migrate(r.data).tasks.find(x => x.id === id);
+  let r = run([task('PLN-1'), task('PLN-2')], [task('PLN-1', {title: 'mine'}), task('PLN-2')], [task('PLN-1'), task('PLN-2', {title: 'theirs'})]);
+  console.assert(!r.clashes.length && get(r, 'PLN-1').title === 'mine' && get(r, 'PLN-2').title === 'theirs', 'merge: different tasks');
+  r = run([task('PLN-1')], [task('PLN-1', {due: '2030-01-01'})], [task('PLN-1', {status: 'done', doneAt: '5'})]);
+  console.assert(!r.clashes.length && get(r, 'PLN-1').due === '2030-01-01' && get(r, 'PLN-1').status === 'done' && get(r, 'PLN-1').doneAt === '5', 'merge: different fields');
+  r = run([task('PLN-1')], [task('PLN-1', {title: 'a'})], [task('PLN-1', {title: 'b'})]);
+  console.assert(r.clashes.length === 1 && r.clashes[0].keys[0] === 'title', 'merge: same field is a clash');
+  r = run([task('PLN-1')], [task('PLN-1', {order: 5})], [task('PLN-1', {order: 7})]);
+  console.assert(!r.clashes.length && get(r, 'PLN-1').order === 7, 'merge: order is settled silently');
+  r = run([task('PLN-1')], [task('PLN-1', {comments: [{at: '2', author: 'a', text: 'x'}]})], [task('PLN-1', {comments: [{at: '1', author: 'b', text: 'y'}]})]);
+  console.assert(!r.clashes.length && get(r, 'PLN-1').comments.map(c => c.text).join() === 'y,x', 'merge: comments from both, in time order');
+  const list = (a, b) => [{text: 'a', done: a}, {text: 'b', done: b}];
+  r = run([task('PLN-1', {checklist: list(false, false)})], [task('PLN-1', {checklist: list(true, false)})], [task('PLN-1', {checklist: list(false, true)})]);
+  console.assert(!r.clashes.length && get(r, 'PLN-1').checklist.every(c => c.done), 'merge: each ticks their own item');
+  r = run([], [task('PLN-5', {title: 'mine'}), task('PLN-6', {parent: 'PLN-5'})], [task('PLN-5', {title: 'theirs'})]);
+  const mineNew = migrate(r.data).tasks.find(x => x.title === 'mine');
+  console.assert(get(r, 'PLN-5').title === 'theirs' && mineNew.id !== 'PLN-5' && get(r, 'PLN-6').parent === mineNew.id && r.notes.length === 1, 'merge: same new number, mine is renumbered');
+  r = run([task('PLN-1'), task('PLN-2')], [task('PLN-2')], [task('PLN-1'), task('PLN-2')]);
+  console.assert(!get(r, 'PLN-1'), 'merge: my delete stands');
+  r = run([task('PLN-1')], [], [task('PLN-1', {title: 'edited'})]);
+  console.assert(get(r, 'PLN-1')?.title === 'edited' && r.notes.length === 1, 'merge: an edit outweighs a delete');
+  const race = merge3(JSON.parse(workKey(data([task('PLN-1')]))), data([task('PLN-1'), task('PLN-2')]), data([task('PLN-1'), task('PLN-3')]));
+  console.assert(get(race, 'PLN-2') && get(race, 'PLN-3'), 'merge: a write overwritten at the same moment comes back when the older base is used');
+  console.assert(workKey(data([], {revs: ['a']})) === workKey(data([])) && data([], {revs: ['a']}).revs[0] === 'a', 'revs: kept in the file, ignored in comparison');
+  file.history.set('r1', 'old'); file.work = 'now';
+  console.assert(baseFor({revs: ['x', 'r1', 'y']}) === 'old' && baseFor({revs: ['y']}) === 'now', 'base: newest version of ours the author saw');
+  file.history.clear(); file.work = null;
 })();
 (function selfTestQuick(){
   const now = new Date(2026, 9, 25), ppl = [{id: 'am', name: 'Анна Морозова'}]; // a Sunday
