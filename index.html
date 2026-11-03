@@ -1642,8 +1642,10 @@ setInterval(pollFile, 5000);
 /* server mode: api.php and MySQL stand in for the JSON file, so the sync and merge code above stays the same */
 const onServer = () => file.handle === serverHandle;
 async function api(action, body){
-  const r = await fetch('api.php?a=' + action, body ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)} : {cache: 'no-store'});
-  const j = await r.json(); // a static host answers with html or the php source, that throws without .status
+  const down = () => Object.assign(new Error('Нет связи с сервером'), {status: 503});
+  const r = await fetch('api.php?a=' + action, body ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)} : {cache: 'no-store'}).catch(() => { throw down(); });
+  // a static host answers with html or the php source, that throws without .status; a server hiccup must not look like one
+  const j = await r.json().catch(e => { throw r.status >= 500 ? down() : e; });
   if (r.status === 401 && !$('#d-login').open) askLogin();
   if (!r.ok) throw Object.assign(new Error(j.error || `Ошибка сервера ${r.status}`), {status: r.status});
   return j;
@@ -1717,7 +1719,10 @@ async function serverStart(){
     if (!s.planerka) return false;
     if (s.auth) await serverConnect(); else askLogin();
   } catch (e) {
-    if (!e.status) return false;
+    if (!e.status){
+      if (onServer()){ file.handle = null; file.error = ''; render(); } // it was a static host after all
+      return false;
+    }
     file.handle = serverHandle; file.name = serverHandle.name; file.error = e.message;
     render();
   }
