@@ -706,6 +706,46 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
   #d-help .d-head{flex-wrap:wrap}
   .help-q{order:3;flex:1 1 100%}
 }
+#chat-badge{display:inline-block;margin-left:2px}
+#chat-badge[hidden]{display:none}
+.ch-note{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 14px;margin-bottom:10px;border:1px solid var(--line);border-radius:12px;background:var(--sunken);font-size:13px;color:var(--muted)}
+.ch-note[hidden]{display:none}
+.ch-wrap{display:grid;grid-template-columns:280px minmax(0,1fr);height:max(440px,calc(100vh - 150px));border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
+#ch-note:not([hidden]) + .ch-wrap{height:max(400px,calc(100vh - 230px))}
+.ch-side{overflow-y:auto;border-right:1px solid var(--line);padding:6px}
+.ch-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;width:100%;padding:8px 10px;border:0;border-radius:10px;background:none;color:var(--fg);text-align:left;cursor:pointer}
+.ch-row:hover{background:var(--sunken)}
+.ch-row[aria-current="true"]{background:var(--accent-soft)}
+.ch-row .ava{grid-row:1/3}
+.ch-who{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-time{font:11px var(--f-mono);color:var(--muted)}
+.ch-prev{grid-column:2;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-row .badge{grid-column:3;justify-self:end}
+.ch-all{background:var(--fg);color:var(--bg)}
+.ch-main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.ch-head{display:flex;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.ch-head b{display:block;font-size:15px}
+.ch-head span{font-size:12px;color:var(--muted)}
+.ch-back{display:none}
+.ch-msgs{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:16px}
+.ch-day{align-self:center;margin:8px 0;font-size:12px;color:var(--muted)}
+.ch-m{display:flex;gap:8px;align-items:flex-end;max-width:min(72ch,85%)}
+.ch-m.mine{align-self:flex-end}
+.ch-bub{padding:7px 11px;border-radius:12px;background:var(--sunken);font-size:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.ch-m.mine .ch-bub{background:var(--accent-soft)}
+.ch-from{display:block;font-size:12px;font-weight:600;color:var(--muted)}
+.ch-at{display:block;margin-top:2px;font:11px var(--f-mono);color:var(--muted);text-align:right}
+.ch-none{margin:auto;max-width:42ch;text-align:center;font-size:13px;color:var(--muted)}
+.ch-form{display:flex;gap:8px;align-items:flex-end;padding:10px 12px;border-top:1px solid var(--line)}
+#chat-in{flex:1;min-width:0;max-height:140px;resize:none;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sunken);color:var(--fg);font:inherit;font-size:14px}
+@media (max-width:760px){
+  .ch-wrap{grid-template-columns:minmax(0,1fr);height:max(420px,calc(100dvh - 190px))}
+  #ch-note:not([hidden]) + .ch-wrap{height:max(360px,calc(100dvh - 300px))}
+  .ch-side{border-right:0}
+  .ch-wrap.open .ch-side,.ch-wrap:not(.open) .ch-main{display:none}
+  .ch-back{display:inline-flex}
+  .ch-m{max-width:92%}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -722,6 +762,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       <button data-view="load" id="vw-load">Загрузка</button>
       <button data-view="log" id="vw-log">Журнал</button>
       <button data-view="report" id="vw-report">Отчёты</button>
+      <button data-view="chat" id="vw-chat">Чат <span class="badge" id="chat-badge" hidden></span></button>
     </div>
     <div class="spacer"></div>
     <button class="btn primary" id="new-task">+ Задача</button>
@@ -835,6 +876,21 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
     <div id="load-body"></div>
   </main>
 
+  <main id="v-chat" hidden>
+    <div class="ch-note" id="ch-note" hidden><span>Сообщения сейчас лежат только в этом браузере. Чтобы переписываться с разных компьютеров, подключите всем один JSON-файл в общей папке.</span><button type="button" class="btn small" id="ch-store">Подключить файл</button></div>
+    <div class="ch-wrap" id="ch-wrap">
+      <nav class="ch-side" id="ch-side" aria-label="Диалоги"></nav>
+      <section class="ch-main">
+        <div class="ch-head"><button type="button" class="btn small ch-back" id="ch-back" aria-label="К списку диалогов">‹</button><div id="ch-title"></div></div>
+        <div class="ch-msgs" id="ch-msgs" role="log" aria-live="polite" tabindex="0"></div>
+        <form class="ch-form" id="ch-form" autocomplete="off">
+          <textarea id="chat-in" rows="1" maxlength="2000" aria-label="Сообщение" placeholder="Напишите сообщение"></textarea>
+          <button type="submit" class="btn primary">Отправить</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
   <main id="v-log" class="stack" hidden>
     <div class="toolbar"><input type="search" id="log-q" placeholder="Поиск по журналу: имя, номер, действие" aria-label="Поиск по журналу" autocomplete="off"><span class="count" id="log-count"></span></div>
     <div id="log-list"></div>
@@ -890,6 +946,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <dt>Загрузка <kbd>4</kbd></dt><dd>Сколько часов у каждого сотрудника на каждой неделе.</dd>
           <dt>Журнал <kbd>5</kbd></dt><dd>Все действия по дням.</dd>
           <dt>Отчёты <kbd>6</kbd></dt><dd>Итоги за период, графики, выгрузка в CSV.</dd>
+          <dt>Чат <kbd>9</kbd></dt><dd>Общий чат команды и личные диалоги.</dd>
           <dt>Проекты <kbd>7</kbd></dt><dd>Все проекты с прогрессом и людьми. Создаёт и меняет проекты только руководитель.</dd>
           <dt>Шаблоны <kbd>8</kbd></dt><dd>Шаблоны задач: создать, изменить, удалить, создать задачу из шаблона.</dd>
           <dt>Настройки ⚙</dt><dd>Кнопка в шапке: внешний вид, меню, справка и команды. См. раздел «Настройки».</dd>
@@ -1022,6 +1079,15 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         </ul>
       </section>
 
+      <section id="h-chat"><h3>Чат</h3>
+        <p>Вкладка «Чат» (клавиша <kbd>9</kbd>): «Общий чат» для всей команды и личные диалоги с каждым сотрудником и руководителем. Сообщения подписываются именем, выбранным в «Я: …». Enter отправляет, Shift+Enter переносит строку. Номер задачи в тексте (например, PLN-101) становится ссылкой. Число на вкладке показывает непрочитанные.</p>
+        <ul>
+          <li><b>С разных компьютеров.</b> Сервера у Планёрки нет, поэтому сообщения передаются через общий JSON-файл: все подключают один файл из сетевой или облачной папки (Chrome, Edge). Планёрка проверяет его каждые 5 секунд. Без такого файла чат работает только внутри одного браузера.</li>
+          <li><b>Не секретно.</b> Входа по паролю нет: любой может выбрать чужое имя в «Я: …», а файл с данными могут прочитать все, у кого к нему есть доступ. Не пишите в чат пароли и личные данные.</li>
+          <li><b>Хранение.</b> Хранятся последние 2000 сообщений. Удаления и правки сообщений нет.</li>
+        </ul>
+      </section>
+
       <section id="h-dict"><h3>Проекты и шаблоны</h3>
         <p><b>Вкладка «Проекты».</b> Карточка проекта показывает, сколько задач открыто, готово и просрочено, сколько часов впереди, полосу готовности и людей с открытыми задачами. Кнопки «Дерево» и «Задачи на доске» открывают проект в дереве или на канбане с фильтром.</p>
         <p><b>Создавать, переименовывать, перекрашивать и убирать проекты в архив может только руководитель</b> — когда в «Я: …» выбран «Руководитель». Сотрудники видят проекты, но без кнопок изменения. Входа с паролем в Планёрке нет, поэтому это ограничение интерфейса: оно защищает от случайных правок, а не от намеренных.</p>
@@ -1103,6 +1169,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         <dl>
           <dt>Браузер</dt><dd>Каждое изменение сохраняется в браузере сразу. Если очистить данные сайта или открыть файл в другом браузере, данных там не будет.</dd>
           <dt>JSON-файл (Chrome, Edge)</dt><dd>«Сохранять в новый файл» или «Открыть файл»: после этого каждое изменение записывается в файл. Файл можно положить в облачную папку. После перезапуска браузера появится плашка «Разрешить доступ» — так браузер защищает файлы.</dd>
+          <dt>Общий файл</dt><dd>Если один файл подключён у нескольких человек, Планёрка каждые 5 секунд подхватывает чужие изменения и сообщения чата. Изменения задач применяются, когда не открыто окно и вы не печатаете в поле. Сообщения чата объединяются сами.</dd>
           <dt>Расхождение данных</dt><dd>Если файл изменили снаружи или в браузере есть правки новее файла, Планёрка спросит, какую версию оставить. Другая версия сохранится в резервную копию.</dd>
           <dt>Экспорт и импорт</dt><dd>«Скачать JSON» и «Импортировать JSON». Работает в любом браузере.</dd>
           <dt>Резервные копии</dt><dd>Последние 15 копий хранятся в этом браузере. Копия создаётся раз в день при запуске, при каждом открытии JSON-файла, а также перед импортом, сбросом, восстановлением и выбором версии при расхождении. В меню хранения у каждой копии есть «Скачать» и «Восстановить» (второе требует двух нажатий). Восстановление тоже можно откатить: текущие данные перед ним попадают в копии.</dd>
@@ -1119,7 +1186,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <tr><td><kbd>N</kbd></td><td>Новая задача</td></tr>
           <tr><td><kbd>Q</kbd></td><td>Быстрый ввод</td></tr>
           <tr><td><kbd>/</kbd></td><td>Поиск</td></tr>
-          <tr><td><kbd>1</kbd>…<kbd>8</kbd></td><td>Распределение, Канбан, Дерево, Загрузка, Журнал, Отчёты, Проекты, Шаблоны</td></tr>
+          <tr><td><kbd>1</kbd>…<kbd>9</kbd></td><td>Распределение, Канбан, Дерево, Загрузка, Журнал, Отчёты, Проекты, Шаблоны, Чат</td></tr>
           <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd> <kbd>Tab</kbd></td><td>В дереве: сделать подзадачей предыдущей / поднять уровнем выше</td></tr>
           <tr><td><kbd>M</kbd></td><td>Личный кабинет</td></tr>
           <tr><td><kbd>Esc</kbd></td><td>Закрыть окно, очистить поиск</td></tr>
@@ -1149,7 +1216,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 7;
+const SCHEMA = 8;
+const CHAT_MAX = 2000, CHAT_TEXT_MAX = 2000; // localStorage holds about 5 MB per site, so old messages drop off
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
 const LS_KEY = 'planerka.data', LS_BACKUP = 'planerka.backup', LS_THEME = 'planerka.theme', LS_VIEW = 'planerka.view', LS_UI = 'planerka.ui', LS_ME = 'planerka.me';
@@ -1233,6 +1301,16 @@ function normTemplate(p){
     prio: PRIO[p.prio] ? p.prio : 'med', tag: s(p.tag, 40), est: Math.max(0, Number(p.est) || 0), project: p.project ? s(p.project, 40) : null,
     desc: s(p.desc, 5000), checklist: (Array.isArray(p.checklist) ? p.checklist : []).map(c => s(typeof c === 'string' ? c : c?.text, 300)).filter(Boolean)};
 }
+/* chat messages: to = 'all' or the other person's id; the manager is 'boss' */
+const normMsg = m => ({id: String(m?.id ?? '').slice(0, 40), from: String(m?.from ?? '').slice(0, 40), to: String(m?.to ?? '').slice(0, 40) || 'all', text: String(m?.text ?? '').slice(0, CHAT_TEXT_MAX), at: String(m?.at ?? '').slice(0, 40)});
+// messages are only ever added, so two copies of the chat merge by id without conflicts
+function mergeChat(a, b){
+  const byId = new Map([...a, ...b].map(m => [m.id, m]));
+  return [...byId.values()].sort((x, y) => x.at.localeCompare(y.at)).slice(-CHAT_MAX);
+}
+// everything except the chat, in a form that doesn't depend on who wrote it
+const workKey = d => JSON.stringify({...migrate(d), savedAt: 0, blobs: 0, chat: 0});
+
 // Validates anything loaded from storage or a file and upgrades older versions to SCHEMA.
 function migrate(raw){
   if (!raw || typeof raw !== 'object' || !Array.isArray(raw.tasks) || !Array.isArray(raw.people))
@@ -1280,7 +1358,9 @@ function migrate(raw){
   const blobs = {};
   for (const [id, b] of Object.entries(raw.blobs && typeof raw.blobs === 'object' ? raw.blobs : {}))
     if (used.has(id) && typeof b?.data === 'string' && b.data.startsWith('data:')) blobs[id] = {data: b.data};
-  return {version: SCHEMA, nextId, people, tasks, projects, templates, events, blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null};
+  // v7 -> v8: chat
+  const chat = mergeChat((Array.isArray(raw.chat) ? raw.chat : []).map(normMsg).filter(m => m.id && m.text), []);
+  return {version: SCHEMA, nextId, people, tasks, projects, templates, events, chat, blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null};
 }
 
 function demo(){
@@ -1325,7 +1405,7 @@ function demo(){
 
 /* ---------- storage: localStorage always, JSON file optionally ---------- */
 const FS_OK = 'showSaveFilePicker' in window;
-const file = {handle: null, name: '', mtime: 0, needsPermission: false, error: ''};
+const file = {handle: null, name: '', mtime: 0, work: null, needsPermission: false, error: ''}; // work = workKey of what the file held at the last read or write
 const canAttach = () => !!file.handle && !file.needsPermission;
 let db, saveTimer, writing = Promise.resolve();
 
@@ -1387,16 +1467,41 @@ function writeFile(force = false){
     try {
       if (!force && file.mtime){
         const f = await h.getFile();
-        if (f.lastModified !== file.mtime) return conflict(await parseFile(f), f.lastModified, 'Файл изменили вне этой вкладки: в другой вкладке, другой программой или на другом компьютере.');
+        if (f.lastModified !== file.mtime){
+          const data = await parseFile(f), k = workKey(data);
+          // someone only added messages (or has the same data): merge them and write on
+          if (k !== file.work && k !== workKey(db)) return conflict(data, f.lastModified, 'Файл изменили вне этой вкладки: в другой вкладке, другой программой или на другом компьютере.');
+          db.chat = mergeChat(db.chat, data.chat); saveLocal(); renderChatBits();
+        }
       }
       const w = await h.createWritable(); await w.write(JSON.stringify(db, null, 2)); await w.close();
-      file.mtime = (await h.getFile()).lastModified; file.error = '';
+      file.mtime = (await h.getFile()).lastModified; file.work = workKey(db); file.error = '';
     } catch (e) { file.error = 'Не удалось записать файл: ' + e.message; }
     renderStore();
   });
   return writing;
 }
 async function parseFile(f){ return migrate(JSON.parse(await f.text())); }
+// picks up what others wrote to a shared file. Changes to tasks wait while a window is open or a field is being typed in, so nothing is pulled out from under the user
+const typingElsewhere = () => document.querySelector('dialog[open]') || (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName) && document.activeElement.id !== 'chat-in');
+function pollFile(){
+  const h = file.handle;
+  if (!h || file.needsPermission || file.error || file.work == null) return;
+  writing = writing.then(async () => {
+    if (file.handle !== h || $('#d-conflict').open) return;
+    const f = await h.getFile();
+    if (f.lastModified === file.mtime) return;
+    const data = await parseFile(f), k = workKey(data), chat = mergeChat(db.chat, data.chat);
+    const fresh = k !== file.work && k !== workKey(db);
+    // our own unsaved edits meet theirs in writeFile, which asks which version to keep
+    if (fresh && (workKey(db) !== file.work || typingElsewhere())) return;
+    if (fresh) db = {...data, chat}; else db.chat = chat;
+    file.mtime = f.lastModified; file.work = k; saveLocal();
+    if (fresh) render(); else renderChatBits();
+    if (chat.length > data.chat.length) writeFile(); // the file lost our message to a simultaneous write
+  }).catch(() => {});
+}
+setInterval(pollFile, 5000);
 
 async function useHandle(h){
   file.handle = h; file.name = h.name; file.needsPermission = false; file.error = '';
@@ -1408,7 +1513,8 @@ async function loadFromHandle(){
   // local edits made while the file was unreachable must not vanish silently
   if (db.savedAt && data.savedAt && db.savedAt > data.savedAt && !sameData(db, data))
     return conflict(data, f.lastModified, 'В браузере есть изменения новее, чем в файле.');
-  db = data; file.mtime = f.lastModified; saveLocal(); render();
+  data.chat = mergeChat(db.chat, data.chat);
+  db = data; file.mtime = f.lastModified; file.work = workKey(data); saveLocal(); render();
   snapshot(data, `При открытии ${file.name}`);
 }
 async function createFile(){
@@ -1423,7 +1529,7 @@ async function openFile(){
   try {
     const [h] = await showOpenFilePicker({types: [{description: 'Данные Планёрки', accept: {'application/json': ['.json']}}]});
     const f = await h.getFile(), data = await parseFile(f);
-    backupLocal('Перед открытием файла'); db = data; await useHandle(h); file.mtime = f.lastModified; saveLocal();
+    backupLocal('Перед открытием файла'); db = data; await useHandle(h); file.mtime = f.lastModified; file.work = workKey(data); saveLocal();
     snapshot(data, `При открытии ${h.name}`);
     toast(`Открыт ${h.name}. Прежние данные браузера сохранены в резервную копию.`);
   } catch (e) { if (e.name !== 'AbortError') toast('Не удалось открыть файл: ' + e.message); }
@@ -1447,12 +1553,13 @@ async function detachFile(){
 let pending = null;
 function conflict(data, mtime, reason){
   pending = {data, mtime};
+  db.chat = data.chat = mergeChat(db.chat, data.chat); // messages survive whichever version wins
   const d = $('#d-conflict');
   d.innerHTML = `<div class="d-head"><h2>Данные в файле и в браузере различаются</h2></div>
     <div class="d-body"><p class="note">${esc(reason)}</p>
     <p class="note">Файл сохранён: ${data.savedAt ? fmtStamp(data.savedAt) : 'неизвестно'} · в браузере: ${db.savedAt ? fmtStamp(db.savedAt) : 'неизвестно'}. Вторую версию сохраню в резервную копию, её можно будет восстановить в меню хранения.</p></div>
     <div class="d-foot"><button class="btn" id="cf-file">Взять данные из файла</button><span class="spacer"></span><button class="btn primary" id="cf-local">Записать в файл данные браузера</button></div>`;
-  d.querySelector('#cf-file').onclick = () => { backupLocal('Версия браузера при расхождении'); db = pending.data; file.mtime = pending.mtime; saveLocal(); d.close(); render(); };
+  d.querySelector('#cf-file').onclick = () => { backupLocal('Версия браузера при расхождении'); db = pending.data; file.mtime = pending.mtime; file.work = workKey(db); saveLocal(); d.close(); render(); };
   d.querySelector('#cf-local').onclick = async () => {
     snapshot(pending.data, 'Версия файла при расхождении');
     db.blobs = {...pending.data.blobs, ...db.blobs}; // the browser copy has no attachment contents; keep the file's
@@ -1513,7 +1620,7 @@ function change(fn, msg, action){
   commit();
   if (typeof msg === 'function') msg = msg();
   if (typeof action === 'function') action = action();
-  if (msg) toast(msg, () => { db = JSON.parse(before); commit(); }, action || undefined);
+  if (msg) toast(msg, () => { db = {...JSON.parse(before), chat: db.chat}; commit(); }, action || undefined);
 }
 const addEvent = text => { db.events.push({at: stamp(), text}); if (db.events.length > 500) db.events.splice(0, db.events.length - 500); };
 
@@ -1779,6 +1886,7 @@ function render(){
   if (view === 'tpl') renderTpl();
   if (view === 'load') renderLoad();
   if (view === 'log') renderLog();
+  renderChatBits();
   if (view === 'report') renderReport();
   if (view === 'tree') renderTreeView();
   if ($('#d-task').open) refreshTaskDialog?.();
@@ -3002,7 +3110,7 @@ function openTplEditor(id){
 
 /* ---------- personal settings: kept in this browser, separately for each person chosen in «Я: …» ---------- */
 const PREF_DEFAULT = {theme: 'system', accent: 'blue', density: 'normal', nav: 'top', hidden: [], start: 'last'};
-const VIEW_NAMES = {team: 'Распределение', board: 'Канбан', tree: 'Дерево', proj: 'Проекты', tpl: 'Шаблоны', load: 'Загрузка', log: 'Журнал', report: 'Отчёты'};
+const VIEW_NAMES = {team: 'Распределение', board: 'Канбан', tree: 'Дерево', proj: 'Проекты', tpl: 'Шаблоны', load: 'Загрузка', log: 'Журнал', report: 'Отчёты', chat: 'Чат'};
 const ACCENTS = {blue: ['Синий', '#2B54E0'], green: ['Зелёный', '#0F7A55'], violet: ['Фиолетовый', '#6A4BC4'], orange: ['Оранжевый', '#C2570C'], graphite: ['Графит', '#3D4451']};
 const prefKey = () => 'planerka.prefs.' + (meId || 'boss');
 const sysDark = matchMedia('(prefers-color-scheme: dark)');
@@ -3252,6 +3360,7 @@ const COMMANDS = [
   ['Новый сотрудник', '', () => openPerson(null)],
   ['Вид: Проекты', '7', () => setView('proj')],
   ['Вид: Шаблоны', '8', () => setView('tpl')],
+  ['Вид: Чат', '9', () => setView('chat')],
   ['Новый шаблон', '', () => openTplEditor(null)],
   ['Настройки', '', openSettings],
   ['Меню сбоку / сверху', '', () => { prefs.nav = prefs.nav === 'side' ? 'top' : 'side'; savePrefs(); applyPrefs(); }],
@@ -3338,7 +3447,7 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.target.closest('input,textarea,select,[contenteditable]') || document.querySelector('dialog[open]')) return;
   const f = {KeyN: () => openTask(null), KeyQ: focusQuick, Slash: focusSearch, Digit1: () => setView('team'), Digit2: () => setView('board'),
-    Digit3: () => setView('tree'), Digit4: () => setView('load'), Digit5: () => setView('log'), Digit6: () => setView('report'), Digit7: () => setView('proj'), Digit8: () => setView('tpl'), KeyM: () => meId ? openCab(meId) : $('#me-ava').click()}[e.code];
+    Digit3: () => setView('tree'), Digit4: () => setView('load'), Digit5: () => setView('log'), Digit6: () => setView('report'), Digit7: () => setView('proj'), Digit8: () => setView('tpl'), Digit9: () => setView('chat'), KeyM: () => meId ? openCab(meId) : $('#me-ava').click()}[e.code];
   if (f){ e.preventDefault(); f(); }
 });
 
@@ -3411,8 +3520,83 @@ $('#new-task').onclick = () => openTask(null);
 $('#new-person').onclick = () => openPerson(null);
 $('#store-btn').onclick = openStore;
 
+/* ---------- chat ---------- */
+let chatWith = 'all', chatOpen = false;
+const chatDrafts = {};
+const chatMe = () => meId || 'boss';
+const chatDraftKey = () => chatMe() + ':' + chatWith;
+const chatPeer = m => m.to === 'all' ? 'all' : m.from === chatMe() ? m.to : m.to === chatMe() ? m.from : null;
+const chatName = id => id === 'all' ? 'Общий чат' : id === 'boss' ? ME : person(id)?.name || 'Бывший сотрудник';
+const chatAva = id => id === 'all' ? '<span class="ava ch-all" aria-hidden="true">#</span>' : person(id) ? ava(person(id)) : `<span class="ava ch-all" aria-hidden="true">${id === 'boss' ? 'Р' : '?'}</span>`;
+const chatReadKey = () => 'planerka.chatread.' + chatMe();
+// reading marks are per person and per browser: reading must not write to the shared file
+function chatRead(){ try { return JSON.parse(pref(chatReadKey())) || {}; } catch { return {}; } }
+// shortcut: compares message times, so a computer with a clock far behind can miss the mark; store message ids if that shows up
+const chatUnread = (peer, read) => db.chat.filter(m => m.from !== chatMe() && chatPeer(m) === peer && m.at > (read[peer] || '')).length;
+const chatLast = peer => db.chat.findLast(m => chatPeer(m) === peer);
+const chatNarrow = () => matchMedia('(max-width:760px)').matches;
+function renderChatBits(toBottom = false){
+  const read = chatRead(), last = chatLast(chatWith);
+  // the open dialog counts as read only while it is really on screen
+  if (view === 'chat' && (chatOpen || !chatNarrow()) && !document.hidden && last && last.at > (read[chatWith] || '')){
+    read[chatWith] = last.at; savePref(chatReadKey(), JSON.stringify(read));
+  }
+  const n = [...new Set(db.chat.map(chatPeer))].filter(Boolean).reduce((a, c) => a + chatUnread(c, read), 0), b = $('#chat-badge');
+  b.hidden = !n; b.textContent = n;
+  if (view === 'chat') renderChat(read, toBottom);
+}
+const chatText = t => esc(t).replace(/\bPLN-\d+\b/g, id => db.tasks.some(x => x.id === id) ? `<button type="button" class="link" data-task-link="${id}">${id}</button>` : id);
+const chatTime = d => d.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+function renderChat(read, toBottom){
+  const me = chatMe();
+  if (chatWith === me) chatWith = 'all';
+  const last = {};
+  db.chat.forEach(m => { const c = chatPeer(m); if (c) last[c] = m; });
+  const gone = Object.keys(last).filter(c => c !== 'all' && c !== 'boss' && !active().some(p => p.id === c));
+  const peers = [...(me === 'boss' ? [] : ['boss']), ...active().filter(p => p.id !== me).map(p => p.id), ...gone].sort((a, b) => (last[b]?.at || '').localeCompare(last[a]?.at || ''));
+  $('#ch-note').hidden = !!file.handle;
+  $('#ch-wrap').classList.toggle('open', chatOpen);
+  $('#ch-side').innerHTML = ['all', ...peers].map(c => {
+    const m = last[c], u = chatUnread(c, read), d = m && new Date(m.at);
+    return `<button type="button" class="ch-row" data-chat="${esc(c)}" aria-current="${c === chatWith}">${chatAva(c)}
+      <span class="ch-who">${esc(chatName(c))}</span><span class="ch-time">${!m ? '' : isoDay(d) === addDays(0) ? chatTime(d) : fmtDay(isoDay(d))}</span>
+      <span class="ch-prev">${m ? `${m.from === me ? 'Вы: ' : ''}${esc(m.text.slice(0, 80))}` : 'Нет сообщений'}</span>${u ? `<span class="badge">${u}</span>` : ''}</button>`;
+  }).join('');
+  $('#ch-title').innerHTML = `<b>${esc(chatName(chatWith))}</b><span>${chatWith === 'all' ? 'Видят все сотрудники' : esc(person(chatWith)?.role || (chatWith === 'boss' ? '' : 'Нет в команде'))}</span>`;
+  const box = $('#ch-msgs'), bottom = toBottom || box.scrollHeight - box.scrollTop - box.clientHeight < 60, top = box.scrollTop;
+  let day = '';
+  box.innerHTML = db.chat.filter(m => chatPeer(m) === chatWith).map(m => {
+    const d = new Date(m.at), dk = isoDay(d), plain = m.from === me || chatWith !== 'all'; // the name is only needed in the common room
+    const head = dk !== day ? `<div class="ch-day">${(day = dk, d.toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'}))}</div>` : '';
+    return `${head}<div class="ch-m${m.from === me ? ' mine' : ''}">${plain ? '' : chatAva(m.from)}<div class="ch-bub">${plain ? '' : `<span class="ch-from">${esc(chatName(m.from))}</span>`}${chatText(m.text)}<time class="ch-at">${chatTime(d)}</time></div></div>`;
+  }).join('') || `<p class="ch-none">${chatWith === 'all' ? 'Здесь пишут всей командой. Номер задачи вроде PLN-101 становится ссылкой.' : 'Сообщений пока нет. Входа по паролю в Планёрке нет, поэтому личная переписка не секретна: её может открыть любой, у кого есть доступ к данным.'}</p>`;
+  box.scrollTop = bottom ? box.scrollHeight : top;
+}
+function openChat(peer){
+  chatDrafts[chatDraftKey()] = $('#chat-in').value;
+  chatWith = peer; chatOpen = true;
+  $('#chat-in').value = chatDrafts[chatDraftKey()] || '';
+  renderChatBits(true);
+  $('#chat-in').focus();
+}
+function sendChat(){
+  const inp = $('#chat-in'), text = inp.value.trim();
+  if (!text) return;
+  db.chat = mergeChat(db.chat, [normMsg({id: 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), from: chatMe(), to: chatWith, text, at: stamp()})]);
+  inp.value = ''; inp.style.height = ''; chatDrafts[chatDraftKey()] = '';
+  commit();
+  renderChatBits(true);
+}
+$('#ch-side').onclick = e => { const b = e.target.closest('[data-chat]'); if (b) openChat(b.dataset.chat); };
+$('#ch-back').onclick = () => { chatOpen = false; renderChatBits(); };
+$('#ch-store').onclick = openStore;
+$('#ch-form').onsubmit = e => { e.preventDefault(); sendChat(); $('#chat-in').focus(); };
+$('#chat-in').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); sendChat(); } };
+$('#chat-in').oninput = e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 2 + 'px'; };
+document.addEventListener('visibilitychange', () => { if (!document.hidden && db) renderChatBits(); });
+
 /* ---------- view & theme (per browser, not part of the data) ---------- */
-const VIEWS = ['team', 'board', 'tree', 'proj', 'tpl', 'cab', 'load', 'log', 'report'];
+const VIEWS = ['team', 'board', 'tree', 'proj', 'tpl', 'cab', 'load', 'log', 'report', 'chat'];
 let view = 'team';
 function setView(v){
   if (v === 'my') v = 'cab'; // saved by older versions
@@ -3436,6 +3620,12 @@ addEventListener('storage', e => {
 
 /* ---------- self-check of the migration ---------- */
 (function selfTest(){
+  const c7 = migrate({version: 7, people: [], tasks: []});
+  console.assert(c7.version === SCHEMA && c7.chat.length === 0, 'v7 -> v8: chat');
+  const msg = (id, at) => ({id, from: 'a', to: 'all', text: 't', at});
+  console.assert(migrate({version: 8, people: [], tasks: [], chat: [msg('x', '2'), null, {id: 'y', text: ''}]}).chat.map(m => m.id).join() === 'x', 'chat: bad messages dropped');
+  console.assert(mergeChat([msg('b', '2'), msg('a', '1')], [msg('b', '2'), msg('c', '3')]).map(m => m.id).join() === 'a,b,c', 'chat: merge by id, in time order');
+  console.assert(workKey({version: 8, people: [], tasks: [], chat: [msg('x', '2')], savedAt: '1'}) === workKey({version: 8, people: [], tasks: [], savedAt: '2'}), 'workKey ignores chat and save time');
   const m = migrate({tasks: [{id: 'PLN-7', title: 'a', checklist: ['x', 'y'], done: [1], due: '27 окт', assignee: 'ghost'}, {title: 'b'}], people: []});
   console.assert(m.version === SCHEMA && m.tasks[0].status === 'new' && m.tasks[0].checklist[1].done && !m.tasks[0].checklist[0].done, 'v0 checklist');
   console.assert(m.tasks[0].due === '' && m.tasks[0].assignee === null, 'bad due / unknown assignee dropped');
