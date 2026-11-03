@@ -1,6 +1,6 @@
 <?php
 // Планёрка: хранение в MySQL. Страница работает с базой как с общим JSON-файлом, объединение правок происходит в браузере.
-// shortcut: один пароль на команду и все данные одним документом; отдельные таблицы и личные входы понадобятся, когда нужны права по сотрудникам
+// shortcut: все данные одним документом, поэтому вход определяет, кто работает, но любой вошедший технически может прочитать и записать весь документ; отдельные таблицы понадобятся для прав на сервере
 ini_set('display_errors', '0');
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -16,19 +16,31 @@ set_exception_handler(function ($e) { error_log('planerka: ' . $e->getMessage())
 $cfgFile = __DIR__ . '/config.php';
 if (!is_file($cfgFile)) fail('Нет файла config.php. Создайте его из config.sample.php.', 500);
 $cfg = require $cfgFile;
-if (strlen($cfg['password'] ?? '') < 10) fail('В config.php задайте пароль команды не короче 10 символов.', 500);
+if (strlen($cfg['password'] ?? '') < 10) fail('В config.php задайте пароль администратора не короче 10 символов.', 500);
 
 $pdo = new PDO("mysql:host={$cfg['db_host']};dbname={$cfg['db_name']};charset=utf8mb4", $cfg['db_user'], $cfg['db_pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 $pdo->exec('CREATE TABLE IF NOT EXISTS planerka_doc (id TINYINT PRIMARY KEY, version BIGINT NOT NULL, data LONGTEXT NOT NULL, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 $pdo->exec('CREATE TABLE IF NOT EXISTS planerka_blobs (id VARCHAR(40) PRIMARY KEY, data LONGTEXT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 $pdo->exec('CREATE TABLE IF NOT EXISTS planerka_logins (ip VARCHAR(45) PRIMARY KEY, fails INT NOT NULL, at INT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+$pdo->exec('CREATE TABLE IF NOT EXISTS planerka_users (login VARCHAR(40) PRIMARY KEY, person VARCHAR(40) NOT NULL UNIQUE, hash VARCHAR(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 $pdo->exec("INSERT IGNORE INTO planerka_doc (id, version, data) VALUES (1, 0, '')");
 
-$key = hash('sha256', $cfg['password'] . '|' . $cfg['db_pass']); // смена пароля команды завершает все входы
-function token($exp, $key) { return $exp . '.' . hash_hmac('sha256', (string) $exp, $key); }
-function authed($key) {
-  $parts = explode('.', $_COOKIE['planerka'] ?? '');
-  return count($parts) === 2 && (int) $parts[0] > time() && hash_equals(token((int) $parts[0], $key), $_COOKIE['planerka']);
+$key = hash('sha256', $cfg['password'] . '|' . $cfg['db_pass']); // смена пароля администратора завершает все входы
+const ADMIN = 'admin';
+// хэш пароля входит в подпись: новый пароль или удаление пользователя завершают его входы
+function token($login, $exp, $stamp, $key) { return "$login|$exp|" . hash_hmac('sha256', "$login|$exp|$stamp", $key); }
+function userRow($pdo, $login) {
+  $q = $pdo->prepare('SELECT login, person, hash FROM planerka_users WHERE login = ?');
+  $q->execute([$login]);
+  return $q->fetch(PDO::FETCH_ASSOC);
+}
+function publicUser($login, $row) { return ['login' => $login, 'person' => $row ? $row['person'] : null, 'admin' => !$row]; }
+function currentUser($pdo, $key) {
+  $parts = explode('|', $_COOKIE['planerka'] ?? '');
+  if (count($parts) !== 3 || (int) $parts[1] <= time()) return null;
+  $row = $parts[0] === ADMIN ? null : userRow($pdo, $parts[0]);
+  if ($parts[0] !== ADMIN && !$row) return null;
+  return hash_equals(token($parts[0], (int) $parts[1], $row ? $row['hash'] : '', $key), $_COOKIE['planerka']) ? publicUser($parts[0], $row) : null;
 }
 function setToken($value, $exp) {
   $https = ($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
@@ -45,7 +57,7 @@ if ($isPost) {
   if (!is_array($body)) fail('Данные не дошли: возможно, запрос больше лимита хостинга (post_max_size).', 413);
 }
 
-if ($action === 'status') reply(['planerka' => true, 'auth' => authed($key)]);
+if ($action === 'status') { $me = currentUser($pdo, $key); reply(['planerka' => true, 'auth' => (bool) $me, 'user' => $me]); }
 
 if ($action === 'login' && $isPost) {
   $ip = $_SERVER['REMOTE_ADDR'] ?? '';
@@ -54,19 +66,51 @@ if ($action === 'login' && $isPost) {
   $row = $q->fetch(PDO::FETCH_ASSOC);
   $fails = $row && $row['at'] > time() - LOGIN_LOCK_MIN * 60 ? (int) $row['fails'] : 0;
   if ($fails >= LOGIN_FAILS) fail('Слишком много попыток. Подождите ' . LOGIN_LOCK_MIN . ' минут.', 429);
-  if (!is_string($body['password'] ?? null) || !hash_equals($cfg['password'], $body['password'])) {
+  $login = is_string($body['login'] ?? null) ? strtolower(trim($body['login'])) : '';
+  $pass = is_string($body['password'] ?? null) ? $body['password'] : '';
+  $row = $login === ADMIN ? null : userRow($pdo, $login);
+  // хэш считается и для несуществующего логина, чтобы время ответа его не выдавало
+  $ok = $login === ADMIN ? hash_equals($cfg['password'], $pass) : password_verify($pass, $row ? $row['hash'] : password_hash('', PASSWORD_DEFAULT)) && $row;
+  if (!$ok) {
     $pdo->prepare('REPLACE INTO planerka_logins (ip, fails, at) VALUES (?, ?, ?)')->execute([$ip, $fails + 1, time()]);
-    fail('Неверный пароль.', 403);
+    fail('Неверный логин или пароль.', 403);
   }
   $pdo->prepare('DELETE FROM planerka_logins WHERE ip = ?')->execute([$ip]);
   $exp = time() + TOKEN_DAYS * 86400;
-  setToken(token($exp, $key), $exp);
-  reply(['ok' => true]);
+  setToken(token($login, $exp, $row ? $row['hash'] : '', $key), $exp);
+  reply(['ok' => true, 'user' => publicUser($login, $row)]);
 }
 
 if ($action === 'logout' && $isPost) { setToken('', time() - 3600); reply(['ok' => true]); }
 
-if (!authed($key)) fail('Нужно войти.', 401);
+$me = currentUser($pdo, $key);
+if (!$me) fail('Нужно войти.', 401);
+
+if (in_array($action, ['users', 'user_save', 'user_del'], true)) {
+  if (!$me['admin']) fail('Это может только администратор.', 403);
+  if ($action === 'users') reply(['users' => $pdo->query('SELECT login, person FROM planerka_users ORDER BY login')->fetchAll(PDO::FETCH_ASSOC)]);
+  if (!$isPost) fail('Неверный запрос.', 405);
+  $login = is_string($body['login'] ?? null) ? strtolower(trim($body['login'])) : '';
+  if ($action === 'user_del') {
+    $pdo->prepare('DELETE FROM planerka_users WHERE login = ?')->execute([$login]);
+    reply(['ok' => true]);
+  }
+  $pass = $body['password'] ?? null;
+  if (!is_string($pass) || strlen($pass) < 8 || strlen($pass) > 72) fail('Пароль должен быть длиной от 8 до 72 символов.', 400);
+  $hash = password_hash($pass, PASSWORD_DEFAULT);
+  if (userRow($pdo, $login)) {
+    $pdo->prepare('UPDATE planerka_users SET hash = ? WHERE login = ?')->execute([$hash, $login]);
+    reply(['ok' => true]);
+  }
+  if ($login === ADMIN || !preg_match('/^[a-z0-9._-]{2,40}$/', $login)) fail('Логин: от 2 до 40 латинских букв, цифр и знаков . _ - (имя admin занято).', 400);
+  $person = $body['person'] ?? null;
+  if (!is_string($person) || !preg_match('/^[\w-]{1,40}$/', $person)) fail('Выберите сотрудника.', 400);
+  $q = $pdo->prepare('SELECT login FROM planerka_users WHERE person = ?');
+  $q->execute([$person]);
+  if ($q->fetchColumn() !== false) fail('У этого сотрудника уже есть логин.', 400);
+  $pdo->prepare('INSERT INTO planerka_users (login, person, hash) VALUES (?, ?, ?)')->execute([$login, $person, $hash]);
+  reply(['ok' => true]);
+}
 
 if ($action === 'ver') reply(['version' => (int) $pdo->query('SELECT version FROM planerka_doc WHERE id = 1')->fetchColumn()]);
 

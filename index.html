@@ -144,6 +144,11 @@ dialog::backdrop{background:rgba(10,12,10,.45)}
 #d-login::backdrop{background:var(--bg)}
 .lg-label{font-weight:600}
 .lg-in{box-sizing:border-box;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);font:inherit;margin-top:-8px}
+.us-row{flex-wrap:wrap}
+.us-add{display:grid;gap:8px;margin-top:8px}
+.us-add input,.us-row input{box-sizing:border-box;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit;min-width:0}
+.dict-row.us-row .grow{flex:1 1 100%}
+.dict-row.us-row input{flex:1 1 140px}
 .mg-row{display:grid;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
 .mg-opt{display:flex;gap:8px;align-items:flex-start;cursor:pointer;overflow-wrap:anywhere}
 .mg-opt i{font-style:normal;opacity:.7}
@@ -944,6 +949,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <dialog id="d-store"></dialog>
 <dialog id="d-conflict"></dialog>
 <dialog id="d-login"></dialog>
+<dialog id="d-users"></dialog>
 <dialog id="d-pal" aria-label="Команды"></dialog>
 <dialog id="d-return"></dialog>
 <dialog id="d-tpl"></dialog>
@@ -1208,7 +1214,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <dt>Браузер</dt><dd>Каждое изменение сохраняется в браузере сразу. Если очистить данные сайта или открыть файл в другом браузере, данных там не будет.</dd>
           <dt>JSON-файл (Chrome, Edge)</dt><dd>«Сохранять в новый файл» или «Открыть файл»: после этого каждое изменение записывается в файл. Файл можно положить в облачную папку. После перезапуска браузера появится плашка «Разрешить доступ» — так браузер защищает файлы.</dd>
           <dt>Общий файл</dt><dd>Если один файл подключён у нескольких человек, Планёрка каждые 5 секунд подхватывает чужие изменения и сообщения чата. Можно работать одновременно: правки разных задач и разных полей одной задачи, новые задачи, комментарии и пункты чек-листа объединяются сами. Изменения применяются, когда не открыто окно и вы не печатаете в поле. Если двое изменили одно и то же поле, Планёрка спросит, что оставить. Если задачу удалили с одной стороны и изменили с другой, она останется.</dd>
-          <dt>База данных</dt><dd>Если Планёрка размещена на хостинге с PHP и MySQL, все работают с общей базой: нужен только пароль команды, подключать файл не надо, работает и на телефоне. Правки объединяются так же, как в общем файле, изменения приходят за 5 секунд. Пароль один на всех, поэтому личные чаты видны любому, кто вошёл.</dd>
+          <dt>База данных</dt><dd>Если Планёрка размещена на хостинге с PHP и MySQL, все работают с общей базой: подключать файл не надо, работает и на телефоне. Каждый входит со своим логином и паролем, поэтому списка «Я: …» нет: действия подписываются именем вошедшего. Администратор входит с логином admin и паролем из настроек сервера, работает как руководитель и добавляет пользователей: «Хранение данных» → «Пользователи…». Сначала добавьте сотрудника, затем создайте ему логин. Правки объединяются так же, как в общем файле, изменения приходят за 5 секунд. Все данные лежат одним документом, поэтому разграничение работает в интерфейсе: технически подкованный пользователь может прочитать весь документ, включая личные чаты.</dd>
           <dt>Расхождение данных</dt><dd>Если Планёрка не знает, от какой версии файла начались правки (например, файл подключён впервые, а в браузере есть данные новее), она спросит, какую версию оставить. Другая версия сохранится в резервную копию.</dd>
           <dt>Экспорт и импорт</dt><dd>«Скачать JSON» и «Импортировать JSON». Работает в любом браузере.</dd>
           <dt>Резервные копии</dt><dd>Последние 15 копий хранятся в этом браузере. Копия создаётся раз в день при запуске, при каждом открытии JSON-файла, а также перед импортом, сбросом, восстановлением и выбором версии при расхождении. В меню хранения у каждой копии есть «Скачать» и «Восстановить» (второе требует двух нажатий). Восстановление тоже можно откатить: текущие данные перед ним попадают в копии.</dd>
@@ -1266,6 +1272,7 @@ const HUES = ['#2B54E0','#0F8A6A','#B5476E','#B0731A','#6A4BC4','#3C7A8C'];
 const ME = 'Руководитель';
 // who is working in this browser: null = manager. This is a convenience switch, not a login.
 let meId = null;
+let serverUser = null; // who signed in on the database version: {login, person, admin}. There meId comes from the account
 const actor = () => (meId && person(meId)?.name) || ME;
 const REPEAT_UNITS = {day: 'день', week: 'неделя', month: 'месяц'};
 
@@ -1679,7 +1686,8 @@ const serverHandle = {
     }};
   },
 };
-async function serverConnect(){
+async function serverConnect(user){
+  serverUser = user; meId = user.admin ? null : user.person; savePref(LS_ME, meId || ''); loadPrefs();
   file.handle = serverHandle; file.name = serverHandle.name; file.error = '';
   try {
     const {version} = await api('ver');
@@ -1688,21 +1696,70 @@ async function serverConnect(){
   } catch (e) { if (e.status !== 401) file.error = 'Сервер недоступен: ' + e.message; }
   render();
 }
-function askLogin(){
+function askLogin(message){
   const d = $('#d-login');
   d.innerHTML = `<form method="dialog" id="lg-form"><div class="d-head"><h2>Вход в Планёрку</h2></div>
-    <div class="d-body"><label class="lg-label" for="lg-pass">Пароль команды</label>
+    <div class="d-body"><label class="lg-label" for="lg-login">Логин</label>
+    <input class="lg-in" id="lg-login" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label class="lg-label" for="lg-pass">Пароль</label>
     <input class="lg-in" id="lg-pass" type="password" autocomplete="current-password" required>
-    <p class="note" id="lg-err" role="alert" hidden></p></div>
+    <p class="note" id="lg-err" role="alert" ${message ? '' : 'hidden'}>${esc(message || '')}</p></div>
     <div class="d-foot"><span class="spacer"></span><button class="btn primary" type="submit">Войти</button></div></form>`;
   d.oncancel = e => e.preventDefault();
   d.querySelector('#lg-form').onsubmit = async e => {
     e.preventDefault();
     const err = d.querySelector('#lg-err');
-    try { await api('login', {password: d.querySelector('#lg-pass').value}); d.close(); await serverConnect(); }
+    try { const {user} = await api('login', {login: d.querySelector('#lg-login').value, password: d.querySelector('#lg-pass').value}); d.close(); await serverConnect(user); }
     catch (x) { err.hidden = false; err.textContent = x.message; }
   };
   d.showModal();
+}
+// an account whose employee is gone must not fall back to the manager's rights
+function serverDenied(){
+  serverUser = null;
+  askLogin('Ваш сотрудник удалён или в архиве. Обратитесь к администратору.');
+  api('logout', {}).catch(() => {});
+}
+async function openUsers(){
+  $('#d-store').close();
+  const d = $('#d-users');
+  d.innerHTML = '<div class="d-body"><p class="note">Загружаю…</p></div>';
+  d.showModal();
+  await drawUsers();
+}
+async function drawUsers(error = ''){
+  const d = $('#d-users');
+  let users;
+  try { ({users} = await api('users')); }
+  catch (e) { d.innerHTML = `<div class="d-head"><h2>Пользователи</h2><button class="close" aria-label="Закрыть">✕</button></div><div class="d-body"><p class="note" role="alert">${esc(e.message)}</p></div>`; return; }
+  const taken = new Set(users.map(u => u.person)), free = active().filter(p => !taken.has(p.id));
+  d.innerHTML = `<div class="d-head"><h2>Пользователи</h2><button class="close" aria-label="Закрыть">✕</button></div>
+  <div class="d-body">
+    <p class="note" id="us-err" role="alert" ${error ? '' : 'hidden'}>${esc(error)}</p>
+    ${users.length ? '' : '<p class="note">Пока есть только администратор.</p>'}
+    ${users.map(u => `<form class="dict-row us-row" data-user="${esc(u.login)}"><span class="grow"><b>${esc(u.login)}</b> <span class="muted">· ${esc(person(u.person)?.name || 'сотрудник удалён')}</span></span>
+      <input type="password" autocomplete="new-password" placeholder="Новый пароль" aria-label="Новый пароль для ${esc(u.login)}" required>
+      <button class="btn small">Сменить пароль</button><button type="button" class="btn small danger" data-del>Удалить</button></form>`).join('')}
+    <h4 class="sec-t" style="margin-top:16px">Новый пользователь</h4>
+    ${free.length ? `<form class="us-add" id="us-add">
+      <select class="sel" id="us-person" aria-label="Сотрудник">${free.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('')}</select>
+      <input id="us-login" placeholder="Логин" aria-label="Логин" autocapitalize="none" spellcheck="false" autocomplete="off" required>
+      <input id="us-pass" type="password" placeholder="Пароль, не короче 8 символов" aria-label="Пароль" autocomplete="new-password" required>
+      <button class="btn primary">Добавить</button></form>` : '<p class="note">У всех сотрудников уже есть логин. Сначала добавьте нового сотрудника.</p>'}
+  </div>`;
+  const send = (action, body, done) => api(action, body).then(() => { toast(done); return drawUsers(); }, e => drawUsers(e.message));
+  d.querySelector('#us-add')?.addEventListener('submit', e => {
+    e.preventDefault();
+    send('user_save', {login: d.querySelector('#us-login').value, person: d.querySelector('#us-person').value, password: d.querySelector('#us-pass').value}, 'Пользователь добавлен');
+  });
+  d.querySelectorAll('[data-user]').forEach(f => {
+    f.onsubmit = e => { e.preventDefault(); send('user_save', {login: f.dataset.user, password: f.querySelector('input').value}, 'Пароль изменён'); };
+    f.querySelector('[data-del]').onclick = e => {
+      const b = e.currentTarget;
+      if (!b.dataset.armed){ b.dataset.armed = 1; b.textContent = 'Точно удалить?'; return; }
+      send('user_del', {login: f.dataset.user}, 'Пользователь удалён');
+    };
+  });
 }
 async function serverLogout(){
   await api('logout', {}).catch(() => {});
@@ -1717,7 +1774,7 @@ async function serverStart(){
   try {
     const s = await api('status');
     if (!s.planerka) return false;
-    if (s.auth) await serverConnect(); else askLogin();
+    if (s.auth) await serverConnect(s.user); else askLogin();
   } catch (e) {
     if (!e.status){
       if (onServer()){ file.handle = null; file.error = ''; render(); } // it was a static host after all
@@ -2479,7 +2536,11 @@ function openArchive(){
 
 /* ---------- current user and the avatar in the header ---------- */
 function renderMe(){
-  if (meId && (!person(meId) || person(meId).archived)){ meId = null; savePref(LS_ME, ''); }
+  const gone = meId && (!person(meId) || person(meId).archived);
+  if (serverUser && !serverUser.admin){
+    if (file.work != null && (!meId || gone) && !$('#d-login').open && !$('#d-conflict').open) serverDenied();
+  } else if (gone){ meId = null; savePref(LS_ME, ''); }
+  $('#me-sel').hidden = !!serverUser;
   $('#me-sel').innerHTML = `<option value="">Я: ${ME}</option>` + active().map(p => `<option value="${esc(p.id)}" ${p.id === meId ? 'selected' : ''}>Я: ${esc(p.name)}</option>`).join('');
   const p = person(meId), a = $('#me-ava');
   a.textContent = p ? initials(p.name) : 'Р';
@@ -2500,7 +2561,7 @@ $('#me-ava').onclick = e => {
   if (meId) return openCab(meId);
   const r = e.currentTarget.getBoundingClientRect();
   openCtx(r.right - 240, r.bottom + 6, [{head: 'Кабинет сотрудника'}, ...active().map(p => ({label: p.name, icon: ava(p, true), checked: view === 'cab' && cabPid === p.id, run: () => openCab(p.id)})),
-    '-', {label: 'Работать как сотрудник…', run: () => $('#me-sel').focus()}]);
+    ...(serverUser ? [] : ['-', {label: 'Работать как сотрудник…', run: () => $('#me-sel').focus()}])]);
 };
 
 /* ---------- personal cabinet: current tasks, done, statistics ---------- */
@@ -2800,7 +2861,7 @@ function drawStore(){
   d.innerHTML = `<div class="d-head"><h2>Хранение данных</h2><button class="close" aria-label="Закрыть">✕</button></div>
   <div class="d-body store-grid">
     <p class="note">${where}<br>Последнее сохранение: ${db.savedAt ? fmtStamp(db.savedAt) : 'ещё не было'} · задач ${db.tasks.length}, сотрудников ${db.people.length}.</p>
-    ${onServer() ? '<div><h4 class="sec-t">Аккаунт</h4><div class="row"><button class="btn" id="st-logout">Выйти</button></div><p class="note" style="margin-top:8px">Выход удалит копию данных из этого браузера. В базе они останутся.</p></div>' : `<div><h4 class="sec-t">JSON-файл</h4>
+    ${onServer() ? `<div><h4 class="sec-t">Аккаунт</h4>${serverUser ? `<p class="note" style="margin-bottom:8px">Вы вошли как <b>${esc(serverUser.login)}</b>${serverUser.admin ? ' (администратор)' : ''}.</p>` : ''}<div class="row">${serverUser?.admin ? '<button class="btn" id="st-users">Пользователи…</button>' : ''}<button class="btn" id="st-logout">Выйти</button></div><p class="note" style="margin-top:8px">Выход удалит копию данных из этого браузера. В базе они останутся.</p></div>` : `<div><h4 class="sec-t">JSON-файл</h4>
       ${FS_OK ? `<div class="row">
         ${file.needsPermission ? '<button class="btn primary" id="st-grant">Разрешить доступ</button>' : ''}
         <button class="btn" id="st-create">Сохранять в новый файл…</button>
@@ -2820,7 +2881,7 @@ function drawStore(){
       <button class="btn" id="st-demo">Загрузить пример</button></div></div>
   </div>`;
   const on = (id, fn) => { const b = d.querySelector(id); if (b) b.onclick = fn; };
-  on('#st-logout', serverLogout); on('#st-grant', grantAccess); on('#st-create', createFile); on('#st-open', openFile); on('#st-detach', detachFile);
+  on('#st-logout', serverLogout); on('#st-users', openUsers); on('#st-grant', grantAccess); on('#st-create', createFile); on('#st-open', openFile); on('#st-detach', detachFile);
   on('#st-export', exportJson); on('#st-import', () => $('#import-input').click());
   // two-step confirm: confirm() is unreliable inside embedded viewers
   const twoStep = (id, text, fn) => on(id, async e => { const b = e.currentTarget; if (b.dataset.armed) { await backupLocal('Перед сбросом'); fn(); commit(); toast('Готово. Прежние данные в резервной копии.'); drawStore(); } else { b.dataset.armed = 1; b.textContent = text; } });
@@ -3277,9 +3338,9 @@ function openReturn(id){
 }
 
 /* ---------- projects: everyone sees them, only the manager creates and changes them ---------- */
-// «manager» = nobody chosen in «Я: …»; there is no login, so this guards the interface, not the data file
-const isBoss = () => !meId;
-const bossOnly = () => { if (isBoss()) return true; toast('Проекты может менять только руководитель. Выберите «Я: Руководитель» в шапке.'); return false; };
+// «manager» = the admin account, or nobody chosen in «Я: …»; this guards the interface, not the data
+const isBoss = () => serverUser ? serverUser.admin : !meId;
+const bossOnly = () => { if (isBoss()) return true; toast(serverUser ? 'Проекты может менять только администратор.' : 'Проекты может менять только руководитель. Выберите «Я: Руководитель» в шапке.'); return false; };
 function renderProj(){
   const boss = isBoss(), list = db.projects.filter(p => !p.archived), arch = db.projects.filter(p => p.archived), today = addDays(0);
   $('#proj-count').textContent = list.length;
@@ -3412,7 +3473,7 @@ function drawSettings(){
   const seg = (key, opts) => `<div class="seg" role="group">${Object.entries(opts).map(([v, l]) => `<button type="button" data-pref="${key}" data-val="${v}" aria-pressed="${prefs[key] === v}">${l}</button>`).join('')}</div>`;
   d.innerHTML = `<div class="d-head"><h2>Настройки</h2><button class="close" aria-label="Закрыть">✕</button></div>
   <div class="d-body set-body">
-    <p class="note">Настройки хранятся в этом браузере, у каждого свои. Сейчас это настройки: <b>${esc(person(meId)?.name || ME)}</b>. Другой человек выбирается в списке «Я: …».</p>
+    <p class="note">Настройки хранятся в этом браузере, у каждого свои. Сейчас это настройки: <b>${esc(person(meId)?.name || ME)}</b>.${serverUser ? '' : ' Другой человек выбирается в списке «Я: …».'}</p>
     <section><h4 class="sec-t">Внешний вид</h4>
       <div class="set-row"><span>Тема</span>${seg('theme', {light: 'Светлая', dark: 'Тёмная', system: 'Как в системе'})}</div>
       <div class="set-row"><span>Цвет акцента</span><div class="set-acc">${Object.entries(ACCENTS).map(([k, [l, c]]) => `<button type="button" data-pref="accent" data-val="${k}" aria-pressed="${prefs.accent === k}" title="${l}" aria-label="${l}" style="background:${c}"></button>`).join('')}</div></div>
