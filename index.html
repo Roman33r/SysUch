@@ -141,6 +141,9 @@ dialog::backdrop{background:rgba(10,12,10,.45)}
 .d-head h2{margin:0;font:600 18px/1.25 var(--f-body);text-wrap:balance;min-width:0;overflow-wrap:anywhere}
 .close{margin-left:auto;border:0;background:var(--sunken);width:32px;height:32px;border-radius:8px;cursor:pointer;flex:none}
 .d-body{padding:18px 20px;display:grid;gap:16px;max-height:68vh;overflow:auto}
+#d-login::backdrop{background:var(--bg)}
+.lg-label{font-weight:600}
+.lg-in{box-sizing:border-box;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);font:inherit;margin-top:-8px}
 .mg-row{display:grid;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
 .mg-opt{display:flex;gap:8px;align-items:flex-start;cursor:pointer;overflow-wrap:anywhere}
 .mg-opt i{font-style:normal;opacity:.7}
@@ -940,6 +943,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <dialog id="d-person"></dialog>
 <dialog id="d-store"></dialog>
 <dialog id="d-conflict"></dialog>
+<dialog id="d-login"></dialog>
 <dialog id="d-pal" aria-label="Команды"></dialog>
 <dialog id="d-return"></dialog>
 <dialog id="d-tpl"></dialog>
@@ -1204,6 +1208,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <dt>Браузер</dt><dd>Каждое изменение сохраняется в браузере сразу. Если очистить данные сайта или открыть файл в другом браузере, данных там не будет.</dd>
           <dt>JSON-файл (Chrome, Edge)</dt><dd>«Сохранять в новый файл» или «Открыть файл»: после этого каждое изменение записывается в файл. Файл можно положить в облачную папку. После перезапуска браузера появится плашка «Разрешить доступ» — так браузер защищает файлы.</dd>
           <dt>Общий файл</dt><dd>Если один файл подключён у нескольких человек, Планёрка каждые 5 секунд подхватывает чужие изменения и сообщения чата. Можно работать одновременно: правки разных задач и разных полей одной задачи, новые задачи, комментарии и пункты чек-листа объединяются сами. Изменения применяются, когда не открыто окно и вы не печатаете в поле. Если двое изменили одно и то же поле, Планёрка спросит, что оставить. Если задачу удалили с одной стороны и изменили с другой, она останется.</dd>
+          <dt>База данных</dt><dd>Если Планёрка размещена на хостинге с PHP и MySQL, все работают с общей базой: нужен только пароль команды, подключать файл не надо, работает и на телефоне. Правки объединяются так же, как в общем файле, изменения приходят за 5 секунд. Пароль один на всех, поэтому личные чаты видны любому, кто вошёл.</dd>
           <dt>Расхождение данных</dt><dd>Если Планёрка не знает, от какой версии файла начались правки (например, файл подключён впервые, а в браузере есть данные новее), она спросит, какую версию оставить. Другая версия сохранится в резервную копию.</dd>
           <dt>Экспорт и импорт</dt><dd>«Скачать JSON» и «Импортировать JSON». Работает в любом браузере.</dd>
           <dt>Резервные копии</dt><dd>Последние 15 копий хранятся в этом браузере. Копия создаётся раз в день при запуске, при каждом открытии JSON-файла, а также перед импортом, сбросом, восстановлением и выбором версии при расхождении. В меню хранения у каждой копии есть «Скачать» и «Восстановить» (второе требует двух нажатий). Восстановление тоже можно откатить: текущие данные перед ним попадают в копии.</dd>
@@ -1577,9 +1582,12 @@ function writeFile(force = false){
       if (!force && file.mtime && !await pullFile(await h.getFile())) return renderStore(); // the next poll finishes this write
       db.revs = [...db.revs, 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)].slice(-REVS_MAX);
       const json = JSON.stringify(db, null, 2), work = workKey(db), revs = db.revs;
-      const w = await h.createWritable(); await w.write(json); await w.close();
-      remember(work, revs, (await h.getFile()).lastModified); file.error = '';
-    } catch (e) { file.error = 'Не удалось записать файл: ' + e.message; }
+      const w = await h.createWritable(); await w.write(json); const version = await w.close();
+      remember(work, revs, version ?? (await h.getFile()).lastModified); file.error = '';
+    } catch (e) {
+      if (e.status === 409){ if (file.work == null) loadFromHandle(); else setTimeout(writeFile, 300); return; }
+      file.error = (onServer() ? 'Не удалось сохранить: ' : 'Не удалось записать файл: ') + e.message;
+    }
     renderStore();
   });
   return writing;
@@ -1620,6 +1628,7 @@ function acceptMerge(merged, data, k, mtime){
 }
 function pollFile(){
   const h = file.handle;
+  if (onServer() && file.work == null && !$('#d-login').open){ serverStart(); return; } // the server was down when the page opened
   if (!h || file.needsPermission || file.work == null) return;
   writing = writing.then(async () => {
     if (file.handle !== h || $('#d-conflict').open) return;
@@ -1629,6 +1638,91 @@ function pollFile(){
   }).catch(() => {});
 }
 setInterval(pollFile, 5000);
+
+/* server mode: api.php and MySQL stand in for the JSON file, so the sync and merge code above stays the same */
+const onServer = () => file.handle === serverHandle;
+async function api(action, body){
+  const r = await fetch('api.php?a=' + action, body ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)} : {cache: 'no-store'});
+  const j = await r.json(); // a static host answers with html or the php source, that throws without .status
+  if (r.status === 401 && !$('#d-login').open) askLogin();
+  if (!r.ok) throw Object.assign(new Error(j.error || `Ошибка сервера ${r.status}`), {status: r.status});
+  return j;
+}
+const serverHandle = {
+  name: 'База данных', seen: 0, known: new Set(), // known = attachments the server already has
+  async getFile(){
+    const {version} = await api('ver');
+    this.seen = version;
+    let text;
+    return {lastModified: version, text: () => text ??= this.load()};
+  },
+  // shortcut: every attachment is downloaded when the page opens; fetch them on click if teams keep many large files
+  async load(){
+    const {data} = await api('load'), d = JSON.parse(data);
+    d.blobs = {};
+    for (const t of d.tasks) for (const {id} of t.files || []){
+      this.known.add(id);
+      if (!db.blobs[id]) await api('blob&id=' + encodeURIComponent(id)).then(b => { d.blobs[id] = b; }).catch(() => {});
+    }
+    return JSON.stringify(d);
+  },
+  async createWritable(){
+    let json = '';
+    return {write: async j => { json = j; }, close: async () => {
+      const d = JSON.parse(json);
+      for (const [id, b] of Object.entries(d.blobs)) if (!this.known.has(id)){ await api('blob', {id, data: b.data}); this.known.add(id); }
+      d.blobs = {};
+      this.seen = (await api('save', {base: this.seen, data: JSON.stringify(d)})).version;
+      return this.seen;
+    }};
+  },
+};
+async function serverConnect(){
+  file.handle = serverHandle; file.name = serverHandle.name; file.error = '';
+  try {
+    const {version} = await api('ver');
+    serverHandle.seen = version;
+    if (version) await loadFromHandle(); else await writeFile(true); // the first person fills an empty database
+  } catch (e) { if (e.status !== 401) file.error = 'Сервер недоступен: ' + e.message; }
+  render();
+}
+function askLogin(){
+  const d = $('#d-login');
+  d.innerHTML = `<form method="dialog" id="lg-form"><div class="d-head"><h2>Вход в Планёрку</h2></div>
+    <div class="d-body"><label class="lg-label" for="lg-pass">Пароль команды</label>
+    <input class="lg-in" id="lg-pass" type="password" autocomplete="current-password" required>
+    <p class="note" id="lg-err" role="alert" hidden></p></div>
+    <div class="d-foot"><span class="spacer"></span><button class="btn primary" type="submit">Войти</button></div></form>`;
+  d.oncancel = e => e.preventDefault();
+  d.querySelector('#lg-form').onsubmit = async e => {
+    e.preventDefault();
+    const err = d.querySelector('#lg-err');
+    try { await api('login', {password: d.querySelector('#lg-pass').value}); d.close(); await serverConnect(); }
+    catch (x) { err.hidden = false; err.textContent = x.message; }
+  };
+  d.showModal();
+}
+async function serverLogout(){
+  await api('logout', {}).catch(() => {});
+  file.handle = null; clearTimeout(saveTimer);
+  [LS_KEY, LS_BACKUP].forEach(k => localStorage.removeItem(k));
+  await idbDel('base'); await idbDel('snapshots');
+  location.reload();
+}
+// true = this copy runs on a server with api.php, the file and browser modes stay out of the way
+async function serverStart(){
+  if (location.protocol === 'file:') return false;
+  try {
+    const s = await api('status');
+    if (!s.planerka) return false;
+    if (s.auth) await serverConnect(); else askLogin();
+  } catch (e) {
+    if (!e.status) return false;
+    file.handle = serverHandle; file.name = serverHandle.name; file.error = e.message;
+    render();
+  }
+  return true;
+}
 
 async function useHandle(h){
   file.handle = h; file.name = h.name; file.needsPermission = false; file.error = ''; file.history.clear();
@@ -1649,7 +1743,7 @@ async function loadFromHandle(){
   const data = await parseFile(f);
   // local edits made while the file was unreachable must not vanish silently
   if (db.savedAt && data.savedAt && db.savedAt > data.savedAt && !sameData(db, data))
-    return conflict(data, f.lastModified, 'В браузере есть изменения новее, чем в файле.');
+    return conflict(data, f.lastModified, `В браузере есть изменения новее, чем ${onServer() ? 'на сервере' : 'в файле'}.`);
   Object.assign(data, chatOf(db, data));
   db = data; remember(workKey(data), data.revs, f.lastModified); saveLocal(); render();
   snapshot(data, `При открытии ${file.name}`);
@@ -1705,10 +1799,10 @@ function askClashes(r, data, k, mtime){
   const d = $('#d-conflict');
   const rec = c => r.data[c.coll].find(x => x.id === c.id) || {};
   d.innerHTML = `<div class="d-head"><h2>Двое изменили одно и то же</h2></div>
-    <div class="d-body"><p class="note">Остальное уже объединено. Выберите, что оставить в этих полях. Версия файла сохранится в резервную копию.</p>
+    <div class="d-body"><p class="note">Остальное уже объединено. Выберите, что оставить в этих полях. Другая версия сохранится в резервную копию.</p>
     ${r.clashes.map((c, i) => `<div class="mg-row"><b>${esc(c.coll === 'tasks' ? `${c.id} · ${rec(c).title || ''}` : rec(c).name || c.id)}</b> <span class="note">${esc(MERGE_LABELS[c.keys[0]] || c.keys[0])}</span>
       <label class="mg-opt"><input type="radio" name="mg-${i}" value="mine" checked> <span><i>Моё:</i> ${esc(clashValue(c, c.mine).slice(0, 200))}</span></label>
-      <label class="mg-opt"><input type="radio" name="mg-${i}" value="theirs"> <span><i>В файле:</i> ${esc(clashValue(c, c.theirs).slice(0, 200))}</span></label></div>`).join('')}</div>
+      <label class="mg-opt"><input type="radio" name="mg-${i}" value="theirs"> <span><i>${onServer() ? 'На сервере' : 'В файле'}:</i> ${esc(clashValue(c, c.theirs).slice(0, 200))}</span></label></div>`).join('')}</div>
     <div class="d-foot"><span class="spacer"></span><button class="btn primary" id="mg-ok">Применить</button></div>`;
   d.querySelector('#mg-ok').onclick = () => {
     r.clashes.forEach((c, i) => { if (d.querySelector(`[name="mg-${i}"]:checked`).value === 'theirs') c.keys.forEach((x, j) => { rec(c)[x] = c.theirs[j]; }); });
@@ -1726,10 +1820,10 @@ function conflict(data, mtime, reason){
   pending = {data, mtime};
   Object.assign(data, chatOf(db, data)); db.chat = data.chat; db.rooms = data.rooms; // messages survive whichever version wins
   const d = $('#d-conflict');
-  d.innerHTML = `<div class="d-head"><h2>Данные в файле и в браузере различаются</h2></div>
+  d.innerHTML = `<div class="d-head"><h2>Данные ${onServer() ? 'на сервере' : 'в файле'} и в браузере различаются</h2></div>
     <div class="d-body"><p class="note">${esc(reason)}</p>
-    <p class="note">Файл сохранён: ${data.savedAt ? fmtStamp(data.savedAt) : 'неизвестно'} · в браузере: ${db.savedAt ? fmtStamp(db.savedAt) : 'неизвестно'}. Вторую версию сохраню в резервную копию, её можно будет восстановить в меню хранения.</p></div>
-    <div class="d-foot"><button class="btn" id="cf-file">Взять данные из файла</button><span class="spacer"></span><button class="btn primary" id="cf-local">Записать в файл данные браузера</button></div>`;
+    <p class="note">${onServer() ? 'На сервере' : 'Файл'} сохранён: ${data.savedAt ? fmtStamp(data.savedAt) : 'неизвестно'} · в браузере: ${db.savedAt ? fmtStamp(db.savedAt) : 'неизвестно'}. Вторую версию сохраню в резервную копию, её можно будет восстановить в меню хранения.</p></div>
+    <div class="d-foot"><button class="btn" id="cf-file">Взять данные ${onServer() ? 'с сервера' : 'из файла'}</button><span class="spacer"></span><button class="btn primary" id="cf-local">Записать ${onServer() ? 'на сервер' : 'в файл'} данные браузера</button></div>`;
   d.querySelector('#cf-file').onclick = () => { backupLocal('Версия браузера при расхождении'); db = pending.data; remember(workKey(db), db.revs, pending.mtime); saveLocal(); d.close(); render(); };
   d.querySelector('#cf-local').onclick = async () => {
     snapshot(pending.data, 'Версия файла при расхождении');
@@ -2678,7 +2772,7 @@ $('#rep-csv').onclick = () => download(`planerka-tasks-${addDays(0)}.csv`, new B
 function renderStore(){
   const dot = $('#store-dot'), label = $('#store-label'), banner = $('#banner');
   dot.className = 'sdot';
-  if (file.error){ dot.classList.add('err'); label.textContent = 'Ошибка файла'; }
+  if (file.error){ dot.classList.add('err'); label.textContent = onServer() ? 'Ошибка сохранения' : 'Ошибка файла'; }
   else if (file.needsPermission){ dot.classList.add('warn'); label.textContent = 'Нужен доступ к файлу'; }
   else if (file.handle){ dot.classList.add('ok'); label.textContent = file.name; }
   else label.textContent = 'Браузер';
@@ -2697,11 +2791,11 @@ function renderStore(){
 function openStore(){ drawStore(); $('#d-store').showModal(); }
 function drawStore(){
   const d = $('#d-store');
-  const where = file.handle ? `Данные хранятся в браузере и в файле <b>${esc(file.name)}</b>${file.needsPermission ? ' (нужно разрешить доступ)' : ''}.` : 'Данные хранятся только в этом браузере. Если очистить данные сайта, они пропадут.';
+  const where = onServer() ? 'Данные хранятся в общей базе на сервере, копия есть в этом браузере. Все участники команды работают с ними одновременно.' : file.handle ? `Данные хранятся в браузере и в файле <b>${esc(file.name)}</b>${file.needsPermission ? ' (нужно разрешить доступ)' : ''}.` : 'Данные хранятся только в этом браузере. Если очистить данные сайта, они пропадут.';
   d.innerHTML = `<div class="d-head"><h2>Хранение данных</h2><button class="close" aria-label="Закрыть">✕</button></div>
   <div class="d-body store-grid">
     <p class="note">${where}<br>Последнее сохранение: ${db.savedAt ? fmtStamp(db.savedAt) : 'ещё не было'} · задач ${db.tasks.length}, сотрудников ${db.people.length}.</p>
-    <div><h4 class="sec-t">JSON-файл</h4>
+    ${onServer() ? '<div><h4 class="sec-t">Аккаунт</h4><div class="row"><button class="btn" id="st-logout">Выйти</button></div><p class="note" style="margin-top:8px">Выход удалит копию данных из этого браузера. В базе они останутся.</p></div>' : `<div><h4 class="sec-t">JSON-файл</h4>
       ${FS_OK ? `<div class="row">
         ${file.needsPermission ? '<button class="btn primary" id="st-grant">Разрешить доступ</button>' : ''}
         <button class="btn" id="st-create">Сохранять в новый файл…</button>
@@ -2709,7 +2803,7 @@ function drawStore(){
         ${file.handle ? '<button class="btn danger" id="st-detach">Отключить файл</button>' : ''}
       </div><p class="note" style="margin-top:8px">После подключения каждое изменение записывается в файл. Файл можно положить в облачную папку для резервной копии. Если с файлом одновременно работают двое, Планёрка предупредит о расхождении.</p>`
       : '<p class="note">Этот браузер не умеет подключать файлы напрямую, это есть в Chrome и Edge. Используйте экспорт и импорт.</p>'}
-    </div>
+    </div>`}
     <div><h4 class="sec-t">Экспорт и импорт</h4><div class="row">
       <button class="btn" id="st-export">Скачать JSON</button>
       <button class="btn" id="st-import">Импортировать JSON…</button></div></div>
@@ -2721,7 +2815,7 @@ function drawStore(){
       <button class="btn" id="st-demo">Загрузить пример</button></div></div>
   </div>`;
   const on = (id, fn) => { const b = d.querySelector(id); if (b) b.onclick = fn; };
-  on('#st-grant', grantAccess); on('#st-create', createFile); on('#st-open', openFile); on('#st-detach', detachFile);
+  on('#st-logout', serverLogout); on('#st-grant', grantAccess); on('#st-create', createFile); on('#st-open', openFile); on('#st-detach', detachFile);
   on('#st-export', exportJson); on('#st-import', () => $('#import-input').click());
   // two-step confirm: confirm() is unreliable inside embedded viewers
   const twoStep = (id, text, fn) => on(id, async e => { const b = e.currentTarget; if (b.dataset.armed) { await backupLocal('Перед сбросом'); fn(); commit(); toast('Готово. Прежние данные в резервной копии.'); drawStore(); } else { b.dataset.armed = 1; b.textContent = text; } });
@@ -2797,7 +2891,7 @@ function openTask(id, opts = {}){
       ${sec('files', 'Вложения', `<div class="attach" id="tw-attach"></div>
         <div class="add-row"><input id="tw-link" maxlength="2000" placeholder="Ссылка: https://…" aria-label="Адрес ссылки"><input id="tw-link-title" maxlength="200" placeholder="Подпись" aria-label="Подпись ссылки"><button type="button" class="btn small" id="tw-link-add">Добавить</button></div>
         <span class="err" id="tw-link-err" hidden>Нужна ссылка, начинающаяся с http:// или https://</span>
-        <div class="add-row">${canAttach() ? `<label class="btn small" for="tw-file">Прикрепить файлы…</label><input type="file" id="tw-file" multiple hidden><span class="note">до ${fmtSize(FILE_MAX)} каждый, хранятся в ${esc(file.name)}</span>`
+        <div class="add-row">${canAttach() ? `<label class="btn small" for="tw-file">Прикрепить файлы…</label><input type="file" id="tw-file" multiple hidden><span class="note">до ${fmtSize(FILE_MAX)} каждый, хранятся в ${onServer() ? 'базе данных' : esc(file.name)}</span>`
           : `<span class="note">Файлы можно прикреплять, когда подключён JSON-файл: в браузере для них мало места.</span>`}</div>`)}
       ${sec('talk', 'Обсуждение', `<div class="seg tw-filter" role="group" aria-label="Что показывать"><button type="button" data-feed="all">Всё</button><button type="button" data-feed="comments">Только комментарии</button></div>
         <div class="tw-feed" id="tw-feed"></div>
@@ -4030,7 +4124,7 @@ addEventListener('storage', e => {
   loadPrefs();
   setView(prefs.start === 'last' ? (pref(LS_VIEW) || 'team') : prefs.start); // renders
   dailySnapshot();
-  if (!FS_OK) return;
+  if (await serverStart() || !FS_OK) return;
   const h = await idbGet('handle');
   if (!h) return;
   file.handle = h; file.name = h.name;
