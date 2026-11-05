@@ -892,6 +892,13 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .kb-ed{min-height:360px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--bg);outline:none}
 .kb-ed:focus{border-color:var(--accent)}
 .kb-ed:empty::before{content:attr(data-placeholder);color:var(--muted)}
+.kb-ed img{cursor:pointer}
+.kb-ed img.kb-sel{outline:2px solid var(--accent);outline-offset:2px}
+.kb-imgbar{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center}
+.kb-imgbar[hidden]{display:none}
+.kb-imgbar input{width:110px;accent-color:var(--accent)}
+.kb-handle{position:fixed;z-index:5;width:14px;height:14px;border:2px solid var(--surface);border-radius:3px;background:var(--accent);cursor:nwse-resize;touch-action:none}
+.kb-handle[hidden]{display:none}
 .kb-ed.kb-drop{outline:2px dashed var(--accent);outline-offset:-4px}
 .kb-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .kb-foot .spacer{flex:1}
@@ -1016,6 +1023,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       </div>
       <section class="kb-main" id="kb-main" aria-live="polite"></section>
     </div>
+    <span class="kb-handle" id="kb-handle" hidden title="Потяните, чтобы изменить размер"></span>
     <input type="file" id="kb-img-in" accept="image/png,image/jpeg,image/gif,image/webp" multiple hidden><input type="file" id="kb-file-in" multiple hidden>
   </main>
 
@@ -1260,6 +1268,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <li><b>Написать.</b> «+ Статья»: название, раздел (можно выбрать существующий или ввести новый) и текст. Ctrl+S или «Сохранить».</li>
           <li><b>Оформление.</b> Стиль абзаца (заголовок, цитата, код), шрифт, размер, цвет текста и фона, жирный (Ctrl+B), наклонный (Ctrl+I), подчёркнутый (Ctrl+U), зачёркнутый, списки, выравнивание, ссылки, разделитель, «Убрать оформление».</li>
           <li><b>Картинки и файлы.</b> Кнопка 🖼, перетаскивание в текст или вставка из буфера (Ctrl+V). Кнопка 📎 прикрепляет любой файл, в статье он скачивается по нажатию. До 5 МБ каждый, большие фото уменьшаются. Нужна база данных или общий JSON-файл.</li>
+          <li><b>Размер картинки.</b> Нажмите на картинку в редакторе: она выделится, в панели появятся кнопки 25%, 50%, 75%, 100% и ползунок, а в правом нижнем углу картинки — маркер, который можно тянуть мышью или пальцем. Ширина задаётся в процентах от ширины текста, поэтому на телефоне картинка тоже помещается. Delete удаляет выделенную картинку.</li>
           <li><b>Вставка из Word и сайтов.</b> Оформление сохраняется, а скрипты и картинки со сторонних сайтов убираются: такие картинки сохраните к себе и вставьте файлом.</li>
           <li><b>Кто может менять.</b> Читают все. Изменить и удалить статью могут её автор, руководители и администраторы. Если двое правили одну статью одновременно, второй увидит предупреждение перед сохранением.</li>
           <li><b>Ссылки на задачи.</b> Номер вроде PLN-101 в тексте статьи становится ссылкой на задачу.</li>
@@ -4597,9 +4606,10 @@ function kbClean(html){
         if (/^[1-7]$/.test(attr('size'))) keep.size = attr('size');
       }
       if (tag === 'TD' || tag === 'TH') for (const k of ['colspan', 'rowspan']) if (/^\d{1,2}$/.test(attr(k))) keep[k] = attr(k);
+      const w = /* read before the attributes go */ tag === 'IMG' && /^\d{1,3}(\.\d+)?%$/.test(n.style.width) ? `width: ${Math.min(100, parseFloat(n.style.width))}%` : '';
       for (const a of [...n.attributes]) n.removeAttribute(a.name);
       for (const [k, v] of Object.entries(keep)) n.setAttribute(k, v);
-      if (css && !keep['data-blob']) n.setAttribute('style', css); // a file chip is styled by the page; the editor tends to stamp a fixed text colour on it
+      if (w || (css && !keep['data-blob'])) n.setAttribute('style', [keep['data-blob'] && tag === 'A' ? '' : css, w].filter(Boolean).join('; ')); // a file chip is styled by the page; the editor tends to stamp a fixed text colour on it
     }
   })(body);
   return body.innerHTML;
@@ -4641,7 +4651,7 @@ function renderKb(){
   }
   $('#kb-list').innerHTML = html || `<p class="note" style="padding:12px 8px">${db.docs.length ? 'Ничего не нашлось.' : 'Статей пока нет.'}</p>`;
   $('#kb-wrap').classList.toggle('open', !!(kbEdit || kbDoc(f.kbOpen)));
-  if (!kbEdit) kbShow(); // the editor is never redrawn: that would lose what is being typed
+  if (!kbEdit){ kbImg = null; kbHandle(); kbShow(); } // the editor is never redrawn: that would lose what is being typed
 }
 function kbShow(){
   const d = kbDoc(ui.kbOpen), box = $('#kb-main');
@@ -4687,6 +4697,7 @@ function kbStartEdit(id){
       ${btn('kbLink', '🔗', 'Ссылка')}${btn('kbImage', '🖼', 'Вставить картинку')}${btn('kbFile', '📎', 'Прикрепить файл')}${btn('insertHorizontalRule', '―', 'Разделитель')}
       <span class="kb-sep"></span>
       ${btn('removeFormat', '⌫', 'Убрать оформление')}${btn('undo', '↶', 'Отменить (Ctrl+Z)')}${btn('redo', '↷', 'Повторить (Ctrl+Y)')}
+      <span class="kb-imgbar" id="kb-imgbar" hidden><span class="kb-sep"></span><span class="note">Картинка:</span>${[25, 50, 75, 100].map(w => `<button type="button" data-kb-w="${w}" aria-label="Ширина ${w}%">${w}%</button>`).join('')}<input type="range" id="kb-imgw" min="10" max="100" step="5" aria-label="Ширина картинки, %"><span class="note" id="kb-imgw-n"></span></span>
     </div>
     <div class="kb-ed" id="kb-ed" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Текст статьи" data-placeholder="Текст статьи. Картинки можно вставить кнопкой 🖼, перетащить сюда или вставить из буфера (Ctrl+V)."></div>
     <div class="kb-foot" id="kb-foot"><span class="note">Ctrl+S сохраняет.</span><span class="spacer"></span><button type="button" class="btn" data-kb-cancel>Отмена</button><button class="btn primary" id="kb-save">Сохранить</button></div>
@@ -4694,12 +4705,45 @@ function kbStartEdit(id){
   const ed = $('#kb-ed');
   ed.innerHTML = kbClean(d?.html || '');
   kbHydrate(ed);
+  kbImg = null;
   kbEdit.start = ed.innerHTML + '\u0000' + (d?.title || '') + '\u0000' + (d?.section || '');
   try { document.execCommand('styleWithCSS', false, true); document.execCommand('defaultParagraphSeparator', false, 'p'); } catch {}
   renderKb();
   (d ? ed : $('#kb-title')).focus();
 }
-const kbDirty = () => kbEdit && ($('#kb-ed').innerHTML + '\u0000' + $('#kb-title').value + '\u0000' + $('#kb-section').value) !== kbEdit.start;
+// a picture is picked by a click; its width changes with the buttons, the slider or the corner handle
+let kbImg = null;
+function kbPickImg(img){
+  document.querySelectorAll('#kb-ed img.kb-sel').forEach(x => { x.classList.remove('kb-sel'); if (!x.className) x.removeAttribute('class'); });
+  kbImg = img || null;
+  const bar = $('#kb-imgbar'); if (bar) bar.hidden = !kbImg;
+  if (kbImg){ kbImg.classList.add('kb-sel'); kbWidthShown(); }
+  kbHandle();
+}
+const kbImgPct = img => parseFloat(img.style.width) || Math.round(img.getBoundingClientRect().width / img.parentElement.getBoundingClientRect().width * 100) || 100;
+function kbWidthShown(){ const p = Math.round(kbImgPct(kbImg)); $('#kb-imgw').value = p; $('#kb-imgw-n').textContent = p + '%'; }
+function kbSetWidth(pct){
+  if (!kbImg) return;
+  kbImg.style.width = Math.max(5, Math.min(100, Math.round(pct))) + '%';
+  kbWidthShown(); kbHandle();
+}
+function kbHandle(){
+  const h = $('#kb-handle');
+  if (!kbEdit || !kbImg?.isConnected){ h.hidden = true; return; }
+  const r = kbImg.getBoundingClientRect();
+  h.hidden = false; h.style.left = r.right - 8 + 'px'; h.style.top = r.bottom - 8 + 'px';
+}
+addEventListener('scroll', kbHandle, true);
+addEventListener('resize', kbHandle);
+$('#kb-handle').onpointerdown = e => {
+  if (!kbImg) return;
+  e.preventDefault();
+  const h = e.currentTarget, x0 = e.clientX, w0 = kbImg.getBoundingClientRect().width, box = kbImg.parentElement.getBoundingClientRect().width;
+  h.setPointerCapture(e.pointerId);
+  h.onpointermove = m => kbSetWidth((w0 + m.clientX - x0) / box * 100);
+  h.onpointerup = h.onpointercancel = () => { h.onpointermove = h.onpointerup = h.onpointercancel = null; };
+};
+const kbDirty = () => kbEdit && ($('#kb-ed').innerHTML.replace(/ class="kb-sel"/g, '') + '\u0000' + $('#kb-title').value + '\u0000' + $('#kb-section').value) !== kbEdit.start;
 function kbExec(cmd, val){
   const ed = $('#kb-ed'); if (!ed) return;
   ed.focus();
@@ -4805,6 +4849,8 @@ $('#kb-main').addEventListener('click', async e => {
     return f ? download(b.dataset.name || 'файл', await (await fetch(f.data)).blob()) : toast('Файл сейчас недоступен');
   }
   if ((b = e.target.closest('#kb-doc img[src]'))) return openChatFile({id: b.dataset.blob, name: b.alt || 'Картинка', type: 'image/png', size: 0});
+  if ((b = e.target.closest('[data-kb-w]'))) return kbSetWidth(+b.dataset.kbW);
+  if (kbEdit && e.target.closest('#kb-ed')) return kbPickImg(e.target.tagName === 'IMG' ? e.target : null);
   if ((b = e.target.closest('.kb-bar button[data-cmd]'))){
     const c = b.dataset.cmd;
     if (c === 'kbImage') return $('#kb-img-in').click();
@@ -4820,9 +4866,11 @@ $('#kb-main').addEventListener('change', e => {
   if (e.target.tagName === 'SELECT' && c && e.target.value){ kbExec(c, c === 'formatBlock' ? `<${e.target.value}>` : e.target.value); e.target.value = ''; }
   else if (e.target.type === 'color' && c) kbExec(c, e.target.value);
 });
+$('#kb-main').addEventListener('input', e => { if (e.target.id === 'kb-imgw') kbSetWidth(+e.target.value); else if (e.target.id === 'kb-ed') kbHandle(); });
 $('#kb-main').addEventListener('submit', e => { e.preventDefault(); kbSave(); });
 $('#kb-main').addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.code === 'KeyS' && kbEdit){ e.preventDefault(); kbSave(); }
+  if (kbImg && e.target.id === 'kb-ed' && (e.key === 'Delete' || e.key === 'Backspace')){ e.preventDefault(); kbImg.remove(); kbPickImg(null); }
   if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.closest('#kb-form')){ e.preventDefault(); $('#kb-ed').focus(); }
 });
 $('#kb-main').addEventListener('paste', e => {
@@ -4881,6 +4929,8 @@ addEventListener('storage', e => {
   console.assert(mergeMarks({a: {at: '2', v: true}}, {a: {at: '1', v: false}}).a.v === true, 'marks: the later one wins');
   const clean = kbClean('<p style="color: red; background-image: url(x)">a<script>alert(1)<\/script><img src="x" onerror="alert(1)"><a href="javascript:alert(1)" onclick="x()">b</a><a href="https://e.ru">c</a><svg><a href="javascript:1">d</a></svg><b onmouseover="x">e</b><img data-blob="f1" src="https://e.ru/t.png"><iframe src="x"></iframe></p>');
   console.assert(!/script|onerror|onclick|onmouseover|javascript|iframe|svg|url\(|https:\/\/e\.ru\/t/.test(clean) && clean.includes('color: red') && clean.includes('href="https://e.ru"') && clean.includes('<b>e</b>') && clean.includes('data-blob="f1"'), 'kb: dangerous html removed, formatting kept: ' + clean);
+  const sized = kbClean('<img data-blob="f2" class="kb-sel" style="width: 40%; height: 900px"><img data-blob="f3" style="width: 300px"><img data-blob="f4" style="width: 250%">');
+  console.assert(sized.includes('style="width: 40%"') && !sized.includes('class') && !sized.includes('900px') && !sized.includes('300px') && sized.includes('width: 100%'), 'kb: picture width kept in percent only: ' + sized);
   const c11 = migrate({version: 11, people: [], tasks: [], docs: [{id: 'd', title: '', html: '<img data-blob="k1">'}, {id: 'd', title: 'dup'}, null], blobs: {k1: {data: 'data:x'}, k2: {data: 'data:y'}}});
   console.assert(c11.docs.length === 1 && c11.docs[0].title === 'Без названия' && Object.keys(c11.blobs).join() === 'k1', 'v11 -> v12: docs, duplicates dropped, their pictures kept');
   const c10 = migrate({version: 10, people: [{id: 'p', name: 'P'}], tasks: [{id: 'PLN-1', title: 'x', assignee: 'p', createdAt: 'c', log: [{at: 'l1', text: 'Р назначил: P'}]}, {id: 'PLN-2', title: 'y', assignee: 'p', createdAt: 'c'}], chat: [{id: 'f', from: 'p', to: 'all', at: '1', text: '', files: [{id: 'b1', name: 'a.png'}]}], blobs: {b1: {data: 'data:x'}, b2: {data: 'data:y'}}});
