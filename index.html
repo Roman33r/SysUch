@@ -858,6 +858,68 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
   #chat-in{order:-1;flex-basis:100%}
   #ch-send{margin-left:auto}
 }
+.kb-wrap{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+.kb-left{display:grid;gap:10px;position:sticky;top:12px;max-height:calc(100vh - 140px);grid-template-rows:auto minmax(0,1fr);padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.kb-tools{display:flex;flex-wrap:wrap;gap:6px}
+.kb-tools input{flex:1 1 100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--sunken);color:var(--fg)}
+.kb-tools .sel{flex:1;min-width:0}
+.kb-list{overflow-y:auto;display:grid;gap:2px;align-content:start}
+.kb-group{margin:10px 8px 4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.kb-row{display:grid;gap:2px;width:100%;padding:8px 10px;border:0;border-radius:10px;background:none;color:var(--fg);text-align:left;cursor:pointer}
+.kb-row:hover{background:var(--sunken)}
+.kb-row[aria-current="true"]{background:var(--accent-soft)}
+.kb-row b{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.kb-row span{font-size:12px;color:var(--muted)}
+.kb-row mark,.kb-hit mark{background:var(--accent-soft);color:inherit;border-radius:3px}
+.kb-hit{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kb-main{min-width:0;padding:20px 24px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.kb-head{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px}
+.kb-head h2{margin:2px 0 4px;font:600 24px/1.25 var(--f-display);overflow-wrap:anywhere}
+.kb-head > div:first-of-type{flex:1;min-width:0}
+.kb-sec-chip{font-size:12px;color:var(--accent);font-weight:600}
+.kb-acts{display:flex;gap:6px}
+.kb-back{display:none}
+.kb-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px;flex:1}
+.kb-fields input{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sunken);color:var(--fg);font:inherit}
+.kb-fields #kb-title{font-size:18px;font-weight:600}
+.kb-bar{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:6px;margin-bottom:8px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.kb-bar .sel{padding:5px 8px;font-size:13px}
+.kb-bar button,.kb-color{min-width:32px;height:32px;padding:0 8px;border:1px solid transparent;border-radius:8px;background:none;color:var(--fg);font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.kb-bar button:hover,.kb-color:hover{background:var(--sunken)}
+.kb-bar button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.kb-color input{width:22px;height:22px;padding:0;border:0;background:none;cursor:pointer}
+.kb-sep{width:1px;height:22px;margin:0 4px;background:var(--line)}
+.kb-ed{min-height:360px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--bg);outline:none}
+.kb-ed:focus{border-color:var(--accent)}
+.kb-ed:empty::before{content:attr(data-placeholder);color:var(--muted)}
+.kb-ed.kb-drop{outline:2px dashed var(--accent);outline-offset:-4px}
+.kb-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.kb-foot .spacer{flex:1}
+.kb-warn{flex:1 1 100%;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-size:14px}
+.kb-doc,.kb-ed{font-size:15px;line-height:1.6;overflow-wrap:anywhere}
+.kb-doc > :first-child,.kb-ed > :first-child{margin-top:0}
+.kb-doc h1,.kb-ed h1{font-size:24px;margin:20px 0 8px}
+.kb-doc h2,.kb-ed h2{font-size:20px;margin:18px 0 6px}
+.kb-doc h3,.kb-ed h3{font-size:17px;margin:14px 0 4px}
+.kb-doc p,.kb-ed p{margin:0 0 10px}
+.kb-doc img,.kb-ed img{max-width:100%;height:auto;border-radius:6px;vertical-align:middle}
+.kb-doc blockquote,.kb-ed blockquote{margin:10px 0;padding:6px 14px;border-left:3px solid var(--accent);background:var(--sunken);border-radius:0 8px 8px 0}
+.kb-doc pre,.kb-ed pre{padding:10px 12px;border-radius:8px;background:var(--sunken);font:13px/1.5 var(--f-mono);white-space:pre-wrap}
+.kb-doc table,.kb-ed table{border-collapse:collapse}
+.kb-doc td,.kb-doc th,.kb-ed td,.kb-ed th{border:1px solid var(--line);padding:4px 8px}
+.kb-doc a,.kb-ed a{color:var(--accent)}
+.kb-doc a[data-blob],.kb-ed a[data-blob]{display:inline-flex;gap:6px;align-items:center;padding:3px 10px;border:1px solid var(--line);border-radius:8px;text-decoration:none;color:var(--fg);background:var(--sunken)}
+.kb-doc a[data-blob]::before,.kb-ed a[data-blob]::before{content:"📄"}
+.kb-empty{padding:48px 12px;text-align:center;color:var(--muted)}
+.kb-empty h2{margin:0 0 8px;color:var(--fg);font:600 20px var(--f-display)}
+@media (max-width:760px){
+  .kb-wrap{grid-template-columns:minmax(0,1fr)}
+  .kb-left{position:static;max-height:none}
+  .kb-wrap.open .kb-left,.kb-wrap:not(.open) .kb-main{display:none}
+  .kb-back{display:inline-flex}
+  .kb-main{padding:14px}
+  .kb-fields{grid-template-columns:minmax(0,1fr)}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -875,6 +937,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       <button data-view="log" id="vw-log">Журнал</button>
       <button data-view="report" id="vw-report">Отчёты</button>
       <button data-view="chat" id="vw-chat">Чат <span class="badge" id="chat-badge" hidden></span></button>
+      <button data-view="kb" id="vw-kb">База знаний</button>
       <button data-view="people" id="vw-people">Сотрудники</button>
     </div>
     <div class="spacer"></div>
@@ -939,6 +1002,21 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       </div>
     </div>
     <p class="note" id="tree-note">Клавиши в списке: <kbd>↑</kbd><kbd>↓</kbd> выбор, <kbd>→</kbd><kbd>←</kbd> раскрыть или свернуть, <kbd>Tab</kbd> сделать подзадачей предыдущей, <kbd>Shift</kbd>+<kbd>Tab</kbd> поднять уровнем выше, <kbd>Enter</kbd> открыть. Перетаскивание строки: на середину другой — подзадача, на верх или низ — рядом.</p>
+  </main>
+
+  <main id="v-kb" hidden>
+    <div class="kb-wrap" id="kb-wrap">
+      <div class="kb-left">
+        <div class="kb-tools">
+          <input type="search" id="kb-q" maxlength="80" placeholder="Поиск по статьям" aria-label="Поиск по базе знаний" autocomplete="off">
+          <select class="sel" id="kb-sec" aria-label="Раздел"></select>
+          <button type="button" class="btn small primary" id="kb-new">+ Статья</button>
+        </div>
+        <nav class="kb-list" id="kb-list" aria-label="Статьи"></nav>
+      </div>
+      <section class="kb-main" id="kb-main" aria-live="polite"></section>
+    </div>
+    <input type="file" id="kb-img-in" accept="image/png,image/jpeg,image/gif,image/webp" multiple hidden><input type="file" id="kb-file-in" multiple hidden>
   </main>
 
   <main id="v-people" class="stack" hidden>
@@ -1176,6 +1254,17 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         </ul>
       </section>
 
+      <section id="h-kb"><h3>База знаний</h3>
+        <p>Вкладка «База знаний»: инструкции по задачам, описания, шпаргалки. Слева список статей по разделам, поиск по названию и тексту и фильтр по разделу.</p>
+        <ul>
+          <li><b>Написать.</b> «+ Статья»: название, раздел (можно выбрать существующий или ввести новый) и текст. Ctrl+S или «Сохранить».</li>
+          <li><b>Оформление.</b> Стиль абзаца (заголовок, цитата, код), шрифт, размер, цвет текста и фона, жирный (Ctrl+B), наклонный (Ctrl+I), подчёркнутый (Ctrl+U), зачёркнутый, списки, выравнивание, ссылки, разделитель, «Убрать оформление».</li>
+          <li><b>Картинки и файлы.</b> Кнопка 🖼, перетаскивание в текст или вставка из буфера (Ctrl+V). Кнопка 📎 прикрепляет любой файл, в статье он скачивается по нажатию. До 5 МБ каждый, большие фото уменьшаются. Нужна база данных или общий JSON-файл.</li>
+          <li><b>Вставка из Word и сайтов.</b> Оформление сохраняется, а скрипты и картинки со сторонних сайтов убираются: такие картинки сохраните к себе и вставьте файлом.</li>
+          <li><b>Кто может менять.</b> Читают все. Изменить и удалить статью могут её автор, руководители и администраторы. Если двое правили одну статью одновременно, второй увидит предупреждение перед сохранением.</li>
+          <li><b>Ссылки на задачи.</b> Номер вроде PLN-101 в тексте статьи становится ссылкой на задачу.</li>
+        </ul>
+      </section>
       <section id="h-people"><h3>Сотрудники и режим «Я»</h3>
         <p>Вкладка «Сотрудники» (клавиша <kbd>0</kbd>): список всех сотрудников, поиск по имени и должности, фильтры по роли, должности и статусу.</p>
         <p><b>Роли.</b> Сотрудник работает с задачами и чатом. Руководитель ещё создаёт и меняет сотрудников и проекты. Администратор ещё выдаёт роли и управляет логинами. Роль выдаётся в карточке сотрудника. Полные права есть у входа admin, а без базы данных — у «Я: Руководитель».</p>
@@ -1367,7 +1456,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 11;
+const SCHEMA = 12;
 const CHAT_MAX = 2000, CHAT_TEXT_MAX = 2000; // localStorage holds about 5 MB per site, so old messages drop off
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
@@ -1462,6 +1551,11 @@ function normTemplate(p){
     desc: s(p.desc, 5000), checklist: (Array.isArray(p.checklist) ? p.checklist : []).map(c => s(typeof c === 'string' ? c : c?.text, 300)).filter(Boolean)};
 }
 /* chat messages: to = 'all' or the other person's id; the manager is 'boss' */
+/* knowledge base: articles in sanitized HTML; pictures and files live in blobs, the HTML points at them with data-blob */
+const KB_HTML_MAX = 300000;
+const normDoc = d => { const s = (v, max) => String(v ?? '').slice(0, max);
+  return {id: s(d.id, 40), title: s(d.title, 200).trim() || 'Без названия', section: s(d.section, 60).trim(), html: s(d.html, KB_HTML_MAX), author: s(d.author, 40), createdAt: s(d.createdAt, 40), updatedAt: s(d.updatedAt, 40), updatedBy: s(d.updatedBy, 40)}; };
+const kbBlobIds = html => [...html.matchAll(/data-blob="([\w-]{1,40})"/g)].map(m => m[1]);
 // key -> {at, v}: each person writes only their own keys, the later write wins, so two copies merge without conflicts
 const normMarks = o => Object.fromEntries(Object.entries(o && typeof o === 'object' ? o : {}).filter(([, x]) => typeof x?.at === 'string').map(([k, x]) => [k.slice(0, 120), {at: x.at.slice(0, 40), v: typeof x.v === 'boolean' ? x.v : String(x.v ?? '').slice(0, 40)}]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
 function mergeMarks(a, b){
@@ -1539,7 +1633,7 @@ function merge3(base, mine, theirs){
     notes.push(`Номер ${old} одновременно заняли двое, ваша задача теперь ${id}.`);
   }
   const data = {...t, nextId: next, ...chatOf(mine, theirs), blobs: {...theirs.blobs, ...mine.blobs}, savedAt: mine.savedAt};
-  for (const coll of ['people', 'tasks', 'projects', 'templates']){
+  for (const coll of ['people', 'tasks', 'projects', 'templates', 'docs']){
     const B = new Map(base[coll].map(x => [x.id, x])), M = new Map(m[coll].map(x => [x.id, x])), T = new Map(t[coll].map(x => [x.id, x]));
     data[coll] = [];
     const kept = x => { if (coll === 'tasks') notes.push(`${x.id} удалили с одной стороны и изменили с другой: задача оставлена.`); data[coll].push(x); };
@@ -1601,13 +1695,15 @@ function migrate(raw){
   // v7 -> v8: chat
   const chat = mergeChat((Array.isArray(raw.chat) ? raw.chat : []).map(normMsg).filter(m => m.id && (m.text || m.files.length)), []);
   // v3 -> v4: links/files on tasks, file contents in blobs; blobs nobody refers to are dropped
-  const used = new Set([...tasks.flatMap(t => t.files.map(f => f.id)), ...chat.flatMap(m => m.files.map(f => f.id))]);
+  // v11 -> v12: knowledge base
+  const docIds = new Set(), docs = (Array.isArray(raw.docs) ? raw.docs : []).filter(d => d && typeof d === 'object').map(normDoc).filter(d => d.id && !docIds.has(d.id) && docIds.add(d.id));
+  const used = new Set([...tasks.flatMap(t => t.files.map(f => f.id)), ...chat.flatMap(m => m.files.map(f => f.id)), ...docs.flatMap(d => kbBlobIds(d.html))]);
   const blobs = {};
   for (const [id, b] of Object.entries(raw.blobs && typeof raw.blobs === 'object' ? raw.blobs : {}))
     if (used.has(id) && typeof b?.data === 'string' && b.data.startsWith('data:')) blobs[id] = {data: b.data};
   // v8 -> v9: group chats; people who no longer exist leave them
   const rooms = mergeRooms((Array.isArray(raw.rooms) ? raw.rooms : []).map(normRoom).filter(r => r.id && r.name).map(r => ({...r, members: r.members.filter(m => m === 'boss' || pids.has(m))})), []);
-  return {version: SCHEMA, nextId, people, tasks, projects, templates, events, chat, rooms, marks: normMarks(raw.marks), blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null, revs: (Array.isArray(raw.revs) ? raw.revs : []).map(String).slice(-REVS_MAX)};
+  return {version: SCHEMA, nextId, people, tasks, projects, templates, docs, events, chat, rooms, marks: normMarks(raw.marks), blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null, revs: (Array.isArray(raw.revs) ? raw.revs : []).map(String).slice(-REVS_MAX)};
 }
 
 function demo(){
@@ -1798,7 +1894,8 @@ const serverHandle = {
   async load(){
     const {data} = await api('load'), d = JSON.parse(data);
     d.blobs = {};
-    for (const m of d.chat || []) for (const {id} of m.files || []) this.known.add(id); // chat files load when their message is on screen
+    for (const m of d.chat || []) for (const {id} of m.files || []) this.known.add(id);
+    for (const x of d.docs || []) kbBlobIds(String(x.html ?? '')).forEach(id => this.known.add(id)); // the same for pictures in articles // chat files load when their message is on screen
     for (const t of d.tasks) for (const {id} of t.files || []){
       this.known.add(id);
       if (!db.blobs[id]) await api('blob&id=' + encodeURIComponent(id)).then(b => { d.blobs[id] = b; }).catch(() => {});
@@ -1973,9 +2070,10 @@ async function detachFile(){
   render();
 }
 
-const MERGE_LABELS = {access: 'Роль', title: 'Название', desc: 'Описание', prio: 'Приоритет', status: 'Статус', due: 'Срок', tag: 'Тег', stages: 'Исполнитель и этапы', checklist: 'Чек-лист', comments: 'Комментарии', links: 'Ссылки', files: 'Файлы', project: 'Проект', parent: 'Родительская задача', repeat: 'Повтор', name: 'Название', role: 'Должность', cap: 'Часов в неделю', hue: 'Цвет', archived: 'В архиве'};
+const MERGE_LABELS = {html: 'Текст статьи', section: 'Раздел', access: 'Роль', title: 'Название', desc: 'Описание', prio: 'Приоритет', status: 'Статус', due: 'Срок', tag: 'Тег', stages: 'Исполнитель и этапы', checklist: 'Чек-лист', comments: 'Комментарии', links: 'Ссылки', files: 'Файлы', project: 'Проект', parent: 'Родительская задача', repeat: 'Повтор', name: 'Название', role: 'Должность', cap: 'Часов в неделю', hue: 'Цвет', archived: 'В архиве'};
 function clashValue(c, vals){
   const k = c.keys[0], v = vals[0];
+  if (k === 'html') return kbText(v) || 'Пусто';
   if (k === 'status') return STATUS[v] || v;
   if (k === 'prio') return PRIO[v] || v;
   if (k === 'stages') return v.length ? v.map(x => `${x.title}: ${person(x.assignee)?.name || 'не назначен'}`).join(', ') : `${person(vals[1])?.name || 'Не назначен'}, ${vals[2]} ч`;
@@ -2343,6 +2441,7 @@ function render(){
   if (view === 'cab') renderCab();
   if (view === 'proj') renderProj();
   if (view === 'people') renderPeople();
+  if (view === 'kb') renderKb();
   if (view === 'tpl') renderTpl();
   if (view === 'load') renderLoad();
   if (view === 'log') renderLog();
@@ -3572,7 +3671,7 @@ function openTplEditor(id){
 
 /* ---------- personal settings: kept in this browser, separately for each person chosen in «Я: …» ---------- */
 const PREF_DEFAULT = {theme: 'system', accent: 'blue', density: 'normal', nav: 'top', hidden: [], start: 'last'};
-const VIEW_NAMES = {team: 'Распределение', board: 'Канбан', tree: 'Дерево', proj: 'Проекты', tpl: 'Шаблоны', load: 'Загрузка', log: 'Журнал', report: 'Отчёты', chat: 'Чат', people: 'Сотрудники'};
+const VIEW_NAMES = {team: 'Распределение', board: 'Канбан', tree: 'Дерево', proj: 'Проекты', tpl: 'Шаблоны', load: 'Загрузка', log: 'Журнал', report: 'Отчёты', chat: 'Чат', kb: 'База знаний', people: 'Сотрудники'};
 const ACCENTS = {blue: ['Синий', '#2B54E0'], green: ['Зелёный', '#0F7A55'], violet: ['Фиолетовый', '#6A4BC4'], orange: ['Оранжевый', '#C2570C'], graphite: ['Графит', '#3D4451']};
 const prefKey = () => 'planerka.prefs.' + (meId || 'boss');
 const sysDark = matchMedia('(prefers-color-scheme: dark)');
@@ -3725,7 +3824,7 @@ function archivePerson(id){
 
 /* ---------- filters (per browser, not part of the data) ---------- */
 const UI_DEFAULT = {q: '', who: '', proj: '', prio: '', tag: '', overdue: false, top: false, sort: 'manual', repPeriod: '30',
-  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}, twClosed: [], twFeed: 'all', nwMore: false, plQ: '', plAccess: '', plJob: '', plStatus: 'active'};
+  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}, twClosed: [], twFeed: 'all', nwMore: false, plQ: '', plAccess: '', plJob: '', plStatus: 'active', kbQ: '', kbSec: '', kbOpen: ''};
 const ui = (() => { try { return {...UI_DEFAULT, ...JSON.parse(localStorage.getItem(LS_UI) || '{}')}; } catch { return {...UI_DEFAULT}; } })();
 if (!Array.isArray(ui.treeClosed)) ui.treeClosed = [];
 if (!Array.isArray(ui.twClosed)) ui.twClosed = [];
@@ -3868,6 +3967,8 @@ const COMMANDS = [
   ['Вид: Шаблоны', '8', () => setView('tpl')],
   ['Вид: Чат', '9', () => setView('chat')],
   ['Уведомления', '', openBell],
+  ['Вид: База знаний', '', () => setView('kb')],
+  ['Новая статья в базе знаний', '', () => { setView('kb'); kbStartEdit(null); }],
   ['Новый шаблон', '', () => openTplEditor(null)],
   ['Настройки', '', openSettings],
   ['Меню сбоку / сверху', '', () => { prefs.nav = prefs.nav === 'side' ? 'top' : 'side'; savePrefs(); applyPrefs(); }],
@@ -4464,8 +4565,286 @@ $('#chat-in').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && !e.isCo
 $('#chat-in').oninput = e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 2 + 'px'; };
 document.addEventListener('visibilitychange', () => { if (!document.hidden && db) renderChatBits(); });
 
+/* ---------- knowledge base ---------- */
+// whatever arrives (another person's article, a paste from Word or a web page) passes through here before it is shown
+const KB_TAGS = new Set(['P', 'DIV', 'BR', 'B', 'STRONG', 'I', 'EM', 'U', 'S', 'STRIKE', 'SPAN', 'FONT', 'H1', 'H2', 'H3', 'H4', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'PRE', 'CODE', 'A', 'IMG', 'HR', 'TABLE', 'THEAD', 'TBODY', 'TR', 'TD', 'TH', 'SUB', 'SUP', 'MARK']);
+const KB_DROP = /^(SCRIPT|STYLE|IFRAME|FRAME|FRAMESET|OBJECT|EMBED|TEMPLATE|NOSCRIPT|SVG|MATH|TITLE|META|LINK|BASE|HEAD|FORM|INPUT|BUTTON|SELECT|TEXTAREA|VIDEO|AUDIO|CANVAS)$/;
+const KB_CSS = ['color', 'background-color', 'font-family', 'font-size', 'font-weight', 'font-style', 'text-decoration-line', 'text-align'];
+function kbClean(html){
+  const body = new DOMParser().parseFromString(String(html ?? ''), 'text/html').body;
+  (function walk(el){
+    for (const n of [...el.childNodes]){
+      if (n.nodeType === 3) continue;
+      if (n.nodeType !== 1){ n.remove(); continue; }
+      const tag = n.tagName.toUpperCase(), attr = k => n.getAttribute(k) || '';
+      if (KB_DROP.test(tag)){ n.remove(); continue; }
+      walk(n);
+      if (!KB_TAGS.has(tag)){ n.replaceWith(...n.childNodes); continue; }
+      const keep = {}, css = KB_CSS.map(p => [p, n.style.getPropertyValue(p)]).filter(([, v]) => v && !/url|expression|[<>\\]/i.test(v)).map(([p, v]) => `${p}: ${v}`).join('; ');
+      if (/^[\w-]{1,40}$/.test(attr('data-blob')) && (tag === 'A' || tag === 'IMG')) keep['data-blob'] = attr('data-blob');
+      if (tag === 'A'){
+        if (keep['data-blob']) keep['data-name'] = attr('data-name').slice(0, 200);
+        else if (/^(https?:|mailto:)/i.test(attr('href').trim())){ keep.href = attr('href').trim(); keep.target = '_blank'; keep.rel = 'noopener noreferrer'; }
+      }
+      if (tag === 'IMG'){
+        if (/^data:image\/(png|jpeg|gif|webp);base64,/i.test(attr('src')) && !keep['data-blob']) keep.src = attr('src');
+        if (!keep.src && !keep['data-blob']){ n.remove(); continue; } // a picture from a web page would load from somebody else's server
+        keep.alt = attr('alt').slice(0, 200);
+      }
+      if (tag === 'FONT'){
+        if (/^#?\w{1,20}$/.test(attr('color'))) keep.color = attr('color');
+        if (/^[\w\s,'"-]{1,80}$/.test(attr('face'))) keep.face = attr('face');
+        if (/^[1-7]$/.test(attr('size'))) keep.size = attr('size');
+      }
+      if (tag === 'TD' || tag === 'TH') for (const k of ['colspan', 'rowspan']) if (/^\d{1,2}$/.test(attr(k))) keep[k] = attr(k);
+      for (const a of [...n.attributes]) n.removeAttribute(a.name);
+      for (const [k, v] of Object.entries(keep)) n.setAttribute(k, v);
+      if (css && !keep['data-blob']) n.setAttribute('style', css); // a file chip is styled by the page; the editor tends to stamp a fixed text colour on it
+    }
+  })(body);
+  return body.innerHTML;
+}
+const kbTextCache = new Map();
+function kbText(html){
+  if (!kbTextCache.has(html)){ if (kbTextCache.size > 500) kbTextCache.clear(); kbTextCache.set(html, (new DOMParser().parseFromString(html.replace(/<\/(p|div|h\d|li|blockquote|pre|td|th)>|<br>/gi, '$& '), 'text/html').body.textContent || '').replace(/\s+/g, ' ').trim()); }
+  return kbTextCache.get(html);
+}
+const kbDoc = id => db.docs.find(d => d.id === id);
+const kbCanEdit = d => !d || d.author === chatMe() || canManagePeople();
+const kbWho = id => id ? chatName(id) : 'неизвестно';
+// pictures arrive after the page: the server sends each one only when it is on screen
+const kbHydrate = box => box.querySelectorAll('img[data-blob]').forEach(img => { if (!img.src) chatBlob(img.dataset.blob).then(b => { if (b) img.src = b.data; }); });
+let kbEdit = null, kbRange = null;
+const kbPend = {}; // files inserted into the article being edited, sent with «Сохранить»
+function renderKb(){
+  const f = ui, q = chatNorm(f.kbQ.trim()), secs = [...new Set(db.docs.map(d => d.section).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ru'));
+  if (f.kbSec && !secs.includes(f.kbSec)) f.kbSec = '';
+  const sel = $('#kb-sec');
+  if (document.activeElement !== sel){ sel.innerHTML = '<option value="">Все разделы</option>' + secs.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join(''); sel.value = f.kbSec; }
+  if (document.activeElement !== $('#kb-q')) $('#kb-q').value = f.kbQ;
+  const mark = (t, i, n) => `${esc(t.slice(0, i))}<mark>${esc(t.slice(i, i + n))}</mark>${esc(t.slice(i + n))}`;
+  const hits = db.docs.filter(d => !f.kbSec || d.section === f.kbSec).map(d => {
+    if (!q) return {d};
+    const ti = chatNorm(d.title).indexOf(q), text = kbText(d.html), xi = chatNorm(text).indexOf(q);
+    return ti < 0 && xi < 0 && !chatNorm(d.section).includes(q) ? null : {d, ti, text, xi};
+  }).filter(Boolean);
+  const row = ({d, ti, text, xi}) => `<button type="button" class="kb-row" data-kb="${esc(d.id)}" aria-current="${d.id === (kbEdit ? kbEdit.id : f.kbOpen)}">
+    <b>${ti >= 0 ? mark(d.title, ti, q.length) : esc(d.title)}</b><span>${q && d.section ? esc(d.section) + ' · ' : ''}${esc(kbWho(d.author))} · ${fmtDay(isoDay(new Date(d.updatedAt || d.createdAt)))}</span>
+    ${xi >= 0 && !(ti >= 0) ? `<span class="kb-hit">${xi > 30 ? '…' : ''}${mark(text.slice(Math.max(0, xi - 30), xi + q.length + 60), Math.min(xi, 30), q.length)}</span>` : ''}</button>`;
+  let html;
+  if (q) html = hits.sort((a, b) => (b.ti >= 0) - (a.ti >= 0) || b.d.updatedAt.localeCompare(a.d.updatedAt)).map(row).join('');
+  else {
+    // grouped by section, the newest first inside each; articles without a section go last
+    const groups = new Map();
+    for (const h of hits.sort((a, b) => b.d.updatedAt.localeCompare(a.d.updatedAt))) (groups.get(h.d.section) || groups.set(h.d.section, []).get(h.d.section)).push(h);
+    html = [...groups].sort(([a], [b]) => !a - !b || a.localeCompare(b, 'ru')).map(([sec, l]) => `<p class="kb-group">${esc(sec || 'Без раздела')}</p>${l.map(row).join('')}`).join('');
+  }
+  $('#kb-list').innerHTML = html || `<p class="note" style="padding:12px 8px">${db.docs.length ? 'Ничего не нашлось.' : 'Статей пока нет.'}</p>`;
+  $('#kb-wrap').classList.toggle('open', !!(kbEdit || kbDoc(f.kbOpen)));
+  if (!kbEdit) kbShow(); // the editor is never redrawn: that would lose what is being typed
+}
+function kbShow(){
+  const d = kbDoc(ui.kbOpen), box = $('#kb-main');
+  if (!d){
+    box.innerHTML = `<div class="kb-empty"><h2>База знаний</h2><p>Инструкции, описания и шпаргалки команды. Любой сотрудник может написать статью, изменить её может автор или руководитель.</p><p><button type="button" class="btn primary" data-kb-new>+ Написать статью</button></p></div>`;
+    return;
+  }
+  box.innerHTML = `<div class="kb-head"><button type="button" class="btn small kb-back" data-kb-back aria-label="К списку статей">‹</button>
+    <div>${d.section ? `<span class="kb-sec-chip">${esc(d.section)}</span>` : ''}<h2>${esc(d.title)}</h2>
+    <p class="note">Автор: ${esc(kbWho(d.author))} · ${d.updatedAt && d.updatedAt !== d.createdAt ? `изменено ${esc(fmtStamp(d.updatedAt))}${d.updatedBy && d.updatedBy !== d.author ? `, ${esc(kbWho(d.updatedBy))}` : ''}` : `создано ${esc(fmtStamp(d.createdAt))}`}</p></div>
+    ${kbCanEdit(d) ? `<div class="kb-acts"><button type="button" class="btn small" data-kb-edit>Изменить</button><button type="button" class="btn small" data-kb-del>Удалить</button></div>` : ''}</div>
+    <article class="kb-doc" id="kb-doc">${kbClean(d.html) || '<p class="note">Статья пустая.</p>'}</article>`;
+  const doc = box.querySelector('#kb-doc');
+  kbHydrate(doc);
+  // task numbers become links, as in the chat
+  const w = document.createTreeWalker(doc, NodeFilter.SHOW_TEXT), nodes = [];
+  while (w.nextNode()) if (/\bPLN-\d+\b/.test(w.currentNode.data) && !w.currentNode.parentElement.closest('a')) nodes.push(w.currentNode);
+  for (const t of nodes){ const span = document.createElement('span'); span.innerHTML = chatText(t.data); t.replaceWith(...span.childNodes); }
+}
+const KB_FONTS = ['Arial', 'Verdana', 'Tahoma', 'Georgia', 'Times New Roman', 'Courier New'];
+function kbStartEdit(id){
+  if (kbEdit) return toast('Сначала сохраните или отмените статью, которую вы правите');
+  const d = id ? kbDoc(id) : null;
+  kbEdit = {id: d?.id || null, base: d?.updatedAt || null, force: false};
+  for (const k in kbPend) delete kbPend[k];
+  const secs = [...new Set(db.docs.map(x => x.section).filter(Boolean))];
+  const btn = (cmd, label, title, val = '') => `<button type="button" data-cmd="${cmd}" data-val="${val}" title="${title}" aria-label="${title}">${label}</button>`;
+  $('#kb-main').innerHTML = `<form id="kb-form" novalidate>
+    <div class="kb-head"><button type="button" class="btn small kb-back" data-kb-cancel aria-label="Отменить и вернуться">‹</button>
+      <div class="kb-fields"><input id="kb-title" maxlength="200" placeholder="Название статьи" aria-label="Название" value="${esc(d?.title || '')}">
+      <input id="kb-section" maxlength="60" list="kb-sections" placeholder="Раздел, например «Отчёты 1С»" aria-label="Раздел" value="${esc(d?.section || '')}"><datalist id="kb-sections">${secs.map(x => `<option value="${esc(x)}">`).join('')}</datalist></div></div>
+    <div class="kb-bar" role="toolbar" aria-label="Оформление текста">
+      <select class="sel" data-cmd="formatBlock" aria-label="Стиль абзаца"><option value="">Стиль</option><option value="p">Обычный текст</option><option value="h2">Заголовок</option><option value="h3">Подзаголовок</option><option value="blockquote">Цитата</option><option value="pre">Код</option></select>
+      <select class="sel" data-cmd="fontName" aria-label="Шрифт"><option value="">Шрифт</option>${KB_FONTS.map(x => `<option style="font-family:'${x}'">${x}</option>`).join('')}</select>
+      <select class="sel" data-cmd="fontSize" aria-label="Размер шрифта"><option value="">Размер</option><option value="2">Мелкий</option><option value="3">Обычный</option><option value="4">Средний</option><option value="5">Крупный</option><option value="6">Очень крупный</option></select>
+      <span class="kb-sep"></span>
+      ${btn('bold', '<b>Ж</b>', 'Жирный (Ctrl+B)')}${btn('italic', '<i>К</i>', 'Наклонный (Ctrl+I)')}${btn('underline', '<u>Ч</u>', 'Подчёркнутый (Ctrl+U)')}${btn('strikeThrough', '<s>З</s>', 'Зачёркнутый')}
+      <label class="kb-color" title="Цвет текста">А<input type="color" data-cmd="foreColor" value="#d92d20" aria-label="Цвет текста"></label>
+      <label class="kb-color" title="Цвет выделения фона">🖍<input type="color" data-cmd="hiliteColor" value="#ffe066" aria-label="Цвет выделения фона"></label>
+      <span class="kb-sep"></span>
+      ${btn('insertUnorderedList', '•', 'Маркированный список')}${btn('insertOrderedList', '1.', 'Нумерованный список')}${btn('justifyLeft', '⯇', 'По левому краю')}${btn('justifyCenter', '≡', 'По центру')}${btn('justifyRight', '⯈', 'По правому краю')}
+      <span class="kb-sep"></span>
+      ${btn('kbLink', '🔗', 'Ссылка')}${btn('kbImage', '🖼', 'Вставить картинку')}${btn('kbFile', '📎', 'Прикрепить файл')}${btn('insertHorizontalRule', '―', 'Разделитель')}
+      <span class="kb-sep"></span>
+      ${btn('removeFormat', '⌫', 'Убрать оформление')}${btn('undo', '↶', 'Отменить (Ctrl+Z)')}${btn('redo', '↷', 'Повторить (Ctrl+Y)')}
+    </div>
+    <div class="kb-ed" id="kb-ed" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Текст статьи" data-placeholder="Текст статьи. Картинки можно вставить кнопкой 🖼, перетащить сюда или вставить из буфера (Ctrl+V)."></div>
+    <div class="kb-foot" id="kb-foot"><span class="note">Ctrl+S сохраняет.</span><span class="spacer"></span><button type="button" class="btn" data-kb-cancel>Отмена</button><button class="btn primary" id="kb-save">Сохранить</button></div>
+  </form>`;
+  const ed = $('#kb-ed');
+  ed.innerHTML = kbClean(d?.html || '');
+  kbHydrate(ed);
+  kbEdit.start = ed.innerHTML + '\u0000' + (d?.title || '') + '\u0000' + (d?.section || '');
+  try { document.execCommand('styleWithCSS', false, true); document.execCommand('defaultParagraphSeparator', false, 'p'); } catch {}
+  renderKb();
+  (d ? ed : $('#kb-title')).focus();
+}
+const kbDirty = () => kbEdit && ($('#kb-ed').innerHTML + '\u0000' + $('#kb-title').value + '\u0000' + $('#kb-section').value) !== kbEdit.start;
+function kbExec(cmd, val){
+  const ed = $('#kb-ed'); if (!ed) return;
+  ed.focus();
+  if (kbRange){ const s = getSelection(); s.removeAllRanges(); s.addRange(kbRange); }
+  document.execCommand(cmd, false, val);
+  kbState();
+}
+function kbState(){
+  document.querySelectorAll('.kb-bar button[data-cmd]').forEach(b => { try { if (!/^(kb|undo|redo|remove|insertH)/.test(b.dataset.cmd)) b.setAttribute('aria-pressed', document.queryCommandState(b.dataset.cmd)); } catch {} });
+}
+document.addEventListener('selectionchange', () => {
+  const ed = $('#kb-ed'), s = getSelection();
+  if (ed && s.rangeCount && ed.contains(s.anchorNode)){ kbRange = s.getRangeAt(0).cloneRange(); kbState(); }
+});
+async function kbInsertFiles(files, asImages){
+  if (!canAttach()) return toast('Картинки и файлы можно добавлять при работе с базой данных или общим JSON-файлом: в браузере для них нет места.');
+  const big = [];
+  for (const raw of files){
+    const img = /^image\/(png|jpeg|gif|webp)$/.test(raw.type), f = img ? await shrinkImage(raw) : raw;
+    if (f.size > FILE_MAX){ big.push(f.name); continue; }
+    let data; try { data = await fileData(f); } catch { toast(`Не удалось прочитать файл ${f.name}`); continue; }
+    if (img && asImages !== false) kbExec('insertHTML', `<img src="${esc(data)}" alt="${esc(f.name)}">`);
+    else {
+      const id = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      kbPend[id] = data;
+      kbExec('insertHTML', `<a data-blob="${id}" data-name="${esc(f.name)}">${esc(f.name)} · ${fmtSize(f.size)}</a>&nbsp;`);
+    }
+  }
+  if (big.length) toast(`Не добавлены, больше ${fmtSize(FILE_MAX)}: ${big.join(', ')}`);
+}
+async function kbSave(){
+  const ed = $('#kb-ed'), title = $('#kb-title').value.trim(), section = $('#kb-section').value.trim(), save = $('#kb-save');
+  if (!title){ $('#kb-title').focus(); return toast('Введите название статьи'); }
+  const cur = kbEdit.id && kbDoc(kbEdit.id);
+  if (kbEdit.id && !cur) kbEdit.id = null; // deleted meanwhile: it is saved as a new one
+  // someone else saved this article while it was open here: ask rather than overwrite their text silently
+  if (cur && cur.updatedAt !== kbEdit.base && !kbEdit.force){
+    $('#kb-foot').insertAdjacentHTML('afterbegin', `<div class="kb-warn" id="kb-warn">Пока вы правили, статью изменил(а) ${esc(kbWho(cur.updatedBy))} в ${esc(fmtStamp(cur.updatedAt))}. Нажмите «Сохранить» ещё раз, чтобы записать вашу версию поверх, или «Отмена», чтобы увидеть их версию.</div>`);
+    kbEdit.force = true;
+    return;
+  }
+  const box = document.createElement('div');
+  box.innerHTML = kbClean(ed.innerHTML);
+  const uploads = [];
+  box.querySelectorAll('img[data-blob]').forEach(img => img.removeAttribute('src'));
+  box.querySelectorAll('img[src]').forEach(img => { const id = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6) + uploads.length; uploads.push([id, img.getAttribute('src')]); img.setAttribute('data-blob', id); img.removeAttribute('src'); });
+  box.querySelectorAll('a[data-blob]').forEach(a => { if (kbPend[a.dataset.blob]) uploads.push([a.dataset.blob, kbPend[a.dataset.blob]]); });
+  const html = box.innerHTML;
+  if (html.length > KB_HTML_MAX) return toast('Статья слишком длинная: разбейте её на несколько');
+  if (uploads.length){
+    if (!canAttach()) return toast('Картинки можно сохранить только при работе с базой данных или общим JSON-файлом');
+    save.disabled = true;
+    try {
+      for (const [id, data] of uploads){
+        if (onServer() && !serverHandle.known.has(id)){ await api('blob', {id, data}); serverHandle.known.add(id); }
+        db.blobs[id] = {data};
+      }
+    } catch (e) { return toast(`Картинка или файл не сохранились: ${e.status ? e.message : 'возможно, больше лимита хостинга'}. Текст остался в редакторе.`); }
+    finally { save.disabled = false; }
+  }
+  const id = kbEdit.id || 'kb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), at = stamp();
+  change(() => {
+    const d = kbDoc(id);
+    if (d) Object.assign(d, {title, section, html, updatedAt: at, updatedBy: chatMe()});
+    else db.docs.push(normDoc({id, title, section, html, author: chatMe(), createdAt: at, updatedAt: at, updatedBy: chatMe()}));
+    addEvent(`${actor()} ${d ? 'изменил' : 'написал'} статью «${title}» в базе знаний`);
+  });
+  kbEdit = null; ui.kbOpen = id; saveUi();
+  toast('Статья сохранена');
+  renderKb();
+}
+function kbCancel(){
+  if (kbDirty() && !kbEdit.armed){ kbEdit.armed = true; return toast('Изменения не сохранены. Нажмите «Отмена» ещё раз, чтобы их выбросить'); }
+  kbEdit = null;
+  renderKb();
+}
+function kbDelete(id){
+  const d = kbDoc(id); if (!d) return;
+  change(() => { db.docs = db.docs.filter(x => x.id !== id); addEvent(`${actor()} удалил статью «${d.title}» из базы знаний`); }, `Статья «${d.title}» удалена`);
+}
+const kbSet = (k, v) => { ui[k] = v; saveUi(); renderKb(); };
+$('#kb-q').oninput = e => kbSet('kbQ', e.target.value);
+$('#kb-sec').onchange = e => kbSet('kbSec', e.target.value);
+$('#kb-new').onclick = () => kbStartEdit(null);
+$('#kb-list').onclick = e => {
+  const b = e.target.closest('[data-kb]'); if (!b) return;
+  if (kbEdit) return toast('Сначала сохраните или отмените статью, которую вы правите');
+  ui.kbOpen = b.dataset.kb; saveUi(); renderKb(); scrollTo(0, 0);
+};
+$('#kb-main').addEventListener('click', async e => {
+  let b;
+  if (e.target.closest('[data-kb-new]')) return kbStartEdit(null);
+  if (e.target.closest('[data-kb-back]')){ ui.kbOpen = ''; saveUi(); return renderKb(); }
+  if (e.target.closest('[data-kb-edit]')) return kbStartEdit(ui.kbOpen);
+  if (e.target.closest('[data-kb-cancel]')) return kbCancel();
+  if ((b = e.target.closest('[data-kb-del]'))){
+    if (!b.dataset.armed){ b.dataset.armed = 1; b.textContent = 'Точно удалить?'; b.classList.add('danger'); return; }
+    return kbDelete(ui.kbOpen);
+  }
+  if ((b = e.target.closest('#kb-doc a[data-blob]'))){
+    e.preventDefault();
+    const f = await chatBlob(b.dataset.blob);
+    return f ? download(b.dataset.name || 'файл', await (await fetch(f.data)).blob()) : toast('Файл сейчас недоступен');
+  }
+  if ((b = e.target.closest('#kb-doc img[src]'))) return openChatFile({id: b.dataset.blob, name: b.alt || 'Картинка', type: 'image/png', size: 0});
+  if ((b = e.target.closest('.kb-bar button[data-cmd]'))){
+    const c = b.dataset.cmd;
+    if (c === 'kbImage') return $('#kb-img-in').click();
+    if (c === 'kbFile') return $('#kb-file-in').click();
+    if (c === 'kbLink'){ const url = safeUrl(prompt('Адрес ссылки', 'https://')); if (url) kbExec(String(getSelection()) ? 'createLink' : 'insertHTML', String(getSelection()) ? url : `<a href="${esc(url)}">${esc(url)}</a>`); return; }
+    kbExec(c);
+  }
+});
+// toolbar buttons keep the selection in the text
+$('#kb-main').addEventListener('mousedown', e => { if (e.target.closest('.kb-bar button')) e.preventDefault(); });
+$('#kb-main').addEventListener('change', e => {
+  const c = e.target.dataset?.cmd;
+  if (e.target.tagName === 'SELECT' && c && e.target.value){ kbExec(c, c === 'formatBlock' ? `<${e.target.value}>` : e.target.value); e.target.value = ''; }
+  else if (e.target.type === 'color' && c) kbExec(c, e.target.value);
+});
+$('#kb-main').addEventListener('submit', e => { e.preventDefault(); kbSave(); });
+$('#kb-main').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.code === 'KeyS' && kbEdit){ e.preventDefault(); kbSave(); }
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.closest('#kb-form')){ e.preventDefault(); $('#kb-ed').focus(); }
+});
+$('#kb-main').addEventListener('paste', e => {
+  if (e.target.closest('#kb-ed') == null) return;
+  const files = [...e.clipboardData.files], html = e.clipboardData.getData('text/html');
+  if (files.length){ e.preventDefault(); return kbInsertFiles(files); }
+  if (html){ e.preventDefault(); kbExec('insertHTML', kbClean(html)); }
+});
+$('#kb-main').addEventListener('dragover', e => { const ed = e.target.closest('#kb-ed'); if (ed && [...e.dataTransfer.types].includes('Files')){ e.preventDefault(); ed.classList.add('kb-drop'); } });
+$('#kb-main').addEventListener('dragleave', e => { const ed = e.target.closest('#kb-ed'); if (ed && !ed.contains(e.relatedTarget)) ed.classList.remove('kb-drop'); });
+$('#kb-main').addEventListener('drop', e => {
+  const ed = e.target.closest('#kb-ed'); if (!ed || !e.dataTransfer.files.length) return;
+  e.preventDefault(); ed.classList.remove('kb-drop');
+  const r = document.caretRangeFromPoint?.(e.clientX, e.clientY); if (r) kbRange = r;
+  kbInsertFiles([...e.dataTransfer.files]);
+});
+$('#kb-img-in').onchange = e => { const l = [...e.target.files]; e.target.value = ''; kbInsertFiles(l); };
+$('#kb-file-in').onchange = e => { const l = [...e.target.files]; e.target.value = ''; kbInsertFiles(l, false); };
+addEventListener('beforeunload', e => { if (kbDirty()) e.preventDefault(); });
+
 /* ---------- view & theme (per browser, not part of the data) ---------- */
-const VIEWS = ['team', 'board', 'tree', 'proj', 'tpl', 'cab', 'load', 'log', 'report', 'chat', 'people'];
+const VIEWS = ['team', 'board', 'tree', 'proj', 'tpl', 'cab', 'load', 'log', 'report', 'chat', 'kb', 'people'];
 let view = 'team';
 function setView(v){
   if (v === 'my') v = 'cab'; // saved by older versions
@@ -4500,6 +4879,10 @@ addEventListener('storage', e => {
   console.assert(mergeChat([rx('👍|a', '2', true)], [rx('👍|a', '3', false)])[0].reacts['👍|a'].v === false && mergeChat([rx('👍|a', '3', false)], [rx('👍|a', '2', true)])[0].reacts['👍|a'].v === false, 'chat: the later reaction wins in either order');
   console.assert(eqJ(mergeMarks({b: {at: '1', v: 'x'}}, {a: {at: '1', v: 'y'}}), mergeMarks({a: {at: '1', v: 'y'}}, {b: {at: '1', v: 'x'}})), 'marks: same result in either order');
   console.assert(mergeMarks({a: {at: '2', v: true}}, {a: {at: '1', v: false}}).a.v === true, 'marks: the later one wins');
+  const clean = kbClean('<p style="color: red; background-image: url(x)">a<script>alert(1)<\/script><img src="x" onerror="alert(1)"><a href="javascript:alert(1)" onclick="x()">b</a><a href="https://e.ru">c</a><svg><a href="javascript:1">d</a></svg><b onmouseover="x">e</b><img data-blob="f1" src="https://e.ru/t.png"><iframe src="x"></iframe></p>');
+  console.assert(!/script|onerror|onclick|onmouseover|javascript|iframe|svg|url\(|https:\/\/e\.ru\/t/.test(clean) && clean.includes('color: red') && clean.includes('href="https://e.ru"') && clean.includes('<b>e</b>') && clean.includes('data-blob="f1"'), 'kb: dangerous html removed, formatting kept: ' + clean);
+  const c11 = migrate({version: 11, people: [], tasks: [], docs: [{id: 'd', title: '', html: '<img data-blob="k1">'}, {id: 'd', title: 'dup'}, null], blobs: {k1: {data: 'data:x'}, k2: {data: 'data:y'}}});
+  console.assert(c11.docs.length === 1 && c11.docs[0].title === 'Без названия' && Object.keys(c11.blobs).join() === 'k1', 'v11 -> v12: docs, duplicates dropped, their pictures kept');
   const c10 = migrate({version: 10, people: [{id: 'p', name: 'P'}], tasks: [{id: 'PLN-1', title: 'x', assignee: 'p', createdAt: 'c', log: [{at: 'l1', text: 'Р назначил: P'}]}, {id: 'PLN-2', title: 'y', assignee: 'p', createdAt: 'c'}], chat: [{id: 'f', from: 'p', to: 'all', at: '1', text: '', files: [{id: 'b1', name: 'a.png'}]}], blobs: {b1: {data: 'data:x'}, b2: {data: 'data:y'}}});
   console.assert(c10.version === SCHEMA && c10.tasks[0].assignedTo === 'p' && c10.tasks[0].assignedAt === 'l1' && c10.tasks[1].assignedAt === 'c', 'v10 -> v11: assignment time from the log or the creation');
   console.assert(c10.chat.length === 1 && Object.keys(c10.blobs).join() === 'b1', 'v10 -> v11: a message with only a file stays, its blob is kept, others are dropped');
