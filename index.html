@@ -668,8 +668,6 @@ input.proj-name:focus{outline:none;border-color:var(--line);background:var(--sun
   body.nav-rail .nv-grp:first-child{display:none}
   body.nav-rail #chat-badge{position:absolute;top:2px;right:2px}
   body.nav-rail header .btn{width:44px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex:none}
-  body.nav-rail #new-task{font-size:0}
-  body.nav-rail #new-task::before{content:"+";font-size:22px;line-height:1}
   body.nav-rail .me-ava{position:relative;top:auto;right:auto;flex:none;margin:4px auto 0}
   body.nav-rail .bell-btn{align-self:center}
   body.nav-rail .toast{left:calc(50% + 42px)}
@@ -1148,7 +1146,6 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
       <button data-view="people" id="vw-people">Сотрудники</button>
     </div>
     <div class="spacer"></div>
-    <button class="btn primary" id="new-task">+ Задача</button>
     <select class="sel" id="me-sel" aria-label="Кто работает" title="Кто сейчас работает в Планёрке"></select>
     <button class="btn store-btn" id="store-btn" title="Где хранятся данные"><span class="sdot" id="store-dot"></span><span id="store-label">Браузер</span></button>
     <button type="button" class="bell-btn" id="bell-btn" aria-label="Уведомления" title="Уведомления"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2.2 2.2 0 0 0 4 0"/></svg><span class="badge" id="bell-badge" hidden></span></button>
@@ -1171,6 +1168,8 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
     <select id="fl-sort" aria-label="Сортировка"><option value="manual">Свой порядок</option><option value="prio">По приоритету</option><option value="due">По сроку</option></select>
     <span class="count" id="fl-count"></span>
     <button class="btn small" id="fl-reset" hidden>Сбросить фильтры</button>
+    <span class="spacer"></span>
+    <button class="btn small primary" id="new-task">+ Задача</button>
   </div>
 
   <main class="view" id="v-team">
@@ -1590,7 +1589,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
           <li><b>Тема:</b> светлая, тёмная или как в системе.</li>
           <li><b>Цвет акцента:</b> синий, зелёный, фиолетовый, оранжевый, графит.</li>
           <li><b>Плотность:</b> обычная или компактная — меньше отступов, больше задач на экране.</li>
-          <li><b>Расположение меню:</b> сверху или сбоку. Сбоку меню становится колонкой слева, кнопки «+ Задача», «Я: …» и хранение — внизу колонки. На телефоне меню всегда сверху.</li>
+          <li><b>Расположение меню:</b> сверху или сбоку. Сбоку меню становится колонкой слева, «Я: …» и хранение — внизу колонки. Кнопка «+ Задача» — справа в строке фильтров «Распределения» и «Канбана», как «+ Задача в проект» в «Дереве»; везде работает клавиша <kbd>N</kbd>.</li>
           <li><b>Вкладки в меню:</b> лишние можно скрыть. Скрытая вкладка открывается из палитры команд и цифрой на клавиатуре.</li>
           <li><b>Открывать при запуске:</b> последний открытый вид или конкретный, например личный кабинет.</li>
           <li><b>Справка и команды</b> — здесь же; <kbd>F1</kbd> и <kbd>Ctrl</kbd> <kbd>K</kbd> работают как раньше.</li>
