@@ -509,6 +509,12 @@ header{position:relative;padding-right:98px}
 .ad-ic input:checked + span{border-color:var(--accent);background:var(--accent-soft)}
 .ad-ic input:focus-visible + span{outline:2px solid var(--accent)}
 .ad-steps{display:flex;gap:6px}
+.ad-bgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px}
+.ad-bgt{display:grid;gap:4px;padding:4px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);cursor:pointer;text-align:center;min-width:0}
+.ad-bgt small{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ad-bgt .look-sw{height:34px}
+.ad-bgt:hover{border-color:var(--accent)}
+.ad-bgt.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);background:var(--accent-soft)}
 .ad-steps input{width:90px}
 .lbg-media,.lbg-el{position:absolute;inset:0;width:100%;height:100%}
 .cab-who.lbg > .lbg-media{position:absolute;z-index:0}
@@ -4088,13 +4094,20 @@ function openAchDef(id){
       </div>
       <div class="fields"><div class="field"><label for="ad-dept">Для кого</label><select class="sel" id="ad-dept"><option value="">Все сотрудники</option>${opt(db.depts.map(p => [p.id, 'Отдел: ' + p.name]), x.dept)}</select></div>
         <div class="field"><label for="ad-frame" id="ad-frame-l">${x.manual ? 'Рамка при вручении' : 'Рамка за серебро'}</label><select class="sel" id="ad-frame">${opt(Object.entries(LOOK_FRAME).map(([k, f]) => [k, k ? f.name : 'Нет']), x.frame)}</select></div>
-        <div class="field"><label for="ad-bg" id="ad-bg-l">${x.manual ? 'Фон при вручении' : 'Фон за золото'}</label><select class="sel" id="ad-bg">${opt(bgs, x.bg)}</select></div></div>
+</div>
+      <div class="field"><span class="k" id="ad-bg-l">${x.manual ? 'Фон при вручении' : 'Фон за золото'}</span>
+        <div class="ad-bgs" role="group" aria-labelledby="ad-bg-l">${bgs.map(([k, l]) => { const u = k.startsWith('u:') && db.bgs.find(b => 'u:' + b.id === k);
+          return `<button type="button" class="ad-bgt${k === x.bg ? ' on' : ''}" data-ad-bg="${esc(k)}" aria-pressed="${k === x.bg}"><span class="look-sw lbg${k && !u ? ' lbg-' + k : ''}">${u ? bgMedia(u, true) : ''}</span><small>${esc(u ? u.name : l)}</small></button>`; }).join('')}</div>
+        <input type="hidden" id="ad-bg" value="${esc(x.bg)}"></div>
       <p class="note">Бронза любого достижения — медаль в профиле. Достижение сразу считается по уже сделанной работе. Загрузить свои фоны в каталог можно в «Гардеробе».</p>
     </div>
     <div class="d-foot">${cur ? '<button type="button" class="btn danger" data-ad-del>Удалить</button>' : ''}<span class="spacer"></span><button type="button" class="btn" data-ad-cancel>Отмена</button><button class="btn primary">Сохранить</button></div></form>`;
   let manual = x.manual;
   d.querySelectorAll('[data-ad-kind]').forEach(b => b.onclick = () => { manual = b.dataset.adKind === '1'; d.querySelectorAll('[data-ad-kind]').forEach(y => y.setAttribute('aria-pressed', y === b)); d.querySelector('#ad-auto').hidden = manual; d.querySelector('#ad-frame-l').textContent = manual ? 'Рамка при вручении' : 'Рамка за серебро'; d.querySelector('#ad-bg-l').textContent = manual ? 'Фон при вручении' : 'Фон за золото'; });
   d.querySelector('[data-ad-cancel]').onclick = () => d.close();
+  // the background is picked by its picture, like in the wardrobe
+  d.querySelectorAll('[data-ad-bg]').forEach(b => b.onclick = () => { d.querySelector('#ad-bg').value = b.dataset.adBg; d.querySelectorAll('[data-ad-bg]').forEach(y => { y.classList.toggle('on', y === b); y.setAttribute('aria-pressed', y === b); }); });
+  hydrateBg(d);
   d.querySelector('[data-ad-del]')?.addEventListener('click', async () => {
     const n = db.awards.filter(a => a.def === id).length;
     if (!await askConfirm(`Удалить «${cur.name}»?`, `<p>Достижение пропадёт у всех${n ? `, вместе с ${n} врученными наградами` : ''}. Открытые им рамки и фоны снимутся.</p>`, 'Удалить')) return;
