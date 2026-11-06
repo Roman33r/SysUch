@@ -60,6 +60,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
 .spacer{flex:1}
 .seg{display:inline-flex;background:var(--sunken);border:1px solid var(--line);border-radius:999px;padding:3px}
 .seg button{border:0;background:none;padding:6px 12px;border-radius:999px;cursor:pointer;font-size:13px;color:var(--muted)}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
 
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 14px;cursor:pointer;font-size:14px;font-weight:500}
@@ -666,10 +667,10 @@ input.proj-name:focus{outline:none;border-color:var(--line);background:var(--sun
   body.nav-rail .nv-grp{display:block;width:28px;height:1px;margin:6px auto;background:var(--line);font-size:0}
   body.nav-rail .nv-grp:first-child{display:none}
   body.nav-rail #chat-badge{position:absolute;top:2px;right:2px}
-  body.nav-rail header .btn{width:44px;height:40px;padding:0;justify-content:center}
+  body.nav-rail header .btn{width:44px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex:none}
   body.nav-rail #new-task{font-size:0}
   body.nav-rail #new-task::before{content:"+";font-size:22px;line-height:1}
-  body.nav-rail .me-ava{position:static;margin:4px auto 0}
+  body.nav-rail .me-ava{position:relative;top:auto;right:auto;flex:none;margin:4px auto 0}
   body.nav-rail .bell-btn{align-self:center}
   body.nav-rail .toast{left:calc(50% + 42px)}
 }
@@ -4290,7 +4291,7 @@ function applyPrefs(){
   document.body.classList.toggle('nav-side', prefs.nav === 'side' || prefs.nav === 'rail');
   document.body.classList.toggle('nav-rail', prefs.nav === 'rail');
   document.body.classList.toggle('nav-icons', prefs.navIcons === 'icons');
-  document.body.classList.toggle('nav-text', prefs.navIcons === 'text');
+  document.body.classList.toggle('nav-text', prefs.navIcons === 'text' && prefs.nav !== 'rail'); // saved earlier together: the rail still shows its icons
   document.body.classList.toggle('bbar-on', prefs.bottomBar !== 'off');
   document.body.classList.toggle('card-icons', prefs.cardIcons !== 'off');
   document.body.classList.toggle('prio-bar', prefs.prioBar !== 'off');
@@ -4304,7 +4305,8 @@ function setTheme(t){ prefs.theme = t; savePrefs(); applyPrefs(); if ($('#d-set'
 function openSettings(){ drawSettings(); $('#d-set').showModal(); }
 function drawSettings(){
   const d = $('#d-set');
-  const seg = (key, opts) => `<div class="seg" role="group">${Object.entries(opts).map(([v, l]) => `<button type="button" data-pref="${key}" data-val="${v}" aria-pressed="${prefs[key] === v}">${l}</button>`).join('')}</div>`;
+  // off = {value: why it can't be chosen now}
+  const seg = (key, opts, off = {}) => `<div class="seg" role="group">${Object.entries(opts).map(([v, l]) => `<button type="button" data-pref="${key}" data-val="${v}" aria-pressed="${prefs[key] === v}" ${off[v] ? `disabled title="${off[v]}"` : ''}>${l}</button>`).join('')}</div>`;
   d.innerHTML = `<div class="d-head"><h2>Настройки</h2><button class="close" aria-label="Закрыть">✕</button></div>
   <div class="d-body set-body">
     <p class="note">Настройки хранятся в этом браузере, у каждого свои. Сейчас это настройки: <b>${esc(person(meId)?.name || ME)}</b>.${serverUser ? '' : ' Другой человек выбирается в списке «Я: …».'}</p>
@@ -4317,8 +4319,8 @@ function drawSettings(){
       <div class="set-row"><span>Ширина страницы</span>${seg('width', {normal: 'Обычная', full: 'Вся ширина окна'})}</div>
     </section>
     <section><h4 class="sec-t">Меню</h4>
-      <div class="set-row"><span>Расположение</span>${seg('nav', {top: 'Сверху', side: 'Сбоку', rail: 'Узкая полоса'})}</div>
-      <div class="set-row"><span>Пункты меню</span>${seg('navIcons', {both: 'Значок и название', text: 'Только название', icons: 'Только значок'})}</div>
+      <div class="set-row"><span>Расположение</span>${seg('nav', {top: 'Сверху', side: 'Сбоку', rail: 'Узкая полоса'}, prefs.navIcons === 'text' ? {rail: 'В узкой полосе только значки: сначала выберите пункты со значком'} : {})}</div>
+      <div class="set-row"><span>Пункты меню</span>${seg('navIcons', {both: 'Значок и название', text: 'Только название', icons: 'Только значок'}, prefs.nav === 'rail' ? {text: 'В узкой полосе названий нет: сначала выберите меню сверху или сбоку'} : {})}</div>
       <div class="set-row"><span>Порядок пунктов</span>${seg('navGroups', {on: 'По группам', off: 'Подряд'})}</div>
       <div class="set-row"><span>На телефоне</span>${seg('bottomBar', {on: 'Панель внизу', off: 'Меню сверху'})}</div>
       <div class="set-row top"><span>Вкладки в меню</span><div class="set-checks">${Object.entries(VIEW_NAMES).map(([v, l]) => `<label class="chk"><input type="checkbox" data-vis="${v}" ${prefs.hidden.includes(v) ? '' : 'checked'}> ${l}</label>`).join('')}</div></div>
