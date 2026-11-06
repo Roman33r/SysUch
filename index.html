@@ -500,12 +500,14 @@ header{position:relative;padding-right:98px}
 .lbg-media,.lbg-el{position:absolute;inset:0;width:100%;height:100%}
 .cab-who.lbg > .lbg-media{position:absolute;z-index:0}
 .lbg-el{object-fit:cover;display:block}
+.lbg-blur{filter:blur(16px) brightness(.7);transform:scale(1.2)}
 .lbg-shade{position:absolute;inset:0;background:rgba(0,0,0,.4)}
-.bg-prev{position:relative;min-height:110px;display:flex;align-items:center;padding:18px 20px;margin-bottom:12px}
+.bg-prev{position:relative;height:96px;display:flex;align-items:center;padding:0 20px;margin-bottom:6px;overflow:hidden}
 .look-sw{position:relative;overflow:hidden}
 .look-sw > svg{position:relative}
 .look-up{position:relative;display:grid}
 .look-x{position:absolute;top:4px;right:4px;width:22px;height:22px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer}
+.look-x.look-ed{right:30px;font-size:12px}
 .look-add .look-sw{border-style:dashed;color:var(--accent)}
 .ach-list{display:grid;gap:10px}
 .ach-item{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}
@@ -1874,7 +1876,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 20;
+const SCHEMA = 21;
 const CHAT_MAX = 2000, CHAT_TEXT_MAX = 2000; // localStorage holds about 5 MB per site, so old messages drop off
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
@@ -2009,7 +2011,7 @@ function normAchDef(x){
 const normAward = x => ({id: String(x.id ?? '').slice(0, 40), def: String(x.def ?? '').slice(0, 40), to: String(x.to ?? '').slice(0, 40), by: String(x.by ?? '').slice(0, 40), note: String(x.note ?? '').slice(0, 300), at: String(x.at ?? '').slice(0, 40)});
 // an uploaded background: in the shared catalogue (owner '') or a person's own; y = which part of it shows in the strip
 const normBg = x => ({id: String(x.id ?? '').slice(0, 40), name: String(x.name ?? '').trim().slice(0, 60) || 'Фон', blob: /^[\w-]{1,40}$/.test(x.blob) ? x.blob : '', mime: BG_MIME.test(x.mime) ? x.mime : 'image/jpeg',
-  y: Math.min(100, Math.max(0, Math.round(+x.y) || 50)), free: !!x.free, owner: String(x.owner ?? '').slice(0, 40), at: String(x.at ?? '').slice(0, 40)});
+  y: Math.min(100, Math.max(0, Number.isFinite(+x.y) && x.y !== '' && x.y != null ? Math.round(+x.y) : 50)), fit: x.fit === 'contain' ? 'contain' : 'cover', free: !!x.free, owner: String(x.owner ?? '').slice(0, 40), at: String(x.at ?? '').slice(0, 40)});
 const normLook = l => ({bg: Object.hasOwn(LOOK_BG, l?.bg) || /^u:[\w-]{1,40}$/.test(l?.bg ?? '') ? l.bg : '', frame: Object.hasOwn(LOOK_FRAME, l?.frame) ? l.frame : '',
   badges: [...new Set(Array.isArray(l?.badges) ? l.badges.map(String) : [])].filter(id => /^[\w-]{1,40}$/.test(id)).slice(0, 3)});
 /* blocks of the personal cabinet; a person's own order and sizes are kept on their card: «name:CxR» = C of 12 columns, R grid rows («:w» from older versions = full width) */
@@ -3885,7 +3887,7 @@ function openLook(pid){
         <div class="look-grid">${Object.entries(LOOK_BG).map(([k, x]) => { const ok = bgOpen(pid, k);
           return `<button type="button" class="look-tile${k === sel.bg ? ' on' : ''}" data-lbg="${k}" ${ok ? '' : 'aria-disabled="true"'} title="${esc(ok ? x.name : bgCond(k))}"><span class="look-sw lbg${k ? ' lbg-' + k : ''}">${ok ? '' : ic('lock', 16)}</span><span>${esc(x.name)}</span>${ok ? '' : `<small>${esc(bgCond(k))}</small>`}</button>`; }).join('')}
           ${db.bgs.filter(b => !b.owner || b.owner === pid).map(b => { const k = 'u:' + b.id, ok = bgOpen(pid, k), del = (b.owner === pid || (!b.owner && canManagePeople()));
-            return `<span class="look-up"><button type="button" class="look-tile${k === sel.bg ? ' on' : ''}" data-lbg="${k}" ${ok ? '' : 'aria-disabled="true"'} title="${esc(ok ? b.name : bgCond(k))}"><span class="look-sw">${bgMedia(b, true)}${ok ? '' : ic('lock', 16)}</span><span>${esc(b.name)}</span><small>${b.owner ? 'ваш' : b.free ? 'каталог, для всех' : ok ? 'каталог' : esc(bgCond(k))}</small></button>${del ? `<button type="button" class="look-x" data-bgdel="${esc(b.id)}" aria-label="Удалить фон «${esc(b.name)}»">${ic('x', 12)}</button>` : ''}</span>`; }).join('')}
+            return `<span class="look-up"><button type="button" class="look-tile${k === sel.bg ? ' on' : ''}" data-lbg="${k}" ${ok ? '' : 'aria-disabled="true"'} title="${esc(ok ? b.name : bgCond(k))}"><span class="look-sw">${bgMedia(b, true)}${ok ? '' : ic('lock', 16)}</span><span>${esc(b.name)}</span><small>${b.owner ? 'ваш' : b.free ? 'каталог, для всех' : ok ? 'каталог' : esc(bgCond(k))}</small></button>${del ? `<button type="button" class="look-x" data-bgdel="${esc(b.id)}" aria-label="Удалить фон «${esc(b.name)}»">${ic('x', 12)}</button><button type="button" class="look-x look-ed" data-bgedit="${esc(b.id)}" aria-label="Настроить фон «${esc(b.name)}»" title="Как вписать и какая часть видна">✎</button>` : ''}</span>`; }).join('')}
           ${canOwnBg(pid) ? '<button type="button" class="look-tile look-add" data-bgup="own"><span class="look-sw">' + ic('palette', 18) + '</span><span>Загрузить свой фон</span><small>открыто золотом</small></button>' : '<button type="button" class="look-tile" aria-disabled="true" title="Свой фон открывается золотом в любом достижении"><span class="look-sw">' + ic('lock', 16) + '</span><span>Свой фон</span><small>золото в любом достижении</small></button>'}
           ${canManagePeople() ? '<button type="button" class="look-tile look-add" data-bgup="cat"><span class="look-sw">' + ic('folderPlus', 18) + '</span><span>В каталог</span><small>фон для команды или награды</small></button>' : ''}</div>
         <h3 class="look-h">Рамка аватара <span class="note">открывается серебром</span></h3>
@@ -3898,7 +3900,7 @@ function openLook(pid){
   };
   d.onclick = e => {
     let b;
-    if (e.target.closest('[data-bgdel],[data-bgup]')) return bgAct(e);
+    if (e.target.closest('[data-bgdel],[data-bgup],[data-bgedit]')) return bgAct(e);
     if (e.target.closest('[data-lclose]')) return d.close();
     if ((b = e.target.closest('[aria-disabled="true"]'))) return toast(b.title || 'Пока не открыто');
     if ((b = e.target.closest('[data-lbg]'))){ sel.bg = b.dataset.lbg; draw(); return hydrateBg(d); }
@@ -3918,6 +3920,13 @@ function openLook(pid){
       change(() => { db.bgs = db.bgs.filter(x => x.id !== bg.id); db.achDefs.forEach(x => { if (x.bg === 'u:' + bg.id) x.bg = ''; }); }, 'Фон удалён');
       return draw(), hydrateBg(d);
     }
+    if ((b = e.target.closest('[data-bgedit]'))){
+      const bg = db.bgs.find(x => x.id === b.dataset.bgedit); if (!bg) return;
+      const f = await chatBlob(bg.blob); if (!f) return toast('Фон сейчас недоступен');
+      const r = await askBg(f.data, bg.mime, bg, !bg.owner, true); if (!r) return;
+      change(() => { const x = db.bgs.find(y => y.id === bg.id); if (x) Object.assign(x, normBg({...x, ...r})); }, 'Фон настроен');
+      return draw(), hydrateBg(d);
+    }
     if ((b = e.target.closest('[data-bgup]'))){ const own = b.dataset.bgup === 'own', made = await uploadBg(own ? pid : ''); if (made){ if (own) sel.bg = 'u:' + made; draw(); hydrateBg(d); } }
   };
   draw();
@@ -3925,9 +3934,13 @@ function openLook(pid){
   d.showModal();
 }
 // pictures and videos of uploaded backgrounds arrive after the page, like photos
+// src: an attribute string, either data-bg-blob="…" (loaded later) or src="data:…"
+function bgEls(mime, src, y, fit, play){
+  const el = (cls, f) => mime.startsWith('video/') ? `<video class="lbg-el${cls}" ${src} muted loop playsinline ${play ? 'autoplay' : ''} preload="metadata" style="object-fit:${f};object-position:50% ${y}%"></video>` : `<img class="lbg-el${cls}" ${src} alt="" style="object-fit:${f};object-position:50% ${y}%">`;
+  return fit === 'contain' ? el(' lbg-blur', 'cover') + el('', 'contain') : el('', 'cover');
+}
 function bgMedia(b, thumb){
-  const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches, pos = `object-position:50% ${b.y}%`;
-  return b.mime.startsWith('video/') ? `<video class="lbg-el" data-bg-blob="${esc(b.blob)}" muted loop playsinline ${motion && !thumb ? 'autoplay' : ''} preload="metadata" style="${pos}"></video>` : `<img class="lbg-el" data-bg-blob="${esc(b.blob)}" alt="" style="${pos}">`;
+  return bgEls(b.mime, `data-bg-blob="${esc(b.blob)}"`, b.y, b.fit, !thumb && !matchMedia('(prefers-reduced-motion: reduce)').matches);
 }
 const hydrateBg = box => box.querySelectorAll('[data-bg-blob]').forEach(el => { if (!el.src) chatBlob(el.dataset.bgBlob).then(x => { if (x){ el.src = x.data; if (el.autoplay) el.play?.().catch(() => {}); } }); });
 // upload a background: into the catalogue (owner '') or one's own; resolves with its id
@@ -3938,30 +3951,39 @@ async function uploadBg(owner){
   if (!BG_MIME.test(f.type)) return toast('Нужна картинка (JPG, PNG, WebP, GIF) или видео MP4/WebM'), null;
   if (f.size > FILE_MAX) return toast(`Файл больше ${fmtSize(FILE_MAX)}. Для анимации лучше короткое видео: оно легче GIF`), null;
   let data; try { data = await fileData(f); } catch { return toast('Не удалось прочитать файл'), null; }
-  const opts = await askBg(data, f.type, f.name.replace(/\.[^.]+$/, '').slice(0, 60), !owner); if (!opts) return null;
+  const opts = await askBg(data, f.type, {name: f.name.replace(/\.[^.]+$/, '').slice(0, 60)}, !owner); if (!opts) return null;
   const blob = newBlobId(), id = 'bg' + Date.now().toString(36);
   try { await putBlob(blob, data); } catch (e) { return toast(`Фон не сохранился: ${e.status ? e.message : 'возможно, он больше лимита хостинга'}`), null; }
-  change(() => { db.bgs.push(normBg({id, blob, mime: f.type, name: opts.name, y: opts.y, free: opts.free, owner, at: stamp()})); if (!owner) addEvent(`${actor()} добавил фон «${opts.name}» в каталог`); }, owner ? 'Свой фон загружен' : `Фон «${opts.name}» в каталоге`);
+  change(() => { db.bgs.push(normBg({id, blob, mime: f.type, ...opts, owner, at: stamp()})); if (!owner) addEvent(`${actor()} добавил фон «${opts.name}» в каталог`); }, owner ? 'Свой фон загружен' : `Фон «${opts.name}» в каталоге`);
   return id;
 }
-// name, the visible part of the picture and, in the catalogue, whether it is free for everyone
-function askBg(data, mime, name, cat){
+// name, how it fits the strip, which part shows and, in the catalogue, whether it is free for everyone
+function askBg(data, mime, init, cat, edit){
   return new Promise(res => {
-    const d = $('#d-ask'); let done = false;
-    const fin = v => { if (done) return; done = true; if (d.open) d.close(); res(v); };
-    d.innerHTML = `<form><div class="d-head"><h2>${cat ? 'Фон в каталог' : 'Свой фон'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
-      <div class="d-body"><div class="cab-who lbg look-prev bg-prev">${mime.startsWith('video/') ? `<video class="lbg-el" src="${esc(data)}" muted loop playsinline autoplay></video>` : `<img class="lbg-el" src="${esc(data)}" alt="">`}<span class="lbg-shade"></span><b style="position:relative;z-index:1">Так фон ляжет за именем</b></div>
-        <div class="field"><label for="bg-y">Какая часть видна: верх ← → низ</label><input type="range" id="bg-y" min="0" max="100" step="1" value="50"></div>
-        <div class="field"><label for="bg-name">Название</label><input class="ask-in" id="bg-name" maxlength="60" value="${esc(name)}"></div>
-        ${cat ? '<label class="chk"><input type="checkbox" id="bg-free"> Доступен всем сразу (иначе — только как награда за достижение)</label>' : ''}</div>
+    const d = $('#d-ask'), v = {name: init.name || 'Фон', y: init.y ?? 50, fit: init.fit || 'cover', free: !!init.free}; let done = false;
+    const fin = r => { if (done) return; done = true; if (d.open) d.close(); res(r); };
+    d.innerHTML = `<form><div class="d-head"><h2>${edit ? 'Настройка фона' : cat ? 'Фон в каталог' : 'Свой фон'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
+      <div class="d-body"><div class="cab-who lbg look-prev bg-prev"><span class="lbg-media" id="bg-pm"></span><b style="position:relative;z-index:1">Так фон ляжет за именем</b></div>
+        <p class="note" style="margin:0 0 10px">Полоса профиля очень широкая и низкая, предпросмотр той же формы, что у вас в кабинете. На других экранах она бывает немного выше или ниже.</p>
+        <div class="set-row"><span>Как вписать</span><div class="seg" role="group"><button type="button" data-bgfit="cover" aria-pressed="${v.fit === 'cover'}">Заполнить полосу</button><button type="button" data-bgfit="contain" aria-pressed="${v.fit === 'contain'}">Целиком</button></div></div>
+        <div class="field" id="bg-yrow"><label for="bg-y">Какая часть видна: верх ← → низ</label><input type="range" id="bg-y" min="0" max="100" step="1" value="${v.y}"></div>
+        <div class="field"><label for="bg-name">Название</label><input class="ask-in" id="bg-name" maxlength="60" value="${esc(v.name)}"></div>
+        ${cat ? `<label class="chk"><input type="checkbox" id="bg-free" ${v.free ? 'checked' : ''}> Доступен всем сразу (иначе — только как награда за достижение)</label>` : ''}</div>
       <div class="d-foot"><span class="spacer"></span><button type="button" class="btn" data-ask="0">Отмена</button><button class="btn primary">Сохранить</button></div></form>`;
-    const el = d.querySelector('.lbg-el'), y = d.querySelector('#bg-y');
-    y.oninput = () => { el.style.objectPosition = `50% ${y.value}%`; };
-    d.querySelector('form').onsubmit = e => { e.preventDefault(); fin({name: d.querySelector('#bg-name').value.trim() || 'Фон', y: +y.value, free: !!d.querySelector('#bg-free')?.checked}); };
+    const pm = d.querySelector('#bg-pm'), y = d.querySelector('#bg-y');
+    const draw = () => { pm.innerHTML = bgEls(mime, `src="${esc(data)}"`, v.y, v.fit, true) + '<span class="lbg-shade"></span>'; d.querySelector('#bg-yrow').hidden = v.fit === 'contain'; };
+    // moving the slider only shifts the picture: the video keeps playing
+    y.oninput = () => { v.y = +y.value; pm.querySelectorAll('.lbg-el').forEach(el => { el.style.objectPosition = `50% ${v.y}%`; }); };
+    d.querySelectorAll('[data-bgfit]').forEach(b => b.onclick = () => { v.fit = b.dataset.bgfit; d.querySelectorAll('[data-bgfit]').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); });
+    draw();
+    d.querySelector('form').onsubmit = e => { e.preventDefault(); fin({name: d.querySelector('#bg-name').value.trim() || 'Фон', y: v.y, fit: v.fit, free: !!d.querySelector('#bg-free')?.checked}); };
     d.querySelector('[data-ask="0"]').onclick = () => fin(null);
     d.querySelector('.close').onclick = () => fin(null);
     d.addEventListener('close', () => fin(null), {once: true});
     d.showModal();
+    // the preview takes the shape of the real strip, when the cabinet is on screen
+    const r = $('#cab-who')?.getBoundingClientRect(), prev = d.querySelector('.bg-prev');
+    if (r?.width && r.height) prev.style.height = Math.max(60, Math.min(200, prev.getBoundingClientRect().width * r.height / r.width)) + 'px';
   });
 }
 // the constructor of an own achievement: a rule with three thresholds, or an award handed out by hand
@@ -7050,7 +7072,7 @@ addEventListener('storage', e => {
   const a20 = migrate({version: 19, people: [{id: 'a', name: 'A', achAll: true}], tasks: [], achDefs: [{id: 'd1', name: 'X', steps: [9, 3, 5], metric: 'nope', bg: 'u:gone', frame: 'fire'}, {id: 'd2', manual: true}],
     awards: [{id: 'w1', def: 'd2', to: 'a'}, {id: 'w2', def: 'dx', to: 'a'}, {id: 'w3', def: 'd2', to: 'ghost'}], bgs: [{id: 'b1', blob: 'k1', mime: 'video/mp4', y: 130}, {id: 'b2', blob: ''}], blobs: {k1: {data: 'data:v'}}});
   console.assert(a20.achDefs[0].steps.join() === '3,5,9' && a20.achDefs[0].metric === 'closed' && a20.achDefs[0].bg === '' && a20.achDefs[0].frame === 'fire' && a20.awards.map(w => w.id).join() === 'w1'
-    && a20.bgs.length === 1 && a20.bgs[0].y === 100 && a20.blobs.k1 && a20.people[0].achAll === true && normPerson({id: 'b', name: 'B'}).achAll === undefined, 'own achievements, awards and backgrounds are cleaned');
+    && a20.bgs.length === 1 && a20.bgs[0].y === 100 && a20.bgs[0].fit === 'cover' && normBg({blob: 'k', fit: 'contain', y: 0}).fit === 'contain' && normBg({blob: 'k', y: 0}).y === 0 && a20.blobs.k1 && a20.people[0].achAll === true && normPerson({id: 'b', name: 'B'}).achAll === undefined, 'own achievements, awards and backgrounds are cleaned');
   console.assert(achStreak(['2026-11-05', '2026-11-06', '2026-11-09', '2026-11-11', '2026-11-12', '2026-11-12']) === 3 && achStreak([]) === 0 && achStreak(['2026-11-07']) === 0
     && JSON.stringify(normLook({bg: 'stars', frame: 'nope', badges: ['sniper', 'x', 'sniper', 'team', 'clean', 'writer']})) === '{"bg":"stars","frame":"","badges":["sniper","x","team"]}', 'achievements: streaks skip days off, looks are cleaned');
   console.assert(perStart('quarter', '2026-11-06') === '2026-10-01' && perEnd('quarter', '2026-10-01') === '2026-12-31' && perStart('week', '2026-11-06', -1) === '2026-10-26' && perStart('year', '2026-11-06', 1) === '2027-01-01' && perStart('month', '2026-03-31', -1) === '2026-02-01' && planBuckets('year', '2026-01-01', '2026-12-31').length === 12 && workDays('2026-11-02', '2026-11-08') === 4, 'cabinet periods');
