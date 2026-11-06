@@ -990,7 +990,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .cal-side label{display:flex;gap:8px;align-items:center;cursor:pointer}
 .cal-side input{accent-color:var(--accent)}
 .cal-sw{width:10px;height:10px;border-radius:3px;flex:none}
-.cal-main{overflow:hidden}
+.cal-main{overflow:hidden;--cal-line:color-mix(in srgb,var(--fg) 13%,var(--surface));--cal-day:color-mix(in srgb,var(--fg) 4%,var(--surface))}
 .cal-day{padding:14px;display:grid;gap:8px;align-content:start;position:sticky;top:12px}
 .cal-day h3{margin:0;font:600 16px var(--f-body)}
 .cal-day h3::first-letter{text-transform:uppercase}
@@ -1005,14 +1005,22 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .cal-chip.busy{--c:var(--muted);font-style:italic}
 .cal-chip.other{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 14%,var(--surface)) 0 6px,color-mix(in srgb,var(--c) 22%,var(--surface)) 6px 12px)}
 .cal-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
-.cal-wd{padding:8px 8px 4px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)}
-.cal-cell{min-height:104px;padding:4px 5px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;min-width:0}
+.cal-wd{padding:8px 8px 4px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--cal-line)}
+.cal-wd:nth-child(n+6){color:var(--high)}
+.cal-cell{min-height:104px;padding:4px 5px;border-right:1px solid var(--cal-line);border-bottom:1px solid var(--cal-line);cursor:pointer;min-width:0;background:var(--cal-day)}
+.cal-cell:hover{background:color-mix(in srgb,var(--fg) 7%,var(--surface))}
+.cal-cell.we{background:color-mix(in srgb,var(--high) 6%,var(--cal-day))}
+.cal-cell.hol{background:color-mix(in srgb,var(--high) 11%,var(--cal-day))}
+.cal-cell.we .cal-dn,.cal-cell.hol .cal-dn,.cal-dh.we,.cal-dh.hol,.cal-md.we,.cal-md.hol{color:var(--high)}
+.cal-dh.we b,.cal-dh.hol b{color:var(--high)}
+.cal-hol{display:block;font-size:10px;line-height:1.3;color:var(--high);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-col.we,.cal-col.hol,.cal-ad.we,.cal-ad.hol{background-color:color-mix(in srgb,var(--high) 5%,transparent)}
 .cal-cell:nth-child(7n){border-right:0}
-.cal-cell.out{background:var(--sunken)}
+.cal-cell.out{background:var(--bg)}
 .cal-cell.out .cal-dn{color:var(--muted)}
 .cal-cell.sel{box-shadow:inset 0 0 0 2px var(--accent)}
 .cal-dn{display:inline-grid;place-items:center;min-width:24px;height:24px;border-radius:12px;font-size:13px;margin-bottom:2px}
-.today > .cal-dn,.cal-dh.today b{background:var(--accent);color:var(--on-accent)}
+.today > .cal-dn,.cal-dh.today b,.cal-cell.today .cal-dn{background:var(--accent);color:var(--on-accent)}
 .cal-more{font-size:12px;color:var(--muted);padding:0 6px}
 .cal-tg{display:grid;grid-template-columns:54px repeat(var(--days),minmax(0,1fr))}
 .cal-tg-wrap{overflow-x:auto}
@@ -1042,7 +1050,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .cal-md.has{font-weight:700}
 .cal-md.has::after{content:"";position:absolute;left:50%;bottom:3px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
 .cal-md.late::after{background:var(--high)}
-.cal-md.today{background:var(--accent);color:var(--on-accent)}
+.cal-md.today,.cal-md.today.we,.cal-md.today.hol{background:var(--accent);color:var(--on-accent)}
 .cal-md.today::after{background:var(--on-accent)}
 .cal-md.sel{box-shadow:inset 0 0 0 2px var(--accent)}
 .ev-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -1055,7 +1063,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .ev-guests label{display:flex;gap:6px;align-items:center;font-size:14px}
 #d-ev .err,#d-ev .note{margin:0}
 .cs-row{display:flex;gap:10px;align-items:center;padding:6px 0}
-.cs-row span{flex:1;min-width:0}
+.cs-row > span:not(.ava){flex:1;min-width:0}
 @media (max-width:1100px){.cal-wrap{grid-template-columns:200px minmax(0,1fr)} .cal-day{grid-column:1/-1;position:static}}
 @media (max-width:760px){.cal-wrap,.cal-wrap.no-day{grid-template-columns:minmax(0,1fr)} .cal-months{--cols:1!important} .cal-cell{min-height:64px} .cal-chip{font-size:11px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -1414,6 +1422,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <li><b>Приглашения.</b> Приглашённые видят событие у себя, получают напоминание и строку «приглашает» в колокольчике. Менять событие может его владелец.</li>
           <li><b>Доступ.</b> «Доступ к моему календарю»: каждому коллеге — нет доступа, только «занят» (время без названий), видит всё или может добавлять и менять события. Слева галочками выбирается, чьи календари показывать.</li>
           <li><b>Сроки задач.</b> Открытые задачи с датой срока; просроченные красные. Галочка «Сроки задач» их прячет.</li>
+          <li><b>Контекстное меню.</b> Правая кнопка на дне или часе: новое событие, новая задача со сроком на этот день, открыть день. На событии: изменить или удалить, на задаче: открыть.</li>
+          <li><b>Выходные и праздники</b> выделены красным. Праздники — нерабочие дни по Трудовому кодексу (1–8 января, 23 февраля, 8 марта, 1 и 9 мая, 12 июня, 4 ноября); переносы выходных, которые правительство объявляет каждый год, не учитываются.</li>
         </ul>
         <p>Доступ к календарю проверяет интерфейс: технически данные доступны всем, кто вошёл в Планёрку.</p>
       </section>
@@ -2591,13 +2601,14 @@ function dueChip(t){
 }
 const stChip = t => `<span class="chip st st-${t.status}">${STATUS[t.status]}</span>`;
 // a photo in a circle: the cut-out is fetched once and kept; the initials show until it arrives
-const avaFailed = new Set(); let avaRedraw = false;
+// a failed fetch is retried a minute later: a blip in the connection must not hide a photo until the page is reloaded
+const avaFailed = new Map(); let avaRedraw = false;
 function avaImg(ph){
   if (!ph) return '';
   const b = db.blobs[ph.thumb];
   if (b) return `<img src="${esc(b.data)}" alt="">`;
-  if (onServer() && !avaFailed.has(ph.thumb) && !blobWait.has(ph.thumb))
-    chatBlob(ph.thumb).then(x => { if (!x) avaFailed.add(ph.thumb); else if (!avaRedraw){ avaRedraw = true; requestAnimationFrame(() => { avaRedraw = false; render(); }); } });
+  if (onServer() && !(Date.now() - (avaFailed.get(ph.thumb) || 0) < 6e4) && !blobWait.has(ph.thumb))
+    chatBlob(ph.thumb).then(x => { if (!x) avaFailed.set(ph.thumb, Date.now()); else if (!avaRedraw){ avaRedraw = true; requestAnimationFrame(() => { avaRedraw = false; render(); }); } });
   return '';
 }
 /* who is online: the server remembers when each person's Planerka was last on screen (only with the database) */
@@ -3857,6 +3868,7 @@ function openCreate(opts = {}){
   else if ('project' in opts) base.project = opts.project;
   else if (ui.proj && ui.proj !== '-' && project(ui.proj) && ['team', 'board'].includes(view)) base.project = ui.proj;
   if (opts.status) base.status = opts.status;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(opts.due || '')) base.due = opts.due;
   if ('assignee' in opts) base.assignee = opts.assignee; else if (!base.assignee && meId) base.assignee = meId;
   base.people = base.assignee ? [base.assignee] : [];
   let pick = structuredClone(base), tplName = '';
@@ -5268,6 +5280,12 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && db
 /* ---------- calendar ---------- */
 const CAL_VIEWS = {day: 'День', week: 'Неделя', month: 'Месяц', quarter: 'Квартал', year: 'Год'};
 const CAL_H = 44; // pixels per hour in the day and week grids
+// non-working holidays fixed by the Labour Code (art. 112); the yearly transfers of days off are set by decree and aren't known here
+const CAL_HOLIDAYS = {'01-01': 'Новогодние каникулы', '01-02': 'Новогодние каникулы', '01-03': 'Новогодние каникулы', '01-04': 'Новогодние каникулы', '01-05': 'Новогодние каникулы', '01-06': 'Новогодние каникулы',
+  '01-07': 'Рождество Христово', '01-08': 'Новогодние каникулы', '02-23': 'День защитника Отечества', '03-08': 'Международный женский день', '05-01': 'Праздник Весны и Труда',
+  '05-09': 'День Победы', '06-12': 'День России', '11-04': 'День народного единства'};
+const calHoliday = d => CAL_HOLIDAYS[d.slice(5)] || '';
+const calRest = d => calHoliday(d) ? ' hol' : dow(d) % 6 === 0 ? ' we' : '';
 const dBetween = (a, b) => Math.round((new Date(b + 'T00:00') - new Date(a + 'T00:00')) / 864e5);
 const dow = d => new Date(d + 'T00:00').getDay();
 const hm = s => s.slice(11, 16);
@@ -5345,7 +5363,7 @@ function renderCal(){
     const sel = ui.calDay;
     main.innerHTML = `<div class="cal-month">${['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map(w => `<span class="cal-wd">${w}</span>`).join('')}${Array.from({length: 42}, (_, i) => {
       const day = shiftDay(from, i), list = calOnDay(items, day), more = list.length - 3;
-      return `<div class="cal-cell${day.slice(0, 7) !== d.slice(0, 7) ? ' out' : ''}${day === today ? ' today' : ''}${day === sel ? ' sel' : ''}" data-cal-pick="${day}"><span class="cal-dn">${+day.slice(8)}</span>${list.slice(0, 3).map(x => calChip(x, day)).join('')}${more > 0 ? `<span class="cal-more">ещё ${more}</span>` : ''}</div>`;
+      return `<div class="cal-cell${calRest(day)}${day.slice(0, 7) !== d.slice(0, 7) ? ' out' : ''}${day === today ? ' today' : ''}${day === sel ? ' sel' : ''}" data-cal-pick="${day}"${calHoliday(day) ? ` title="${calHoliday(day)}"` : ''}><span class="cal-dn">${+day.slice(8)}</span>${calHoliday(day) ? `<span class="cal-hol">${calHoliday(day)}</span>` : ''}${list.slice(0, 3).map(x => calChip(x, day)).join('')}${more > 0 ? `<span class="cal-more">ещё ${more}</span>` : ''}</div>`;
     }).join('')}</div>`;
   } else if (v === 'day' || v === 'week'){
     const days = v === 'day' ? [d] : Array.from({length: 7}, (_, i) => shiftDay(from, i));
@@ -5361,11 +5379,11 @@ function renderCal(){
     };
     const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
     main.innerHTML = `<div class="cal-tg-wrap" style="--days:${days.length}"><div class="cal-tg">
-      <span class="cal-hl" style="border-bottom:1px solid var(--line)"></span>${days.map(x => `<button type="button" class="cal-dh${x === today ? ' today' : ''}" data-cal-goday="${x}">${new Date(x + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'short'})}<b>${+x.slice(8)}</b></button>`).join('')}
-      <span class="cal-hl">весь день</span>${days.map(x => `<div class="cal-ad">${calOnDay(items, x).filter(i => !calTimed(i)).map(i => calChip(i, x)).join('')}</div>`).join('')}
+      <span class="cal-hl" style="border-bottom:1px solid var(--line)"></span>${days.map(x => `<button type="button" class="cal-dh${calRest(x)}${x === today ? ' today' : ''}" data-cal-goday="${x}" title="${calHoliday(x) || 'Открыть день'}">${new Date(x + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'short'})}<b>${+x.slice(8)}</b></button>`).join('')}
+      <span class="cal-hl">весь день</span>${days.map(x => `<div class="cal-ad${calRest(x)}" data-cal-ad="${x}">${calOnDay(items, x).filter(i => !calTimed(i)).map(i => calChip(i, x)).join('')}</div>`).join('')}
     </div><div class="cal-scroll"><div class="cal-tg cal-hrs" style="--h:${CAL_H}px;height:${CAL_H * 24}px">
       <div>${Array.from({length: 24}, (_, h) => `<div class="cal-hr" style="height:${CAL_H}px">${h ? String(h).padStart(2, '0') + ':00' : ''}</div>`).join('')}</div>
-      ${days.map(x => `<div class="cal-col${x === today ? ' today' : ''}" data-cal-col="${x}">${lanes(x).map(g => `<button type="button" class="cal-ev${g.x.busy ? ' busy' : ''}" data-cal-item="${esc(g.x.key)}" style="top:${g.a / 60 * CAL_H}px;height:${Math.max(20, (g.b - g.a) / 60 * CAL_H - 2)}px;left:calc(${g.l / g.n * 100}% + 2px);width:calc(${100 / g.n}% - 4px);${g.x.busy ? '' : `--c:${g.x.e.color}`}"><b>${esc(calLabel(g.x))}</b>${hm(g.x.start)}–${hm(g.x.end)}${g.x.other ? ' · ' + esc(chatName(g.x.e.owner)) : ''}</button>`).join('')}${x === today ? `<span class="cal-now" style="top:${nowMin / 60 * CAL_H}px"></span>` : ''}</div>`).join('')}
+      ${days.map(x => `<div class="cal-col${calRest(x)}${x === today ? ' today' : ''}" data-cal-col="${x}">${lanes(x).map(g => `<button type="button" class="cal-ev${g.x.busy ? ' busy' : ''}" data-cal-item="${esc(g.x.key)}" style="top:${g.a / 60 * CAL_H}px;height:${Math.max(20, (g.b - g.a) / 60 * CAL_H - 2)}px;left:calc(${g.l / g.n * 100}% + 2px);width:calc(${100 / g.n}% - 4px);${g.x.busy ? '' : `--c:${g.x.e.color}`}"><b>${esc(calLabel(g.x))}</b>${hm(g.x.start)}–${hm(g.x.end)}${g.x.other ? ' · ' + esc(chatName(g.x.e.owner)) : ''}</button>`).join('')}${x === today ? `<span class="cal-now" style="top:${nowMin / 60 * CAL_H}px"></span>` : ''}</div>`).join('')}
     </div></div></div>`;
     const sc = main.querySelector('.cal-scroll');
     sc.scrollTop = keep ?? CAL_H * 8 - 10; // the working day in view
@@ -5376,7 +5394,7 @@ function renderCal(){
       return `<div class="cal-mini"><h4 data-cal-month="${m}">${new Date(m + 'T00:00').toLocaleDateString('ru-RU', {month: 'long'})}</h4><div class="cal-mg">${['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map(w => `<span>${w}</span>`).join('')}${Array.from({length: 42}, (_, j) => {
         const day = shiftDay(g, j); if (day.slice(0, 7) !== m.slice(0, 7)) return '<i></i>';
         const list = calOnDay(items, day), late = list.some(x => x.kind === 'task' && x.t.due < today);
-        return `<button type="button" class="cal-md${list.length ? ' has' : ''}${late ? ' late' : ''}${day === today ? ' today' : ''}${day === sel ? ' sel' : ''}" data-cal-pick="${day}" title="${list.length ? `Дел: ${list.length}` : ''}">${+day.slice(8)}</button>`;
+        return `<button type="button" class="cal-md${calRest(day)}${list.length ? ' has' : ''}${late ? ' late' : ''}${day === today ? ' today' : ''}${day === sel ? ' sel' : ''}" data-cal-pick="${day}" title="${[calHoliday(day), list.length ? `Дел: ${list.length}` : ''].filter(Boolean).join(' · ')}">${+day.slice(8)}</button>`;
       }).join('')}</div></div>`;
     }).join('')}</div>`;
   }
@@ -5387,7 +5405,7 @@ function renderCal(){
     const day = ui.calDay && ui.calDay >= from && ui.calDay <= to ? ui.calDay : from <= today && today <= to ? today : (v === 'month' ? monthStart(d) : from);
     const list = calItems(day, day);
     calShown = [...calShown, ...list];
-    $('#cal-day').innerHTML = `<h3>${new Date(day + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'})}</h3>
+    $('#cal-day').innerHTML = `<h3>${new Date(day + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'})}</h3>${calHoliday(day) ? `<span class="cal-hol">${calHoliday(day)}</span>` : ''}
       ${list.map(x => `<button type="button" class="cal-ag" data-cal-item="${esc(x.key)}"><span class="tm">${calTimed(x) ? hm(x.start) : x.kind === 'task' ? 'срок' : 'весь день'}</span><span>${calChip(x, day).replace('<button type="button"', '<span').replace(/<\/button>$/, '</span>')}</span>${x.kind === 'ev' && x.e.remind >= 0 && !x.busy ? `<span class="rem" title="${CAL_REMIND[x.e.remind]}">${bellIcon(false, 12)}</span>` : '<span></span>'}
         <span class="sub">${[calTimed(x) ? `${hm(x.start)}–${hm(x.end)}` : '', x.kind === 'ev' && x.e.repeat ? CAL_REPEAT[x.e.repeat].toLowerCase() : '', x.other ? chatName(x.kind === 'task' ? x.t.assignee : x.e.owner) : '', x.kind === 'task' ? STATUS[x.t.status] : ''].filter(Boolean).join(' · ')}</span></button>`).join('') || '<p class="note">Ничего не запланировано.</p>'}
       <button type="button" class="btn small" data-cal-new="${day}">+ Событие на этот день</button>`;
@@ -5418,6 +5436,28 @@ $('#v-cal').addEventListener('click', e => {
     const m = Math.min(23 * 60 + 30, Math.floor((e.clientY - b.getBoundingClientRect().top) / CAL_H * 2) * 30);
     return openEvent(null, b.dataset.calCol, `${String(m / 60 | 0).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
   }
+});
+// right click: on a day or an hour make an event or a task due that day; on an item open it, or delete an own event
+$('#v-cal').addEventListener('contextmenu', e => {
+  const it = e.target.closest('[data-cal-item]'), cell = e.target.closest('[data-cal-pick],[data-cal-col],[data-cal-goday],[data-cal-ad]');
+  let items = null, el = it || cell;
+  if (it){
+    const x = calShown.find(i => i.key === it.dataset.calItem); if (!x || x.busy) return;
+    items = x.kind === 'task' ? [{label: `Открыть ${x.t.id}`, run: () => openTask(x.t.id, {asEmployee: x.t.assignee === meId})}]
+      : [{label: calCanEdit(x.e) ? 'Изменить событие' : 'Открыть событие', run: () => openEvent(x.e)},
+         ...(calCanEdit(x.e) ? ['-', {label: x.e.repeat ? 'Удалить событие со всеми повторами' : 'Удалить событие', danger: true, run: () => change(() => { db.cal = db.cal.filter(y => y.id !== x.e.id); }, `Событие «${x.e.title}» удалено`)}] : [])];
+  } else if (cell){
+    const day = cell.dataset.calPick || cell.dataset.calCol || cell.dataset.calGoday || cell.dataset.calAd;
+    const m = cell.dataset.calCol ? Math.min(23 * 60 + 30, Math.floor((e.clientY - cell.getBoundingClientRect().top) / CAL_H * 2) * 30) : null;
+    const time = m == null ? '' : `${String(m / 60 | 0).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+    items = [{head: new Date(day + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'}) + (time ? `, ${time}` : '')},
+      {label: time ? `Новое событие в ${time}` : 'Новое событие', run: () => openEvent(null, day, time)},
+      {label: 'Новая задача со сроком на этот день', run: () => openTask(null, {due: day})},
+      ...(ui.calView === 'day' ? [] : [{label: 'Открыть этот день', run: () => { ui.calView = 'day'; calSet('calDate', day); }}])];
+  }
+  if (!items) return;
+  e.preventDefault();
+  openCtx(...ctxAt(e, el), items);
 });
 $('#v-cal').addEventListener('change', e => {
   const o = e.target.dataset.calOn;
@@ -5882,6 +5922,7 @@ addEventListener('storage', e => {
   console.assert(!/script|onerror|onclick|onmouseover|javascript|iframe|svg|url\(|https:\/\/e\.ru\/t/.test(clean) && clean.includes('color: red') && clean.includes('href="https://e.ru"') && clean.includes('<b>e</b>') && clean.includes('data-blob="f1"'), 'kb: dangerous html removed, formatting kept: ' + clean);
   console.assert(emo(esc('ок 👍 ❤ ❤️ <b>')).match(/<img class="emo"/g)?.length === 3 && emo('🦄').includes('data:image') && emo('🦩').includes('data-cdn') && emo('a → b ✕ ©') === 'a → b ✕ ©' && emo(esc('<b>')) === '&lt;b&gt;', 'emoji: built-in pictures with or without FE0F, the CDN for the rest, symbols and text untouched');
   console.assert(emoKey('❤️') === '2764' && emoKey('👍🏻') === '1f44d-1f3fb' && emoKey('🧑‍💻') === '1f9d1-200d-1f4bb' && Object.keys(EMOJI_SVG).length === EMOJI.length, 'emoji: Twemoji file names, every picker emoji has a picture');
+  console.assert(calRest('2026-11-04') === ' hol' && calRest('2026-11-07') === ' we' && calRest('2026-11-06') === '' && calHoliday('2027-01-07') === 'Рождество Христово', 'calendar: weekends and holidays');
   const wk = normEv({id: 'e', title: 'x', owner: 'a', start: '2026-11-02T10:00', end: '2026-11-02T11:00', repeat: 'week'});
   console.assert(evOccur(wk, '2026-11-01', '2026-11-30').map(o => o.start.slice(0, 10)).join() === '2026-11-02,2026-11-09,2026-11-16,2026-11-23,2026-11-30', 'calendar: weekly repeats');
   const bw = normEv({...wk, repeat: 'weekdays'}), mo = normEv({...wk, repeat: 'month'}), one = normEv({...wk, repeat: '', end: '2026-11-04T09:00'});
