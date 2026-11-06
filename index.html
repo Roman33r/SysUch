@@ -485,6 +485,9 @@ header{position:relative;padding-right:98px}
 .cab-name{font:600 20px var(--f-body);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .cab-week{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
 .cab-week b{color:var(--fg)}
+.cab-per{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cab-per .seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.cab-heat i.out{opacity:.35}
 /* six tiles: one row, or two rows of three, or three rows of two; never an orphan */
 .cab-kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:2px;align-content:start}
 .cab-kpi .k{font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0}
@@ -1291,13 +1294,13 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
       </section>
       <section class="cab-panel" data-w="done"><div class="cab-ph"><h3>Выполнено</h3><span class="count" id="cab-done-cnt"></span></div>
           <div id="cab-done"></div></section>
-      <section class="cab-panel" data-w="week"><div class="cab-ph"><h3>План недели</h3><span class="count">часы по сроку задач</span></div>
-          <svg class="cab-chart" id="cab-week" viewBox="0 0 320 130" role="img" aria-label="Запланированные часы по дням недели"></svg>
+      <section class="cab-panel" data-w="week"><div class="cab-ph"><h3>План</h3><span class="count" id="cab-week-n"></span></div>
+          <svg class="cab-chart" id="cab-week" viewBox="0 0 320 130" role="img" aria-label="Запланированные часы по сроку задач"></svg>
           <p class="note" id="cab-week-note"></p></section>
-      <section class="cab-panel" data-w="weeks"><div class="cab-ph"><h3>Закрыто по неделям</h3><span class="count">12 недель</span></div><svg class="cab-chart" id="cab-weeks" viewBox="0 0 320 150" role="img" aria-label="Закрыто задач по неделям"></svg></section>
-      <section class="cab-panel" data-w="heat"><div class="cab-ph"><h3>Активность</h3><span class="count">закрыто по дням</span></div><div class="cab-heat" id="cab-heat"></div>
+      <section class="cab-panel" data-w="weeks"><div class="cab-ph"><h3 id="cab-weeks-h">Закрыто по неделям</h3><span class="count" id="cab-weeks-n"></span></div><svg class="cab-chart" id="cab-weeks" viewBox="0 0 320 150" role="img" aria-label="Закрыто задач по периодам"></svg></section>
+      <section class="cab-panel" data-w="heat"><div class="cab-ph"><h3>Активность</h3><span class="count" id="cab-heat-n">закрыто по дням</span></div><div class="cab-heat" id="cab-heat"></div>
         <div class="cab-legend">меньше <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> больше</div></section>
-      <section class="cab-panel" data-w="proj"><div class="cab-ph"><h3>По проектам</h3><span class="count">часы закрытых, 30 дней</span></div><div class="cab-hbars" id="cab-proj"></div><div class="cab-ring" id="cab-ring"></div></section>
+      <section class="cab-panel" data-w="proj"><div class="cab-ph"><h3>По проектам</h3><span class="count" id="cab-proj-n"></span></div><div class="cab-hbars" id="cab-proj"></div><div class="cab-ring" id="cab-ring"></div></section>
     </div>
   </main>
 
@@ -1534,16 +1537,17 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
         <p>Страница одного сотрудника: что у него сейчас, что сделано и как идёт работа.</p>
         <ul>
           <li><b>Как открыть.</b> Круглый аватар в правом верхнем углу шапки или клавиша <kbd>M</kbd>. Если в «Я: …» выбран сотрудник, откроется его кабинет. Руководитель выбирает сотрудника в списке под аватаром. Ещё кабинет открывается нажатием на имя в карточке команды и в таблице загрузки.</li>
-          <li><b>Цифры сверху:</b> открыто (и сколько новых), просрочено, закрыто за 30 дней со сравнением с прошлыми 30 днями, доля закрытых вовремя, загрузка недели к норме, время до готовности.</li>
+          <li><b>Период.</b> Переключатель «День · Неделя · Месяц · Квартал · Год» рядом с именем, стрелки листают периоды, «Сейчас» возвращает к текущему. По периоду считаются закрытые, «Вовремя», загрузка, время до готовности, «Выполнено», «План», «Закрыто по …», «Активность» и «По проектам». «Открыто», «Просрочено» и «Текущие задачи» всегда показывают то, что есть сейчас.</li>
+          <li><b>Цифры сверху:</b> открыто (и сколько новых), просрочено, закрыто за период со сравнением с прошлым, доля закрытых вовремя, загрузка периода к норме (рабочие дни × часы в неделю ÷ 5), время до готовности.</li>
           <li><b>Текущие задачи</b> по срокам: просрочено, сегодня, на этой неделе, позже, без срока. Фильтр по статусу. Новые, ещё не открытые, отмечены синей точкой. При наведении — «Взять» или «На проверку».</li>
-          <li><b>План недели</b> — часы задач по дню срока; просроченные считаются на сегодня. Красный столбик — день, где сроков больше дневной нормы (часы в неделю ÷ 5). Стрелки у даты листают недели.</li>
-          <li><b>Выполнено</b> — последние 7 дней по дням с пометкой «вовремя» или «+N дн.». «Все выполненные» открывает таблицу с поиском и периодом.</li>
-          <li><b>Статистика:</b> закрыто по неделям за 12 недель с линией среднего, активность по дням, часы закрытых задач по проектам, доля закрытых вовремя.</li>
-          <li><b>Время до готовности</b> — медиана дней от первого ухода задачи из «Новой» до «Готово» за 90 дней. Для старых задач дата начала берётся из истории, а если её там нет — дата создания.</li>
+          <li><b>План недели</b> — часы задач по дню срока; просроченные считаются на сегодня. Красный столбик — день, где сроков больше дневной нормы (часы в неделю ÷ 5). Для месяца столбики — дни, для квартала — недели, для года — месяцы.</li>
+          <li><b>Выполнено</b> — закрытое за период по дням с пометкой «вовремя» или «+N дн.». «Все выполненные» открывает таблицу с поиском и периодом.</li>
+          <li><b>Статистика:</b> закрыто по периодам (выбранный — последний столбик) с линией среднего, активность по дням, часы закрытых задач по проектам, доля закрытых вовремя.</li>
+          <li><b>Время до готовности</b> — медиана дней от первого ухода задачи из «Новой» до «Готово» у задач, закрытых за период. Для старых задач дата начала берётся из истории, а если её там нет — дата создания.</li>
         </ul>
         <ul>
           <li><b>Фото.</b> Кнопка «Фото» в своём кабинете: загрузите снимок и перетащите его так, чтобы в круг попала нужная часть, масштаб — ползунком или колесом мыши. Позже можно изменить область в кружке, не загружая фото заново. Нажатие на аватар в кабинете открывает фото целиком. Фото сотрудника может поменять и руководитель. Нужна база данных или общий JSON-файл.</li>
-          <li><b>Свои блоки.</b> «Настроить блоки» в своём кабинете: перетаскивайте блоки за значок с точками (мышью или пальцем, с клавиатуры — стрелками), убирайте ненужные крестиком, добавляйте обратно кнопками «+ …», растягивайте большие блоки на всю ширину. «Готово» сохраняет порядок, он виден и коллегам, открывшим ваш кабинет.</li>
+          <li><b>Свои блоки.</b> «Настроить блоки» в своём кабинете: перетаскивайте блоки за значок с точками (мышью или пальцем, с клавиатуры — стрелками), убирайте ненужные крестиком, добавляйте обратно кнопками «+ …», меняйте размер за правый нижний угол — ширина и высота прилипают к сетке. «Готово» сохраняет порядок, он виден и коллегам, открывшим ваш кабинет.</li>
         </ul>
         <p>На телефоне блоки идут одной колонкой в том же порядке. Сравнения с коллегами в кабинете нет: только собственная динамика.</p>
       </section>
@@ -1805,8 +1809,8 @@ const hoursWord =n => n%10===1 && n%100!==11 ? 'час' : (n%10>=2 && n%10<=4 &&
 const normPhoto = x => x && /^[\w-]{1,40}$/.test(x.full) && /^[\w-]{1,40}$/.test(x.thumb) ? {full: x.full, thumb: x.thumb,
   z: Math.min(5, Math.max(1, +x.z || 1)), x: isFinite(+x.x) ? Math.min(1, Math.max(0, +x.x)) : .5, y: isFinite(+x.y) ? Math.min(1, Math.max(0, +x.y)) : .5} : null;
 /* blocks of the personal cabinet; a person's own order and sizes are kept on their card: «name:CxR» = C of 12 columns, R grid rows («:w» from older versions = full width) */
-const CAB_W = {open: 'Открыто', over: 'Просрочено', done30: 'Закрыто за 30 дней', ontime: 'Вовремя', load: 'Загрузка недели', cycle: 'Время до готовности',
-  cur: 'Текущие задачи', week: 'План недели', done: 'Выполнено за неделю', weeks: 'Закрыто по неделям', heat: 'Активность', proj: 'По проектам'};
+const CAB_W = {open: 'Открыто', over: 'Просрочено', done30: 'Закрыто за период', ontime: 'Вовремя', load: 'Загрузка', cycle: 'Время до готовности',
+  cur: 'Текущие задачи', week: 'План', done: 'Выполнено', weeks: 'Закрыто по периодам', heat: 'Активность', proj: 'По проектам'};
 const CAB_DEFAULT = ['open', 'over', 'done30', 'ontime', 'load', 'cycle', 'cur', 'done', 'week', 'weeks', 'heat', 'proj'];
 const CAB_KPI = new Set(['open', 'over', 'done30', 'ontime', 'load', 'cycle']);
 const CAB_MIN = w => CAB_KPI.has(w) ? [2, 2] : [3, 4];
@@ -3329,8 +3333,52 @@ const setPersonPhoto = pid => ph => { const p = person(pid); if (p) change(() =>
 const setRoomPhoto = id => ph => { const r = chatRoom(id); if (!r) return; db.rooms = mergeRooms(db.rooms, [{...r, photo: ph, at: stamp()}]); commit(); toast(ph ? 'Фото чата сохранено' : 'Фото чата убрано'); if ($('#d-chatm').open) openMembers(id); };
 
 /* ---------- personal cabinet: current tasks, done, statistics ---------- */
-let cabPid = null, cabWeek = 0, cabFilter = 'all';
-function openCab(pid){ if (!person(pid)) return; if (pid !== cabPid) cabEditing = false; cabPid = pid; cabWeek = 0; setView('cab'); scrollTo(0, 0); }
+let cabPid = null, cabOff = 0, cabFilter = 'all';
+function openCab(pid){ if (!person(pid)) return; if (pid !== cabPid) cabEditing = false; cabPid = pid; cabOff = 0; setView('cab'); scrollTo(0, 0); }
+// period of the cabinet's statistics: words for it and its bounds
+const CAB_PER = {day: ['День', 'за день', 'к прошлому дню', 'дня', 'по дням', 'как днём раньше'], week: ['Неделя', 'за неделю', 'к прошлой неделе', 'недели', 'по неделям', 'как на прошлой неделе'],
+  month: ['Месяц', 'за месяц', 'к прошлому месяцу', 'месяца', 'по месяцам', 'как в прошлом месяце'], quarter: ['Квартал', 'за квартал', 'к прошлому кварталу', 'квартала', 'по кварталам', 'как в прошлом квартале'],
+  year: ['Год', 'за год', 'к прошлому году', 'года', 'по годам', 'как в прошлом году']};
+const cabPerV = () => Object.hasOwn(CAB_PER, ui.cabPer) ? ui.cabPer : 'week';
+// first day of the period holding d, moved by n periods
+function perStart(v, d, n = 0){
+  if (v === 'day') return shiftDay(d, n);
+  if (v === 'week') return shiftDay(weekStart(d), 7 * n);
+  const m = {month: 1, quarter: 3, year: 12}[v];
+  return monthStart(monthStart(d, -((+d.slice(5, 7) - 1) % m)), n * m);
+}
+const perEnd = (v, a) => v === 'day' ? a : v === 'week' ? shiftDay(a, 6) : shiftDay(perStart(v, a, 1), -1);
+const QUARTER = ['I', 'II', 'III', 'IV'];
+function perLabel(v, a){
+  const b = perEnd(v, a), y = a.slice(0, 4);
+  if (v === 'day') return new Date(a + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'});
+  if (v === 'week') return `${fmtDay(a)} – ${fmtDay(b)}`;
+  if (v === 'month'){ const m = new Date(a + 'T00:00').toLocaleDateString('ru-RU', {month: 'long', year: 'numeric'}); return m[0].toUpperCase() + m.slice(1); }
+  return v === 'quarter' ? `${QUARTER[(+a.slice(5, 7) - 1) / 3]} квартал ${y}` : y;
+}
+const workDays = (a, b) => { let n = 0; for (let d = a; d <= b; d = shiftDay(d, 1)) if (!calRest(d)) n++; return n; };
+// bars of the plan: days for a day or a week, days for a month, weeks for a quarter, months for a year
+function planBuckets(v, a, b){
+  const DOW = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];
+  if (v === 'day' || v === 'week') return DOW.map((n, i) => { const d = shiftDay(weekStart(a), i); return {a: d, b: d, label: n, tip: `${n}, ${fmtDay(d)}`}; });
+  const out = [];
+  if (v === 'month') for (let d = a, i = 0; d <= b; d = shiftDay(d, 1), i++) out.push({a: d, b: d, label: i % 5 === 0 ? String(+d.slice(8)) : '', tip: fmtDay(d, true)});
+  if (v === 'quarter') for (let w = weekStart(a), i = 0; w <= b; w = shiftDay(w, 7), i++){ const x = w < a ? a : w, y = shiftDay(w, 6) > b ? b : shiftDay(w, 6); out.push({a: x, b: y, label: i % 3 === 0 ? fmtDay(x) : '', tip: `${fmtDay(x)} – ${fmtDay(y)}`}); }
+  if (v === 'year') for (let i = 0; i < 12; i++){ const x = monthStart(a, i); out.push({a: x, b: perEnd('month', x), label: new Date(x + 'T00:00').toLocaleDateString('ru-RU', {month: 'narrow'}), tip: perLabel('month', x)}); }
+  return out;
+}
+// bar chart in a 320-wide box: bars [{v, cls, label, hl, tip}], one dashed line
+function barsSvg(H, bars, line, lineCls, lineText){
+  const W = 320, L = 24, B = 20, T = 10, max = Math.max(4, Math.ceil(Math.max(line, ...bars.map(x => x.v)) / 2) * 2), y = v => T + (H - T - B) * (1 - v / max), bw = (W - L) / bars.length, pad = Math.min(6, bw * .15), w = bw - 2 * pad;
+  let s = '';
+  for (let g = 0; g <= max; g += max / 4) s += `<line class="grid" x1="${L}" x2="${W}" y1="${y(g)}" y2="${y(g)}"/><text x="${L - 6}" y="${y(g) + 3}" text-anchor="end">${f1(g)}</text>`;
+  bars.forEach((x, i) => {
+    const X = L + i * bw + pad;
+    if (x.v) s += `<rect class="${x.cls}" x="${X}" y="${y(x.v)}" width="${w}" height="${y(0) - y(x.v)}" rx="${Math.min(3, w / 3)}"><title>${x.tip}</title></rect>`;
+    if (x.label) s += `<text x="${X + w / 2}" y="${H - 5}" text-anchor="middle"${x.hl ? ' class="today"' : ''}>${x.label}</text>`;
+  });
+  return s + `<line class="${lineCls}" x1="${L}" x2="${W}" y1="${y(line)}" y2="${y(line)}"/><text x="${W}" y="${y(line) - 4}" text-anchor="end">${lineText}</text>`;
+}
 const medianOf = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
 // time to done counts from the first move out of «Новая»; tasks from before that field existed fall back to creation
 const cycleDays = t => (new Date(t.doneAt) - new Date(t.startedAt || t.createdAt)) / 864e5;
@@ -3343,18 +3391,23 @@ function renderCab(){
   const mine = db.tasks.filter(t => t.assignee === p.id);
   const open = mine.filter(t => t.status !== 'done');
   const done = mine.filter(t => t.status === 'done').sort((a, b) => b.doneAt.localeCompare(a.doneAt));
-  const d30 = daysAgo(30), d60 = daysAgo(60);
-  const done30 = done.filter(t => t.doneAt >= d30), prev30 = done.filter(t => t.doneAt >= d60 && t.doneAt < d30);
+  const v = cabPerV(), pw = CAB_PER[v], from = perStart(v, today, cabOff), to = perEnd(v, from), pfrom = perStart(v, today, cabOff - 1), now = from <= today && today <= to;
+  const inRange = (t, a, b) => { const d = doneDay(t); return a <= d && d <= b; };
+  const done30 = done.filter(t => inRange(t, from, to)), prev30 = done.filter(t => inRange(t, pfrom, shiftDay(from, -1)));
   const withDue = done30.filter(t => t.due), onTime = withDue.filter(t => !isLate(t));
   const over = open.filter(t => t.due && t.due < today).sort((a, b) => a.due.localeCompare(b.due));
-  const ws = shiftDay(thisWs, 7 * cabWeek), load = weekLoad(p.id, ws);
-  const cyc = medianOf(done.filter(t => t.doneAt >= daysAgo(90)).map(cycleDays).filter(x => x >= 0));
+  const work = openWork().filter(w => w.pid === p.id && w.due); // includes this person's stages in tasks held by others
+  // open hours due in the period; overdue work counts on today
+  const dueIn = (a, b) => work.filter(w => (a <= w.due && w.due <= b) || (a <= today && today <= b && w.due < today)).reduce((s, w) => s + w.est, 0);
+  const load = dueIn(from, to), capH = Math.round(p.cap / 5 * (v === 'day' ? 1 : workDays(from, to)) * 10) / 10;
+  const cyc = medianOf(done30.map(cycleDays).filter(x => x >= 0));
 
   const big = `<span class="ava cab-ava" style="background:${p.hue}">${avaImg(p.photo) || esc(initials(p.name))}</span>`;
   $('#cab-who').innerHTML = `${p.photo ? `<button type="button" class="cab-ava-btn" data-photo-view title="Открыть фото" aria-label="Открыть фото: ${esc(p.name)}">${big}</button>` : big}
     <div class="cab-id"><div class="cab-name">${esc(p.name)}${me ? ' <span class="chip">это вы</span>' : ''}</div><div class="muted">${esc(p.role || 'Без роли')} · ${p.cap} ч в неделю${seenText(p.id) ? ' · ' + seenHtml(p.id) : ''}</div></div>
     <span class="spacer"></span>
-    <div class="cab-week"><button type="button" class="ibtn" data-cweek="-1" aria-label="Прошлая неделя">‹</button><span>Неделя <b class="num">${fmtDay(ws)} – ${fmtDay(shiftDay(ws, 6))}</b></span><button type="button" class="ibtn" data-cweek="1" aria-label="Следующая неделя">›</button>${cabWeek ? '<button type="button" class="btn small" data-cweek="0">К этой неделе</button>' : ''}</div>
+    <div class="cab-per"><span class="seg" role="group" aria-label="Период статистики">${Object.entries(CAB_PER).map(([k, x]) => `<button type="button" data-cper="${k}" aria-pressed="${k === v}">${x[0]}</button>`).join('')}</span>
+      <span class="cab-week"><button type="button" class="ibtn" data-cweek="-1" aria-label="Назад">‹</button><b class="num">${perLabel(v, from)}</b><button type="button" class="ibtn" data-cweek="1" aria-label="Вперёд">›</button>${cabOff ? '<button type="button" class="btn small" data-cweek="0">Сейчас</button>' : ''}</span></div>
     ${me || canManagePeople() ? `<button type="button" class="btn small" data-photo-menu>${ic('camera', 15)} Фото</button>` : ''}
     ${me && !cabEditing ? `<button type="button" class="btn small" data-cab-edit>${ic('layout', 15)} Настроить блоки</button>` : ''}
     ${me ? '' : `<button type="button" class="btn small primary" data-chat-to="${esc(p.id)}">Отправить сообщение</button><button type="button" class="btn small" data-person="${esc(p.id)}" ${canManagePeople() ? '' : 'hidden'}>Карточка сотрудника</button>`}`;
@@ -3363,10 +3416,10 @@ function renderCab(){
   const tiles = [
     {w: 'open', k: 'Открыто', v: open.length, d: `${open.filter(t => !t.seen).length} новых · ${open.reduce((s, t) => s + t.est, 0)} ч`},
     {w: 'over', k: 'Просрочено', v: over.length, d: over.length ? `${over[0].id}: ${-daysTo(over[0].due)} дн.` : 'всё в срок', bad: over.length > 0},
-    {w: 'done30', k: 'Закрыто за 30 дней', v: done30.length, d: diff ? `<span class="${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '▲' : '▼'} ${Math.abs(diff)}</span> к прошлым 30 дням` : 'как в прошлые 30 дней'},
+    {w: 'done30', k: `Закрыто ${pw[1]}`, v: done30.length, d: diff ? `<span class="${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '▲' : '▼'} ${Math.abs(diff)}</span> ${pw[2]}` : pw[5]},
     {w: 'ontime', k: 'Вовремя', v: withDue.length ? Math.round(onTime.length / withDue.length * 100) + '%' : '—', d: withDue.length ? `${onTime.length} из ${withDue.length} со сроком` : 'нет закрытых со сроком'},
-    {w: 'load', k: cabWeek ? 'Загрузка той недели' : 'Загрузка недели', v: `${f1(load)}/${p.cap}`, d: load > p.cap ? 'часов, перегруз' : 'часов', gauge: Math.min(1, load / p.cap), bad: load > p.cap},
-    {w: 'cycle', k: 'Время до готовности', v: f1(cyc), d: cyc == null ? 'нет данных за 90 дней' : 'дней, медиана за 90 дней'},
+    {w: 'load', k: `Загрузка ${pw[3]}`, v: `${f1(load)}/${f1(capH)}`, d: load > capH ? 'часов, перегруз' : capH ? 'часов по сроку задач' : 'часов, выходной', gauge: capH ? Math.min(1, load / capH) : load ? 1 : 0, bad: load > capH},
+    {w: 'cycle', k: 'Время до готовности', v: f1(cyc), d: cyc == null ? `нет закрытых ${pw[1]}` : `дней, медиана ${pw[1]}`},
   ];
   for (const x of tiles){ const el = $(`#cab-blocks > [data-w="${x.w}"]`); el.classList.toggle('bad', !!x.bad); el.innerHTML = `<span class="k">${x.k}</span><span class="v">${x.v}</span><span class="d">${x.d}</span>${x.gauge != null ? `<span class="cab-gauge"><i style="width:${x.gauge * 100}%"></i></span>` : ''}`; }
 
@@ -3388,61 +3441,53 @@ function renderCab(){
   }).join('') || `<p class="note">${open.length ? 'Таких задач нет.' : 'Открытых задач нет.'}</p>`;
 
   /* plan of the week: open hours by due day, overdue counted on today */
-  const work = openWork().filter(w => w.pid === p.id); // includes this person's stages in tasks held by others
-  const norm = p.cap / 5, plan = [0, 1, 2, 3, 4, 5, 6].map(i => {
-    const day = shiftDay(ws, i);
-    return work.filter(w => w.due === day || (day === today && w.due && w.due < today)).reduce((s, w) => s + w.est, 0);
-  });
-  const W = 320, H = 130, L = 24, B = 20, T = 10, max = Math.max(4, Math.ceil(Math.max(norm, ...plan) / 2) * 2), y = v => T + (H - T - B) * (1 - v / max), bw = (W - L) / 7;
-  let s = '';
-  for (let g = 0; g <= max; g += max / 4) s += `<line class="grid" x1="${L}" x2="${W}" y1="${y(g)}" y2="${y(g)}"/><text x="${L - 6}" y="${y(g) + 3}" text-anchor="end">${f1(g)}</text>`;
-  ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].forEach((n, i) => {
-    const x = L + i * bw + 6, v = plan[i], day = shiftDay(ws, i);
-    if (v) s += `<rect class="${v > norm ? 'over' : 'plan'}" x="${x}" y="${y(v)}" width="${bw - 12}" height="${y(0) - y(v)}" rx="3"><title>${n}, ${fmtDay(day)}: ${f1(v)} ч${day === today && over.length ? ' (с просроченными)' : ''}</title></rect>`;
-    s += `<text x="${x + (bw - 12) / 2}" y="${H - 5}" text-anchor="middle" ${day === today ? 'class="today"' : ''}>${n}</text>`;
-  });
-  s += `<line class="cap" x1="${L}" x2="${W}" y1="${y(norm)}" y2="${y(norm)}"/><text x="${W}" y="${y(norm) - 4}" text-anchor="end">норма ${f1(norm)} ч</text>`;
-  $('#cab-week').innerHTML = s;
-  $('#cab-week-note').textContent = plan.some(v => v > norm) ? 'Красное — в этот день срок у задач больше чем на дневную норму. Стоит развести сроки.' : 'Пунктир — дневная норма: часы в неделю ÷ 5.';
+  const bk = planBuckets(v, from, to), daily = bk[0].a === bk[0].b, normOf = x => p.cap / 5 * (daily ? 1 : workDays(x.a, x.b));
+  const plan = bk.map(x => { const h = dueIn(x.a, x.b), n = normOf(x), tod = x.a <= today && today <= x.b;
+    return {v: h, cls: h > n ? 'over' : 'plan', label: x.label, hl: v === 'day' ? x.a === from : tod, tip: `${x.tip}: ${f1(h)} ч из ${f1(n)}${tod && over.length ? ' (с просроченными)' : ''}`}; });
+  const norms = bk.map(normOf).sort((a, b) => a - b), norm = norms[norms.length >> 1];
+  $('#cab-week-n').textContent = `часы по сроку задач, ${daily ? 'по дням' : v === 'quarter' ? 'по неделям' : 'по месяцам'}`;
+  $('#cab-week').innerHTML = barsSvg(130, plan, norm, 'cap', `норма ${f1(norm)} ч`);
+  $('#cab-week-note').textContent = plan.some(x => x.cls === 'over') ? `Красное — сроков больше нормы ${daily ? 'дня' : v === 'quarter' ? 'недели' : 'месяца'}. Стоит развести сроки.` : daily ? 'Пунктир — дневная норма: часы в неделю ÷ 5.' : 'Норма — рабочие дни × часы в неделю ÷ 5; пунктир — обычная норма.';
 
-  /* done in the last 7 days, grouped by day */
-  const week = done.filter(t => t.doneAt >= daysAgo(7)), byDay = {};
+  /* done in the period, grouped by day */
+  const week = done30, byDay = {};
   week.forEach(t => (byDay[doneDay(t)] ||= []).push(t));
   const dayName = d => d === today ? 'Сегодня' : d === addDays(-1) ? 'Вчера' : new Date(d + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'});
   const tag = t => !t.due ? '' : isLate(t) ? `<span class="late">+${Math.round((new Date(doneDay(t)) - new Date(t.due)) / 864e5)} дн.</span>` : '<span class="ontime">вовремя</span>';
-  $('#cab-done-cnt').textContent = `за 7 дней: ${week.length}`;
+  $('#cab-done-cnt').textContent = `${pw[1]}: ${week.length}`;
   $('#cab-done').innerHTML = (Object.entries(byDay).map(([d, l]) => `<div class="cab-day"><b>${dayName(d)}</b>${l.map(t => `<div class="cab-drow" data-cab-open="${esc(t.id)}"><span class="si done"></span><span class="t">${esc(t.title)}</span>${tag(t)}</div>`).join('')}</div>`).join('')
-    || '<p class="note">За неделю ничего не закрыто.</p>') + (done.length ? `<button type="button" class="btn small" id="cab-all-done">Все выполненные (${done.length})</button>` : '');
+    || `<p class="note">${pw[1][0].toUpperCase() + pw[1].slice(1)} ничего не закрыто.</p>`) + (done.length ? `<button type="button" class="btn small" id="cab-all-done">Все выполненные (${done.length})</button>` : '');
 
-  /* closed per week, 12 weeks */
-  const weeks = Array.from({length: 12}, (_, i) => shiftDay(thisWs, -7 * (11 - i)));
-  const perWeek = weeks.map(w => done.filter(t => weekStart(doneDay(t)) === w).length);
-  const full = perWeek.slice(0, -1), avg = full.reduce((a, b) => a + b, 0) / full.length;
-  const max2 = Math.max(4, Math.ceil(Math.max(...perWeek, avg) / 2) * 2), y2 = v => 10 + 118 * (1 - v / max2), bw2 = (320 - 24) / 12;
-  s = '';
-  for (let g = 0; g <= max2; g += max2 / 4) s += `<line class="grid" x1="24" x2="320" y1="${y2(g)}" y2="${y2(g)}"/><text x="18" y="${y2(g) + 3}" text-anchor="end">${f1(g)}</text>`;
-  perWeek.forEach((v, i) => {
-    const x = 24 + i * bw2 + 3, last = i === 11;
-    if (v) s += `<rect class="barr${last ? ' cur' : ''}" x="${x}" y="${y2(v)}" width="${bw2 - 6}" height="${y2(0) - y2(v)}" rx="3"><title>Неделя с ${fmtDay(weeks[i])}: ${v}${last ? ' (идёт)' : ''}</title></rect>`;
-    if (i % 3 === 2 || last) s += `<text x="${x + (bw2 - 6) / 2}" y="146" text-anchor="middle">${last ? 'эта' : fmtDay(weeks[i])}</text>`;
-  });
-  s += `<line class="avg" x1="24" x2="320" y1="${y2(avg)}" y2="${y2(avg)}"/><text x="320" y="${y2(avg) - 4}" text-anchor="end">среднее ${f1(avg)}</text>`;
-  $('#cab-weeks').innerHTML = s;
+  /* closed per period, the chosen one last */
+  const N = {day: 14, week: 12, month: 12, quarter: 8, year: 5}[v];
+  const short = a => v === 'day' ? String(+a.slice(8)) : v === 'week' ? fmtDay(a) : v === 'month' ? new Date(a + 'T00:00').toLocaleDateString('ru-RU', {month: 'short'}) : v === 'quarter' ? `${QUARTER[(+a.slice(5, 7) - 1) / 3]} ${a.slice(2, 4)}` : a.slice(0, 4);
+  const pers = Array.from({length: N}, (_, i) => { const a = perStart(v, today, cabOff - (N - 1 - i)), b = perEnd(v, a), c = done.filter(t => inRange(t, a, b)).length, cur = a <= today && today <= b;
+    return {v: c, cur, cls: cur ? 'barr cur' : 'barr', label: i === N - 1 || (N - 1 - i) % (v === 'day' ? 4 : 3) === 0 ? short(a) : '', hl: i === N - 1, tip: `${perLabel(v, a)}: ${c}${cur ? ' (идёт)' : ''}`}; });
+  const full = pers.filter(x => !x.cur), avg = full.length ? full.reduce((a, x) => a + x.v, 0) / full.length : 0;
+  $('#cab-weeks-h').textContent = `Закрыто ${pw[4]}`;
+  $('#cab-weeks-n').textContent = `последние ${N}`;
+  $('#cab-weeks').innerHTML = barsSvg(150, pers, avg, 'avg', `среднее ${f1(avg)}`);
+  const weeks = []; for (let w = weekStart(from); w <= to; w = shiftDay(w, 7)) weeks.push(w);
+  while (weeks.length < 12) weeks.unshift(shiftDay(weeks[0], -7));
 
   /* activity: 12 weeks × 7 days of closed tasks */
   const perDay = {}; done.forEach(t => { const d = doneDay(t); perDay[d] = (perDay[d] || 0) + 1; });
   let h = '';
   ['пн', '', 'ср', '', 'пт', '', ''].forEach((n, d) => {
     h += `<span>${n}</span>`;
-    weeks.forEach(w => { const day = shiftDay(w, d), c = perDay[day] || 0; h += day > today ? '<i class="future"></i>' : `<i class="${c ? 'l' + Math.min(4, c) : ''}" title="${fmtDay(day, true)}: закрыто ${c}"></i>`; });
+    weeks.forEach(w => { const day = shiftDay(w, d), c = perDay[day] || 0; h += day > today ? '<i class="future"></i>' : `<i class="${c ? 'l' + Math.min(4, c) : ''}${day < from || day > to ? ' out' : ''}" title="${fmtDay(day, true)}: закрыто ${c}"></i>`; });
   });
   $('#cab-heat').innerHTML = h;
+  $('#cab-heat').style.gridTemplateColumns = `auto repeat(${weeks.length},minmax(0,1fr))`;
+  $('#cab-heat').style.maxWidth = weeks.length > 20 ? 'none' : '';
+  $('#cab-heat-n').textContent = `закрыто по дням, ${perLabel(v, from)}`;
 
   /* hours of closed work by project, and the on-time ring */
   const byProj = {}; done30.forEach(t => { byProj[t.project || ''] = (byProj[t.project || ''] || 0) + t.est; });
   const rows = Object.entries(byProj).sort((a, b) => b[1] - a[1]), pmax = Math.max(1, ...rows.map(r => r[1]));
   $('#cab-proj').innerHTML = rows.map(([id, v]) => { const pr = project(id); return `<div class="cab-hb"><span class="ell">${esc(pr ? pr.name : 'Без проекта')}</span><span class="track"><i style="width:${v / pmax * 100}%;background:${pr ? pr.hue : 'var(--muted)'}"></i></span><span class="val">${f1(v)} ч</span></div>`; }).join('')
-    || '<p class="note">За 30 дней ничего не закрыто.</p>';
+    || `<p class="note">${pw[1][0].toUpperCase() + pw[1].slice(1)} ничего не закрыто.</p>`;
+  $('#cab-proj-n').textContent = `часы закрытых ${pw[1]}`;
   const pct = withDue.length ? onTime.length / withDue.length : 0;
   $('#cab-ring').innerHTML = withDue.length ? `<svg width="60" height="60" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--sunken)" stroke-width="4"/>
       <circle cx="18" cy="18" r="15.9" fill="none" stroke="${pct >= .8 ? 'var(--low)' : pct >= .5 ? 'var(--med)' : 'var(--high)'}" stroke-width="4" stroke-dasharray="${pct * 100} 100" transform="rotate(-90 18 18)" stroke-linecap="round"/></svg>
@@ -3529,7 +3574,8 @@ $('#v-cab').addEventListener('click', e => {
   if (e.target.closest('[data-wcancel]')){ cabEditing = false; return renderCab(); }
   if (e.target.closest('[data-wsave]')){ const next = cabDraft; cabEditing = false; return change(() => { p.cab = eqJ(next, CAB_DEFAULT.map(x => cabStr(cabSize(x)))) ? null : next; }, 'Блоки кабинета сохранены'); }
   if (e.target.closest('[data-wdrag],[data-wsize]')) return;
-  if ((b = e.target.closest('[data-cweek]'))){ const n = +b.dataset.cweek; cabWeek = n ? cabWeek + n : 0; return renderCab(); }
+  if ((b = e.target.closest('[data-cweek]'))){ const n = +b.dataset.cweek; cabOff = n ? cabOff + n : 0; return renderCab(); }
+  if ((b = e.target.closest('[data-cper]'))){ ui.cabPer = b.dataset.cper; cabOff = 0; saveUi(); return renderCab(); }
   if ((b = e.target.closest('[data-cf]'))){ cabFilter = b.dataset.cf; return renderCab(); }
   if (e.target.closest('#cab-all-done')) return openCabDone(cabPid);
   if (e.target.closest('[data-take],[data-review],[data-stage-done],[data-person]')) return; // the document handler does these
@@ -4477,7 +4523,7 @@ function archivePerson(id){
 
 /* ---------- filters (per browser, not part of the data) ---------- */
 const UI_DEFAULT = {q: '', who: '', proj: '', prio: '', tag: '', overdue: false, top: false, sort: 'manual', repPeriod: '30',
-  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}, twClosed: [], twFeed: 'all', nwMore: false, plQ: '', plAccess: '', plJob: '', plStatus: 'active', kbQ: '', kbSec: '', kbProj: '', kbOpen: '', calView: 'month', calDate: '', calDay: '', calOff: [], calNoTasks: false};
+  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}, twClosed: [], twFeed: 'all', nwMore: false, plQ: '', plAccess: '', plJob: '', plStatus: 'active', kbQ: '', kbSec: '', kbProj: '', kbOpen: '', calView: 'month', calDate: '', calDay: '', calOff: [], calNoTasks: false, cabPer: 'week'};
 const ui = (() => { try { return {...UI_DEFAULT, ...JSON.parse(localStorage.getItem(LS_UI) || '{}')}; } catch { return {...UI_DEFAULT}; } })();
 if (!Array.isArray(ui.treeClosed)) ui.treeClosed = [];
 if (!Array.isArray(ui.twClosed)) ui.twClosed = [];
@@ -6199,6 +6245,7 @@ addEventListener('storage', e => {
   const bw = normEv({...wk, repeat: 'weekdays'}), mo = normEv({...wk, repeat: 'month'}), one = normEv({...wk, repeat: '', end: '2026-11-04T09:00'});
   console.assert(evOccur(bw, '2026-11-06', '2026-11-09').length === 2 && evOccur(mo, '2026-11-01', '2027-01-31').length === 3 && evOccur(one, '2026-11-03', '2026-11-03').length === 1 && evOccur(one, '2026-11-05', '2026-11-30').length === 0, 'calendar: weekdays, months, a span of days');
   console.assert(normEv({id: 'z', start: 'bad'}).start === '' && normEv({id: 'z', start: '2026-11-02T10:00', end: '2026-11-01T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).end === '2026-11-02T10:00' && normEv({id: 'z', start: '2026-11-02T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).guests.join() === 'a', 'calendar: events are cleaned');
+  console.assert(perStart('quarter', '2026-11-06') === '2026-10-01' && perEnd('quarter', '2026-10-01') === '2026-12-31' && perStart('week', '2026-11-06', -1) === '2026-10-26' && perStart('year', '2026-11-06', 1) === '2027-01-01' && perStart('month', '2026-03-31', -1) === '2026-02-01' && planBuckets('year', '2026-01-01', '2026-12-31').length === 12 && workDays('2026-11-02', '2026-11-08') === 4, 'cabinet periods');
   console.assert(normCab(['cur:w', 'cur', 'x', 'heat', 'open:z', 7]).join() === 'cur:6x8,heat:6x10' && normCab(['cur:w', 'open:99x1']).join() === 'cur:12x8,open:12x2' && normCab(null) === null && normPhoto({full: 'a', thumb: 'b', z: 99, x: -1}).z === 5 && normPhoto({full: 'a b', thumb: 'b'}) === null, 'cabinet blocks and photos are cleaned');
   const sized = kbClean('<img data-blob="f2" class="kb-sel" style="width: 40%; height: 900px"><img data-blob="f3" style="width: 300px"><img data-blob="f4" style="width: 250%">');
   console.assert(sized.includes('style="width: 40%"') && !sized.includes('class') && !sized.includes('900px') && !sized.includes('300px') && sized.includes('width: 100%'), 'kb: picture width kept in percent only: ' + sized);
