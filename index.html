@@ -551,18 +551,26 @@ header{position:relative;padding-right:98px}
 .cab-tools input{flex:1 1 220px}
 #d-cabdone{width:min(820px,calc(100vw - 32px))}
 .wrap-cell{white-space:normal!important;min-width:220px}
-.cab-blocks{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;align-items:start}
-.cab-blocks > *{grid-column:span 6;position:relative;min-width:0;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.06)}
-.cab-blocks > .cab-kpi{grid-column:span 2}
-.cab-blocks > .wide{grid-column:1/-1}
+.cab-blocks{--gap:14px;--row:26px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:var(--row);gap:var(--gap);align-items:stretch}
+.cab-blocks > *{grid-column:span var(--c,6);grid-row:span var(--r,8);position:relative;min-width:0;min-height:0;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.06)}
+.cab-blocks > .cab-panel{display:flex;flex-direction:column;overflow:auto}
+.cab-blocks .cab-chart{flex:1 1 0;min-height:70px;max-height:none}
 .cab-blocks > [hidden]{display:none}
 @media (max-width:1150px){.cab-blocks > .cab-kpi{grid-column:span 4}}
 @media (max-width:1000px){.cab-blocks > .cab-panel{grid-column:1/-1}}
-@media (max-width:760px){.cab-blocks > .cab-kpi{grid-column:span 6}}
-.cab-blocks.editing > *{outline:2px dashed var(--line);outline-offset:3px}
-.cab-blocks.editing > .cab-kpi{padding-top:40px}
+@media (max-width:760px){.cab-blocks{grid-auto-rows:auto}.cab-blocks > *{grid-row:auto}.cab-blocks > .cab-kpi{grid-column:span 6}.cab-blocks .cab-chart{flex:none}}
+.cab-blocks.editing{background-image:linear-gradient(to right,color-mix(in srgb,var(--accent) 7%,transparent) calc(100% - var(--gap)),transparent 0),linear-gradient(to bottom,color-mix(in srgb,var(--accent) 7%,transparent) calc(100% - var(--gap)),transparent 0);
+  background-size:calc((100% + var(--gap)) / 12) 100%,100% calc(var(--row) + var(--gap));border-radius:6px}
+.cab-blocks.editing > *{outline:2px dashed var(--line);outline-offset:-2px;user-select:none}
+.cab-blocks.editing > .cab-kpi .k{padding-right:70px}
 .cab-blocks.editing > .cab-panel{padding-top:44px}
-.cab-blocks > .dragging{opacity:.45;outline-color:var(--accent)}
+.cab-blocks > .dragging{opacity:.5;outline-color:var(--accent);z-index:3}
+.cab-blocks > .sizing{outline-color:var(--accent);z-index:3}
+.cab-wsize{position:absolute;right:2px;bottom:2px;width:26px;height:26px;padding:0;border:0;background:none;color:var(--muted);cursor:nwse-resize;touch-action:none;display:grid;place-items:center;z-index:2;border-radius:6px}
+.cab-wsize:hover,.cab-wsize:focus-visible,.sizing > .cab-wsize{color:var(--accent);background:var(--accent-soft)}
+.cab-wbadge{position:absolute;right:30px;bottom:6px;font:600 11px var(--f-mono);color:var(--accent);background:var(--surface);border-radius:6px;padding:1px 6px;z-index:2}
+body.cab-moving,body.cab-moving *{cursor:grabbing!important}
+body.cab-sizing,body.cab-sizing *{cursor:nwse-resize!important}
 .cab-wctl{position:absolute;top:6px;right:6px;display:flex;gap:4px;z-index:2}
 .cab-wctl button{width:30px;height:30px;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer}
 .cab-wctl button:hover,.cab-wctl button:focus-visible{border-color:var(--accent)}
@@ -572,6 +580,7 @@ header{position:relative;padding-right:98px}
 .cab-add{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1 1 100%}
 /* a one-column chart would otherwise scale up to the full width */
 .cab-chart{max-height:240px}
+@media (max-width:760px){.cab-blocks .cab-chart{max-height:240px}}
 .cab-heat{max-width:460px}
 @media (max-width:760px){
 }
@@ -1707,7 +1716,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 13;
+const SCHEMA = 14;
 const CHAT_MAX = 2000, CHAT_TEXT_MAX = 2000; // localStorage holds about 5 MB per site, so old messages drop off
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
@@ -1772,6 +1781,7 @@ const ICONS = {
   camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
   layout: '<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>',
   grip: '<path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="3"/>',
+  corner: '<path d="M19 11v8h-8M19 19l-6-6"/>',
   expand: '<path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   lockOpen: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>',
@@ -1794,11 +1804,21 @@ const hoursWord =n => n%10===1 && n%100!==11 ? 'час' : (n%10>=2 && n%10<=4 &&
 /* a photo: the whole picture (opened by a click) and a small square cut-out for the circles; z, x, y say how it was framed */
 const normPhoto = x => x && /^[\w-]{1,40}$/.test(x.full) && /^[\w-]{1,40}$/.test(x.thumb) ? {full: x.full, thumb: x.thumb,
   z: Math.min(5, Math.max(1, +x.z || 1)), x: isFinite(+x.x) ? Math.min(1, Math.max(0, +x.x)) : .5, y: isFinite(+x.y) ? Math.min(1, Math.max(0, +x.y)) : .5} : null;
-/* blocks of the personal cabinet; a person's own order is kept on their card, «:w» = full width */
+/* blocks of the personal cabinet; a person's own order and sizes are kept on their card: «name:CxR» = C of 12 columns, R grid rows («:w» from older versions = full width) */
 const CAB_W = {open: 'Открыто', over: 'Просрочено', done30: 'Закрыто за 30 дней', ontime: 'Вовремя', load: 'Загрузка недели', cycle: 'Время до готовности',
   cur: 'Текущие задачи', week: 'План недели', done: 'Выполнено за неделю', weeks: 'Закрыто по неделям', heat: 'Активность', proj: 'По проектам'};
 const CAB_DEFAULT = ['open', 'over', 'done30', 'ontime', 'load', 'cycle', 'cur', 'done', 'week', 'weeks', 'heat', 'proj'];
-const normCab = l => Array.isArray(l) ? [...new Map(l.map(String).filter(x => /^\w+(:w)?$/.test(x) && Object.hasOwn(CAB_W, x.split(':')[0])).map(x => [x.split(':')[0], x])).values()] : null;
+const CAB_KPI = new Set(['open', 'over', 'done30', 'ontime', 'load', 'cycle']);
+const CAB_MIN = w => CAB_KPI.has(w) ? [2, 2] : [3, 4];
+const cabDef = w => CAB_KPI.has(w) ? [2, 3] : w === 'cur' || w === 'done' ? [6, 8] : [6, 10];
+const clampN = (v, lo, hi) => Math.min(hi, Math.max(lo, Math.round(v)));
+// [name, columns, rows] with sizes kept inside the grid
+function cabSize(x){
+  const [w, z = ''] = x.split(':'), d = cabDef(w), m = CAB_MIN(w), k = z.match(/^(\d+)x(\d+)$/);
+  return [w, clampN(z === 'w' ? 12 : k ? +k[1] : d[0], m[0], 12), clampN(k ? +k[2] : d[1], m[1], 30)];
+}
+const cabStr = ([w, c, r]) => `${w}:${c}x${r}`;
+const normCab = l => Array.isArray(l) ? [...new Map(l.map(String).filter(x => /^\w+(:(w|\d{1,2}x\d{1,2}))?$/.test(x) && Object.hasOwn(CAB_W, x.split(':')[0])).map(x => [x.split(':')[0], cabStr(cabSize(x))])).values()] : null;
 function normPerson(p){
   const s = (v, max) => String(v ?? '').slice(0, max);
   return {
@@ -3433,43 +3453,63 @@ function renderCab(){
 // order, visibility and width of the blocks; while editing, the draft is shown
 let cabEditing = false, cabDraft = [];
 const cabLayout = () => cabEditing ? cabDraft : person(cabPid)?.cab || CAB_DEFAULT;
-const cabFromDom = () => [...$('#cab-blocks').children].filter(el => !el.hidden).map(el => el.dataset.w + (el.classList.contains('wide') ? ':w' : ''));
+const cabFromDom = () => [...$('#cab-blocks').children].filter(el => !el.hidden).map(el => cabStr([el.dataset.w, +el.style.getPropertyValue('--c'), +el.style.getPropertyValue('--r')]));
+const cabSetSize = (el, c, r) => { el.style.setProperty('--c', c); el.style.setProperty('--r', r); const b = el.querySelector(':scope > .cab-wbadge'); if (b) b.textContent = `${c} × ${r}`; };
 function cabApply(){
-  const box = $('#cab-blocks'), lay = cabLayout(), on = new Set(lay.map(x => x.split(':')[0]));
-  for (const x of lay){ const [w, wide] = x.split(':'), el = box.querySelector(`:scope > [data-w="${w}"]`); if (!el) continue; box.appendChild(el); el.hidden = false; el.classList.toggle('wide', !!wide); }
+  const box = $('#cab-blocks'), lay = cabLayout().map(cabSize), on = new Set(lay.map(x => x[0]));
+  for (const [w, c, r] of lay){ const el = box.querySelector(`:scope > [data-w="${w}"]`); if (!el) continue; box.appendChild(el); el.hidden = false; cabSetSize(el, c, r); }
   for (const el of box.children){
-    const n = CAB_W[el.dataset.w], c = el.querySelector(':scope > .cab-wctl');
+    const n = CAB_W[el.dataset.w], c = el.querySelectorAll(':scope > .cab-wctl,:scope > .cab-wsize,:scope > .cab-wbadge');
     if (!on.has(el.dataset.w)) el.hidden = true;
-    if (cabEditing && !c) el.insertAdjacentHTML('afterbegin', `<span class="cab-wctl"><button type="button" data-wdrag aria-label="Переместить «${n}»: перетащите или нажимайте стрелки" title="Перетащите, чтобы переместить">${ic('grip', 16)}</button>${el.classList.contains('cab-panel') ? `<button type="button" data-wwide aria-label="Ширина «${n}»: половина или вся строка" title="Половина или вся ширина">${ic('expand', 16)}</button>` : ''}<button type="button" data-wdel aria-label="Убрать «${n}»" title="Убрать блок">${ic('x', 16)}</button></span>`);
-    if (!cabEditing && c) c.remove();
+    if (cabEditing && !c.length){
+      el.insertAdjacentHTML('afterbegin', `<span class="cab-wctl"><button type="button" data-wdrag aria-label="Переместить «${n}»: перетащите или нажимайте стрелки" title="Перетащите, чтобы переместить">${ic('grip', 16)}</button><button type="button" data-wdel aria-label="Убрать «${n}»" title="Убрать блок">${ic('x', 16)}</button></span>`);
+      el.insertAdjacentHTML('beforeend', `<span class="cab-wbadge" aria-hidden="true"></span><button type="button" class="cab-wsize" data-wsize aria-label="Размер «${n}»: тяните за угол или нажимайте стрелки" title="Тяните, чтобы изменить ширину и высоту по сетке">${ic('corner', 16)}</button>`);
+      cabSetSize(el, +el.style.getPropertyValue('--c'), +el.style.getPropertyValue('--r'));
+    }
+    if (!cabEditing) c.forEach(x => x.remove());
   }
   box.classList.toggle('editing', cabEditing);
   const bar = $('#cab-edit-bar'), off = Object.keys(CAB_W).filter(w => !on.has(w));
   bar.hidden = !cabEditing;
-  if (cabEditing) bar.innerHTML = `<b>Настройка блоков</b><span class="note">Перетаскивайте блоки за значок с точками, убирайте крестиком.</span>
+  if (cabEditing) bar.innerHTML = `<b>Настройка блоков</b><span class="note">Перетаскивайте блоки за значок с точками, размер меняйте за правый нижний угол — он прилипает к сетке. Убрать блок — крестик.</span>
     ${off.length ? `<span class="cab-add"><span class="note">Добавить:</span>${off.map(w => `<button type="button" class="btn small" data-wadd="${w}">+ ${CAB_W[w]}</button>`).join('')}</span>` : ''}
     <span class="spacer"></span><button type="button" class="btn small" data-wreset>Как было по умолчанию</button><button type="button" class="btn small" data-wcancel>Отмена</button><button type="button" class="btn small primary" data-wsave>Готово</button>`;
 }
-// dragging a block by its handle: mouse and finger alike
+// dragging a block by its handle, or its corner to size it: mouse and finger alike
 $('#cab-blocks').addEventListener('pointerdown', e => {
-  const h = e.target.closest('[data-wdrag]'); if (!h) return;
+  const h = e.target.closest('[data-wdrag],[data-wsize]'); if (!h || e.button > 0) return;
   e.preventDefault();
-  const el = h.closest('[data-w]'), box = $('#cab-blocks');
-  let speed = 0, raf = 0;
-  const roll = () => { if (speed){ scrollBy(0, speed); raf = requestAnimationFrame(roll); } else raf = 0; };
-  try { h.setPointerCapture(e.pointerId); } catch {} el.classList.add('dragging');
-  h.onpointermove = m => {
+  const el = h.closest('[data-w]'), box = $('#cab-blocks'), sizing = 'wsize' in h.dataset, gap = parseFloat(getComputedStyle(box).columnGap) || 0;
+  const r0 = el.getBoundingClientRect(), x0 = e.clientX, y0 = e.clientY + scrollY, colU = (box.clientWidth + gap) / 12, rowU = parseFloat(getComputedStyle(box).gridAutoRows) + gap;
+  const min = CAB_MIN(el.dataset.w);
+  let speed = 0, raf = 0, last = e;
+  const move = m => {
+    last = m;
     speed = m.clientY < 70 ? -14 : m.clientY > innerHeight - 70 ? 14 : 0;
     if (speed && !raf) raf = requestAnimationFrame(roll);
+    if (sizing) return cabSetSize(el, clampN((r0.width + m.clientX - x0 + gap) / colU, min[0], 12), clampN((r0.height + m.clientY + scrollY - y0 + gap) / rowU, min[1], 30));
     const t = document.elementFromPoint(m.clientX, m.clientY)?.closest('#cab-blocks > [data-w]');
     if (!t || t === el) return;
     const r = t.getBoundingClientRect(), before = r.width > box.clientWidth * .7 ? m.clientY < r.top + r.height / 2 : m.clientX < r.left + r.width / 2;
     const ref = before ? t : t.nextSibling;
     if (ref !== el && ref !== el.nextSibling) box.insertBefore(el, ref);
   };
-  h.onpointerup = h.onpointercancel = () => { h.onpointermove = h.onpointerup = h.onpointercancel = null; speed = 0; el.classList.remove('dragging'); cabDraft = cabFromDom(); };
+  const roll = () => { if (speed){ scrollBy(0, speed); move(last); raf = requestAnimationFrame(roll); } else raf = 0; };
+  const end = () => {
+    removeEventListener('pointermove', move); removeEventListener('pointerup', end); removeEventListener('pointercancel', end);
+    speed = 0; el.classList.remove('dragging', 'sizing'); document.body.classList.remove('cab-moving', 'cab-sizing'); cabDraft = cabFromDom();
+  };
+  addEventListener('pointermove', move); addEventListener('pointerup', end); addEventListener('pointercancel', end);
+  el.classList.add(sizing ? 'sizing' : 'dragging'); document.body.classList.add(sizing ? 'cab-sizing' : 'cab-moving');
 });
 $('#cab-blocks').addEventListener('keydown', e => {
+  const z = e.target.closest('[data-wsize]'), k = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]}[e.key];
+  if (z && k){
+    e.preventDefault();
+    const el = z.closest('[data-w]'), min = CAB_MIN(el.dataset.w);
+    cabSetSize(el, clampN(+el.style.getPropertyValue('--c') + k[0], min[0], 12), clampN(+el.style.getPropertyValue('--r') + k[1], min[1], 30));
+    return cabDraft = cabFromDom();
+  }
   const h = e.target.closest('[data-wdrag]'), dir = {ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1}[e.key]; if (!h || !dir) return;
   e.preventDefault();
   const i = cabDraft.findIndex(x => x.split(':')[0] === h.closest('[data-w]').dataset.w), j = i + dir;
@@ -3482,14 +3522,13 @@ $('#v-cab').addEventListener('click', e => {
   const p = person(cabPid), w = e.target.closest('[data-w]')?.dataset.w;
   if (e.target.closest('[data-photo-view]')) return openPhoto(p.photo, `Фото: ${p.name}`);
   if ((b = e.target.closest('[data-photo-menu]'))) return photoMenu(b, p.photo, `Фото: ${p.name}`, setPersonPhoto(p.id));
-  if (e.target.closest('[data-cab-edit]')){ cabDraft = [...(p.cab || CAB_DEFAULT)]; cabEditing = true; return renderCab(); }
+  if (e.target.closest('[data-cab-edit]')){ cabDraft = (p.cab || CAB_DEFAULT).map(x => cabStr(cabSize(x))); cabEditing = true; return renderCab(); }
   if (e.target.closest('[data-wdel]')){ cabDraft = cabDraft.filter(x => x.split(':')[0] !== w); return cabApply(); }
-  if (e.target.closest('[data-wwide]')){ cabDraft = cabDraft.map(x => x.split(':')[0] === w ? (x.endsWith(':w') ? w : w + ':w') : x); return cabApply(); }
-  if ((b = e.target.closest('[data-wadd]'))){ cabDraft.push(b.dataset.wadd); cabApply(); return $(`#cab-blocks > [data-w="${b.dataset.wadd}"]`).scrollIntoView({block: 'nearest', behavior: 'smooth'}); }
-  if (e.target.closest('[data-wreset]')){ cabDraft = [...CAB_DEFAULT]; return cabApply(); }
+  if ((b = e.target.closest('[data-wadd]'))){ cabDraft.push(cabStr(cabSize(b.dataset.wadd))); cabApply(); return $(`#cab-blocks > [data-w="${b.dataset.wadd}"]`).scrollIntoView({block: 'nearest', behavior: 'smooth'}); }
+  if (e.target.closest('[data-wreset]')){ cabDraft = CAB_DEFAULT.map(x => cabStr(cabSize(x))); return cabApply(); }
   if (e.target.closest('[data-wcancel]')){ cabEditing = false; return renderCab(); }
-  if (e.target.closest('[data-wsave]')){ const next = cabDraft; cabEditing = false; return change(() => { p.cab = eqJ(next, CAB_DEFAULT) ? null : next; }, 'Блоки кабинета сохранены'); }
-  if (e.target.closest('[data-wdrag]')) return;
+  if (e.target.closest('[data-wsave]')){ const next = cabDraft; cabEditing = false; return change(() => { p.cab = eqJ(next, CAB_DEFAULT.map(x => cabStr(cabSize(x)))) ? null : next; }, 'Блоки кабинета сохранены'); }
+  if (e.target.closest('[data-wdrag],[data-wsize]')) return;
   if ((b = e.target.closest('[data-cweek]'))){ const n = +b.dataset.cweek; cabWeek = n ? cabWeek + n : 0; return renderCab(); }
   if ((b = e.target.closest('[data-cf]'))){ cabFilter = b.dataset.cf; return renderCab(); }
   if (e.target.closest('#cab-all-done')) return openCabDone(cabPid);
@@ -6160,7 +6199,7 @@ addEventListener('storage', e => {
   const bw = normEv({...wk, repeat: 'weekdays'}), mo = normEv({...wk, repeat: 'month'}), one = normEv({...wk, repeat: '', end: '2026-11-04T09:00'});
   console.assert(evOccur(bw, '2026-11-06', '2026-11-09').length === 2 && evOccur(mo, '2026-11-01', '2027-01-31').length === 3 && evOccur(one, '2026-11-03', '2026-11-03').length === 1 && evOccur(one, '2026-11-05', '2026-11-30').length === 0, 'calendar: weekdays, months, a span of days');
   console.assert(normEv({id: 'z', start: 'bad'}).start === '' && normEv({id: 'z', start: '2026-11-02T10:00', end: '2026-11-01T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).end === '2026-11-02T10:00' && normEv({id: 'z', start: '2026-11-02T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).guests.join() === 'a', 'calendar: events are cleaned');
-  console.assert(normCab(['cur:w', 'cur', 'x', 'heat', 'open:z', 7]).join() === 'cur,heat' && normCab(null) === null && normPhoto({full: 'a', thumb: 'b', z: 99, x: -1}).z === 5 && normPhoto({full: 'a b', thumb: 'b'}) === null, 'cabinet blocks and photos are cleaned');
+  console.assert(normCab(['cur:w', 'cur', 'x', 'heat', 'open:z', 7]).join() === 'cur:6x8,heat:6x10' && normCab(['cur:w', 'open:99x1']).join() === 'cur:12x8,open:12x2' && normCab(null) === null && normPhoto({full: 'a', thumb: 'b', z: 99, x: -1}).z === 5 && normPhoto({full: 'a b', thumb: 'b'}) === null, 'cabinet blocks and photos are cleaned');
   const sized = kbClean('<img data-blob="f2" class="kb-sel" style="width: 40%; height: 900px"><img data-blob="f3" style="width: 300px"><img data-blob="f4" style="width: 250%">');
   console.assert(sized.includes('style="width: 40%"') && !sized.includes('class') && !sized.includes('900px') && !sized.includes('300px') && sized.includes('width: 100%'), 'kb: picture width kept in percent only: ' + sized);
   console.assert(normDoc({id: 'k', task: 'PLN-1', project: 'p'}).task === 'PLN-1' && normDoc({id: 'k'}).project === '', 'kb: links to a task and a project kept');
