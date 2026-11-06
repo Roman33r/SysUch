@@ -185,6 +185,9 @@ dialog::backdrop{background:rgba(10,12,10,.45)}
 .d-foot{display:flex;flex-wrap:wrap;gap:8px;padding:14px 20px;border-top:1px solid var(--line)}
 .d-foot .spacer{flex:1}
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+/* a select as wide as its longest option must not push its column out of the window */
+.fields > *{min-width:0}
+.fields .sel{width:100%;min-width:0}
 .field{display:grid;gap:4px;min-width:0}
 .field label,.k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .field input,.field select,.field textarea,.add-row input{padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--sunken);width:100%}
@@ -500,7 +503,8 @@ header{position:relative;padding-right:98px}
 .ach-tier{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--sunken);color:var(--muted)}
 .ach-tier.t1{background:#F1C3A5;color:#7A3B12}.ach-tier.t2{background:#E3E6EA;color:#3B424A}.ach-tier.t3{background:#FFE08A;color:#6B4A00}.ach-tier.tm{background:#E5DBFF;color:#4C2A99}
 .ad-icons{display:flex;flex-wrap:wrap;gap:4px}
-.ad-ic input{position:absolute;opacity:0;pointer-events:none}
+.ad-ic{position:relative}
+.ad-ic input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;pointer-events:none}
 .ad-ic span{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--fg)}
 .ad-ic input:checked + span{border-color:var(--accent);background:var(--accent-soft)}
 .ad-ic input:focus-visible + span{outline:2px solid var(--accent)}
@@ -3947,7 +3951,7 @@ function openLook(pid){
   const p = person(pid); if (!p) return;
   const d = $('#d-look'), al = achOf(pid), sel = {...normLook(p.look)};
   // what opens a locked item: every achievement that gives it
-  const by = (field, k, need) => al.filter(a => a[field] === k).map(a => a.manual ? `награда «${a.name}»` : `${a.name}: ${TIER[need]} — ${a.steps[need - 1]} ${a.what}`).join(' или ') || 'руководитель может сделать её наградой: «+ Достижение» → рамка';
+  const by = (field, k, need) => [...al, ...db.achDefs.filter(x => x.manual && !al.some(a => a.id === x.id))].filter(a => a[field] === k).map(a => a.manual ? `награда «${a.name}»` : `${a.name}: ${TIER[need]} — ${a.steps[need - 1]} ${a.what}`).join(' или ') || (field === 'bg' ? 'руководитель может сделать его наградой: «+ Достижение» → фон' : 'руководитель может сделать её наградой: «+ Достижение» → рамка');
   const bgCond = k => by('bg', k, 3), frCond = k => by('frame', k, 2);
   const draw = () => {
     const prev = {...lookOf({...p, look: sel})};
