@@ -1129,6 +1129,11 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 .ev-cols{display:flex;gap:8px}
 .ev-cols button{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
 .ev-cols button[aria-pressed="true"]{border-color:var(--fg)}
+.d-ask{width:min(480px,calc(100vw - 32px))}
+.ask-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ask-list li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border-radius:10px;background:var(--sunken)}
+.ask-list .dot{width:10px;height:10px;border-radius:50%;margin-top:5px}
+.ask-list .note{display:block;margin-top:2px;overflow-wrap:anywhere}
 .dp-row{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px;margin:0 0 12px}
 .dp-row .btn.danger{justify-self:start}
 .ev-guests{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px;max-height:160px;overflow:auto;padding:2px}
@@ -1353,6 +1358,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 <dialog id="d-inbox"></dialog>
 <dialog id="d-person"></dialog>
 <dialog id="d-depts"></dialog>
+<dialog id="d-ask" class="d-ask"></dialog>
 <dialog id="d-store"></dialog>
 <dialog id="d-conflict"></dialog>
 <dialog id="d-login"></dialog>
@@ -2563,20 +2569,44 @@ const addLog = (t, text) => t.log.push({at: stamp(), text});
 function change(fn, msg, action){
   const before = JSON.stringify(db), was = new Map(db.tasks.map(t => [t.id, t.assignee + '|' + t.due]));
   if (fn() === false) return;
+  const back = () => { db = {...JSON.parse(before), chat: db.chat, rooms: db.rooms, marks: db.marks}; };
+  const finish = () => {
+    commit();
+    if (typeof msg === 'function') msg = msg();
+    if (typeof action === 'function') action = action();
+    if (msg) toast(msg, () => { back(); commit(); }, action || undefined);
+  };
   const warn = absentWarn(was);
-  if (warn && !confirm(warn)){ db = {...JSON.parse(before), chat: db.chat, rooms: db.rooms, marks: db.marks}; render(); return; }
-  commit();
-  if (typeof msg === 'function') msg = msg();
-  if (typeof action === 'function') action = action();
-  if (msg) toast(msg, () => { db = {...JSON.parse(before), chat: db.chat, rooms: db.rooms, marks: db.marks}; commit(); }, action || undefined);
+  // the change waits, unsaved, for the answer; the window covers the page meanwhile
+  if (warn.length) return void askAbsent(warn).then(ok => { if (ok) finish(); else { back(); render(); } });
+  finish();
 }
 // tasks given to someone, or moved to a date, while the work calendar has them away; the date is the due date, or today without one
-function absentWarn(was){
-  const out = db.tasks.filter(t => t.assignee && t.status !== 'done' && was.get(t.id) !== t.assignee + '|' + t.due).flatMap(t => {
-    const e = absentOn(t.assignee, t.due || addDays(0));
-    return e ? [`${person(t.assignee)?.name || 'Сотрудник'} ${ABSENT[e.kind][1]} (${absentWhen(e)}) — ${t.id}${t.due ? `, срок ${fmtDay(t.due)}` : ''}`] : [];
+const absentWarn = was => db.tasks.filter(t => t.assignee && t.status !== 'done' && was.get(t.id) !== t.assignee + '|' + t.due)
+  .flatMap(t => { const e = absentOn(t.assignee, t.due || addDays(0)); return e ? [{t, e}] : []; });
+// a question in a window: resolves true on the main button, false on cancel, the cross or Esc
+function askConfirm(title, html, ok){
+  return new Promise(res => {
+    const d = $('#d-ask');
+    let done = false;
+    const fin = v => { if (done) return; done = true; if (d.open) d.close(); res(v); };
+    d.innerHTML = `<div class="d-head"><h2>${esc(title)}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
+      <div class="d-body">${html}</div>
+      <div class="d-foot"><span class="spacer"></span><button type="button" class="btn" data-ask="0">Отмена</button><button type="button" class="btn primary" data-ask="1">${esc(ok)}</button></div>`;
+    d.querySelectorAll('[data-ask]').forEach(b => b.onclick = () => fin(b.dataset.ask === '1'));
+    d.querySelector('.close').onclick = () => fin(false);
+    d.addEventListener('close', () => fin(false), {once: true});
+    d.showModal();
+    d.querySelector('[data-ask="0"]').focus(); // Enter by habit shouldn't assign
   });
-  return out.length ? `${out.slice(0, 5).join('\n')}${out.length > 5 ? `\n…и ещё ${out.length - 5}` : ''}\n\nВсё равно назначить?` : '';
+}
+const absentItem = (e, sub) => `<li><span class="dot" style="background:${ABSENT[e.kind][2]}"></span><div><b>${esc(person(e.who)?.name || 'Сотрудник')}</b> — ${ABSENT[e.kind][0].toLowerCase()}, ${absentWhen(e)}<span class="note">${sub}</span></div></li>`;
+function askAbsent(list){
+  const one = new Set(list.map(x => x.e.who)).size === 1, e0 = list[0].e;
+  return askConfirm(one ? `${person(e0.who)?.name || 'Сотрудник'} ${ABSENT[e0.kind][1]}` : 'Сотрудники отсутствуют',
+    `<ul class="ask-list">${list.slice(0, 6).map(({t, e}) => absentItem(e, `${esc(t.id)} ${esc(t.title)} · ${t.due ? `срок ${fmtDay(t.due)}` : 'без срока, назначение на сегодня'}`)).join('')}</ul>
+     ${list.length > 6 ? `<p class="note">…и ещё ${list.length - 6}</p>` : ''}<p>${one ? 'Сотрудник находится' : 'Сотрудники находятся'} вне работы в эти дни. Всё равно назначить?</p>`,
+    'Всё равно назначить');
 }
 const absentOn = (pid, day) => db.cal.find(e => e.kind && e.who === pid && e.owner.startsWith('dept:') && evOccur(e, day, day).length);
 const absentWhen = e => e.start.slice(0, 10) === e.end.slice(0, 10) ? fmtDay(e.start.slice(0, 10)) + (e.allDay ? '' : `, ${hm(e.start)}–${hm(e.end)}`) : `${fmtDay(e.start.slice(0, 10))} – ${fmtDay(e.end.slice(0, 10))}`;
@@ -5679,7 +5709,8 @@ function calItems(from, to){
 }
 const calOnDay = (items, d) => items.filter(x => x.start.slice(0, 10) <= d && x.end.slice(0, 10) >= d);
 const calTimed = x => x.kind === 'ev' && !x.e.allDay;
-const calLabel = x => x.kind === 'task' ? `${x.t.id} ${x.t.title}` : x.busy ? 'Занят' : x.e.title;
+const calLabel = x => x.kind === 'task' ? `${x.t.id} ${x.t.title}` : x.busy ? 'Занят' : x.e.kind && person(x.e.who) && !x.e.title.includes(person(x.e.who).name) ? `${x.e.title}: ${person(x.e.who).name}` : x.e.title;
+const calWhoName = x => x.kind === 'task' ? chatName(x.t.assignee) : calName(x.e.owner);
 function calWhen(o){
   const d = o.start.slice(0, 10), day = new Date(d + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'short', day: 'numeric', month: 'long'});
   return o.e.allDay ? `${day}, весь день` : `${day}, ${hm(o.start)}–${hm(o.end)}`;
@@ -5688,7 +5719,7 @@ function calChip(x, d){
   const late = x.kind === 'task' && x.t.due < addDays(0), cls = x.kind === 'task' ? (late ? 'late' : 'task') : x.busy ? 'busy' : '';
   const style = x.kind === 'ev' && !x.busy ? ` style="--c:${x.e.color}"` : '';
   const time = calTimed(x) && x.start.slice(0, 10) === d ? hm(x.start) + ' ' : '';
-  return `<button type="button" class="cal-chip ${cls}${x.other ? ' other' : ''}"${style} data-cal-item="${esc(x.key)}" title="${esc((x.other ? (x.kind === 'task' ? chatName(x.t.assignee) : calName(x.e.owner)) + ': ' : '') + calLabel(x))}">${esc(time + calLabel(x))}</button>`;
+  return `<button type="button" class="cal-chip ${cls}${x.other ? ' other' : ''}"${style} data-cal-item="${esc(x.key)}" title="${esc((x.other ? calWhoName(x) + ': ' : '') + calLabel(x))}">${esc(time + calLabel(x))}</button>`;
 }
 let calShown = []; // the items on screen, so a click finds its event
 const calFocus = () => /^\d{4}-\d{2}-\d{2}$/.test(ui.calDate) ? ui.calDate : addDays(0);
@@ -5740,7 +5771,7 @@ function renderCal(){
       <span class="cal-hl">весь день</span>${days.map(x => `<div class="cal-ad${calRest(x)}" data-cal-ad="${x}">${calOnDay(items, x).filter(i => !calTimed(i)).map(i => calChip(i, x)).join('')}</div>`).join('')}
     </div><div class="cal-tg cal-hrs" style="--h:${CAL_H}px;height:${CAL_H * 24}px">
       <div>${Array.from({length: 24}, (_, h) => `<div class="cal-hr" style="height:${CAL_H}px">${h ? String(h).padStart(2, '0') + ':00' : ''}</div>`).join('')}</div>
-      ${days.map(x => `<div class="cal-col${calRest(x)}${x === today ? ' today' : ''}" data-cal-col="${x}">${lanes(x).map(g => `<button type="button" class="cal-ev${g.x.busy ? ' busy' : ''}" data-cal-item="${esc(g.x.key)}" style="top:${g.a / 60 * CAL_H}px;height:${Math.max(20, (g.b - g.a) / 60 * CAL_H - 2)}px;left:calc(${g.l / g.n * 100}% + 2px);width:calc(${100 / g.n}% - 4px);${g.x.busy ? '' : `--c:${g.x.e.color}`}"><b>${esc(calLabel(g.x))}</b>${hm(g.x.start)}–${hm(g.x.end)}${g.x.other ? ' · ' + esc(chatName(g.x.e.owner)) : ''}</button>`).join('')}${x === today ? `<span class="cal-now" style="top:${nowMin / 60 * CAL_H}px"></span>` : ''}</div>`).join('')}
+      ${days.map(x => `<div class="cal-col${calRest(x)}${x === today ? ' today' : ''}" data-cal-col="${x}">${lanes(x).map(g => `<button type="button" class="cal-ev${g.x.busy ? ' busy' : ''}" data-cal-item="${esc(g.x.key)}" style="top:${g.a / 60 * CAL_H}px;height:${Math.max(20, (g.b - g.a) / 60 * CAL_H - 2)}px;left:calc(${g.l / g.n * 100}% + 2px);width:calc(${100 / g.n}% - 4px);${g.x.busy ? '' : `--c:${g.x.e.color}`}"><b>${esc(calLabel(g.x))}</b>${hm(g.x.start)}–${hm(g.x.end)}${g.x.other ? ' · ' + esc(calWhoName(g.x)) : ''}</button>`).join('')}${x === today ? `<span class="cal-now" style="top:${nowMin / 60 * CAL_H}px"></span>` : ''}</div>`).join('')}
     </div></div></div>`;
     const sc = main.querySelector('.cal-scroll');
     sc.scrollTop = keep ?? sc.querySelector('.cal-sticky').offsetHeight + CAL_H * 8 - 10; // the working day in view
@@ -5764,7 +5795,7 @@ function renderCal(){
     calShown = [...calShown, ...list];
     $('#cal-day').innerHTML = `<h3>${new Date(day + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'long', day: 'numeric', month: 'long'})}</h3>${calHoliday(day) ? `<span class="cal-hol">${calHoliday(day)}</span>` : ''}
       ${list.map(x => `<button type="button" class="cal-ag" data-cal-item="${esc(x.key)}"><span class="tm">${calTimed(x) ? hm(x.start) : x.kind === 'task' ? 'срок' : 'весь день'}</span><span>${calChip(x, day).replace('<button type="button"', '<span').replace(/<\/button>$/, '</span>')}</span>${x.kind === 'ev' && x.e.remind >= 0 && !x.busy ? `<span class="rem" title="${CAL_REMIND[x.e.remind]}">${bellIcon(false, 12)}</span>` : '<span></span>'}
-        <span class="sub">${[calTimed(x) ? `${hm(x.start)}–${hm(x.end)}` : '', x.kind === 'ev' && x.e.repeat ? CAL_REPEAT[x.e.repeat].toLowerCase() : '', x.other ? chatName(x.kind === 'task' ? x.t.assignee : x.e.owner) : '', x.kind === 'task' ? STATUS[x.t.status] : ''].filter(Boolean).join(' · ')}</span></button>`).join('') || '<p class="note">Ничего не запланировано.</p>'}
+        <span class="sub">${[calTimed(x) ? `${hm(x.start)}–${hm(x.end)}` : '', x.kind === 'ev' && x.e.repeat ? CAL_REPEAT[x.e.repeat].toLowerCase() : '', x.other ? calWhoName(x) : '', x.kind === 'task' ? STATUS[x.t.status] : ''].filter(Boolean).join(' · ')}</span></button>`).join('') || '<p class="note">Ничего не запланировано.</p>'}
       <button type="button" class="btn small" data-cal-new="${day}">+ Событие на этот день</button>`;
   }
 }
@@ -5870,7 +5901,7 @@ function openEvent(ev, day, time){
     d.close();
     change(() => { db.cal = db.cal.filter(y => y.id !== x.id); }, `Событие «${x.title}» удалено`);
   });
-  q('#ev-form').onsubmit = e => {
+  q('#ev-form').onsubmit = async e => {
     e.preventDefault();
     const owner = q('#ev-owner')?.value || x.owner, work = owner.startsWith('dept:'), kind = work ? q('#ev-kind').value : '', who = kind ? q('#ev-who').value : '';
     const date = q('#ev-date').value, date2 = work && q('#ev-date2').value > date ? q('#ev-date2').value : date, allDay = q('#ev-allday').checked;
@@ -5882,7 +5913,8 @@ function openEvent(ev, day, time){
     if (!work){
       const a = `${date}T${t1}`, b = `${date2}T${t2}`, dp = person(owner)?.dept;
       const hit = db.cal.filter(e => e.id !== x.id && e.owner.startsWith('dept:') && (e.kind ? e.who === owner : e.owner === 'dept:' + dp)).flatMap(e => evOccur(e, date, date2)).find(o => o.start < b && o.end > a);
-      if (hit && !confirm(`${owner === me ? 'У вас' : `У ${person(owner)?.name || 'сотрудника'}`} в это время в рабочем календаре: «${hit.e.title}» (${hit.e.kind ? absentWhen(hit.e) : calWhen(hit)}).\n\nВсё равно добавить событие?`)) return;
+      if (hit && !await askConfirm('Время занято в рабочем календаре', `<ul class="ask-list">${hit.e.kind ? absentItem(hit.e, esc(calName(hit.e.owner))) : `<li><span class="dot" style="background:${hit.e.color}"></span><div><b>${esc(hit.e.title)}</b><span class="note">${esc(calName(hit.e.owner))} · ${calWhen(hit)}</span></div></li>`}</ul>
+        <p>${owner === me ? 'У вас' : `У ${esc(person(owner)?.name || 'сотрудника')}`} в это время ${hit.e.kind ? ABSENT[hit.e.kind][0].toLowerCase() : 'событие отдела'}. Всё равно добавить событие?</p>`, 'Всё равно добавить')) return;
     }
     const remind = +q('#ev-remind').value, at = stamp();
     const next = normEv({...x, id: x.id || 'ev' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), title, allDay, start: `${date}T${t1}`, end: `${date2}T${t2}`, remind: kind ? -1 : remind, repeat: kind ? '' : q('#ev-repeat').value,
