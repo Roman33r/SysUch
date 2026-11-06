@@ -969,6 +969,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .kb-call{margin:12px 0;padding:10px 14px;border-left:4px solid var(--cc);border-radius:0 10px 10px 0;background:color-mix(in srgb,var(--cc) 10%,transparent)}
 .kb-call::before{display:block;margin-bottom:4px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--cc)}
 .kb-call > :last-child{margin-bottom:0}
+.kb-call .kb-call{margin:8px 0}
 .kb-c-info{--cc:var(--accent)} .kb-c-info::before{content:"Заметка"}
 .kb-c-tip{--cc:var(--low)} .kb-c-tip::before{content:"Подсказка"}
 .kb-c-warn{--cc:var(--med)} .kb-c-warn::before{content:"Предупреждение"}
@@ -1024,7 +1025,9 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .kb-doc img,.kb-ed img{max-width:100%;height:auto;border-radius:6px;vertical-align:middle}
 .kb-doc blockquote,.kb-ed blockquote{margin:10px 0;padding:6px 14px;border-left:3px solid var(--accent);background:var(--sunken);border-radius:0 8px 8px 0}
 .kb-doc pre,.kb-ed pre{padding:10px 12px;border-radius:8px;background:var(--sunken);font:13px/1.5 var(--f-mono);white-space:pre-wrap}
-.kb-doc table,.kb-ed table{border-collapse:collapse;width:100%;margin:10px 0}
+.kb-doc table,.kb-ed table{border-collapse:collapse;width:100%;margin:10px 0;table-layout:fixed}
+.kb-ed.kb-rz-col,.kb-ed.kb-rz-col *{cursor:col-resize!important}
+.kb-ed.kb-rz-row,.kb-ed.kb-rz-row *{cursor:row-resize!important}
 .kb-doc td,.kb-doc th,.kb-ed td,.kb-ed th{border:1px solid color-mix(in srgb,var(--fg) 18%,transparent);padding:6px 10px;vertical-align:top;min-width:60px;text-align:left}
 .kb-doc th,.kb-ed th{background:var(--sunken);font-weight:600}
 .kb-doc tbody tr:nth-child(even){background:color-mix(in srgb,var(--fg) 3%,transparent)}
@@ -1547,8 +1550,8 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
         <ul>
           <li><b>Папки.</b> Кнопка с папкой создаёт папку, «⋯» у папки (или правая кнопка) — статья или папка внутри, переименовать, вынести, удалить. Вложенность любая. Статьи и папки перетаскиваются мышью на другую папку или на пустое место списка (верхний уровень). При удалении папки её содержимое переезжает на уровень выше. Разделы из прежних версий стали папками.</li>
           <li><b>Написать.</b> «+ Статья»: название, папка и текст. Ctrl+S или «Сохранить».</li>
-          <li><b>Таблица.</b> Кнопка с таблицей вставляет таблицу 3×3 с заголовком. Когда курсор в ячейке, в панели появляются «+ строка», «+ столбец», «− строка», «− столбец» и «Удалить таблицу». Таблицы из Excel и Word можно вставить через Ctrl+V.</li>
-          <li><b>Блоки.</b> Список «Блок»: заметка, подсказка, предупреждение или важно — цветная рамка с заголовком. Выделенный текст попадёт в блок; если курсор уже в блоке, меняется его вид, «Убрать блок» возвращает обычный текст.</li>
+          <li><b>Таблица.</b> Кнопка с таблицей вставляет таблицу 3×3 с заголовком. Когда курсор в ячейке, в панели появляются «+ строка», «+ столбец», «− строка», «− столбец» и «Удалить таблицу». Таблицу из Excel, Google Таблиц или Word скопируйте и вставьте через Ctrl+V. Ширину столбца меняет перетаскивание правой границы ячейки, высоту строки — нижней.</li>
+          <li><b>Блоки.</b> Список «Блок» → «Вставить»: заметка, подсказка, предупреждение или важно — цветная рамка с заголовком. Выделенный текст попадёт в блок. Если курсор уже в блоке, новый блок вставится внутрь него, например предупреждение в заметке. «Блок, где курсор» меняет вид ближайшего блока или убирает его.</li>
           <li><b>Оформление.</b> Стиль абзаца (заголовок, цитата, код), шрифт, размер, цвет текста и фона, жирный (Ctrl+B), наклонный (Ctrl+I), подчёркнутый (Ctrl+U), зачёркнутый, списки, выравнивание, ссылки, разделитель, «Убрать оформление».</li>
           <li><b>Картинки и файлы.</b> Кнопка с картинкой, перетаскивание в текст или вставка из буфера (Ctrl+V). Кнопка со скрепкой прикрепляет любой файл, в статье он скачивается по нажатию. До 5 МБ каждый, большие фото уменьшаются. Нужна база данных или общий JSON-файл.</li>
           <li><b>Размер картинки.</b> Нажмите на картинку в редакторе: она выделится, в панели появятся кнопки 25%, 50%, 75%, 100% и ползунок, а в правом нижнем углу картинки — маркер, который можно тянуть мышью или пальцем. Ширина задаётся в процентах от ширины текста, поэтому на телефоне картинка тоже помещается. Delete удаляет выделенную картинку.</li>
@@ -6069,10 +6072,11 @@ function kbClean(html){
       }
       if (tag === 'DIV' && /^kb-call kb-c-(info|tip|warn|danger)$/.test(attr('class').trim())) keep.class = attr('class').trim();
       if (tag === 'TD' || tag === 'TH') for (const k of ['colspan', 'rowspan']) if (/^\d{1,2}$/.test(attr(k))) keep[k] = attr(k);
+      const cell = (tag === 'TD' || tag === 'TH') ? [/^\d{1,4}(\.\d+)?(px|%)$/.test(n.style.width) ? `width: ${n.style.width}` : '', /^\d{1,4}(\.\d+)?px$/.test(n.style.height) ? `height: ${n.style.height}` : ''].filter(Boolean).join('; ') : '';
       const w = /* read before the attributes go */ tag === 'IMG' && /^\d{1,3}(\.\d+)?%$/.test(n.style.width) ? `width: ${Math.min(100, parseFloat(n.style.width))}%` : '';
       for (const a of [...n.attributes]) n.removeAttribute(a.name);
       for (const [k, v] of Object.entries(keep)) n.setAttribute(k, v);
-      if (w || (css && !keep['data-blob'])) n.setAttribute('style', [keep['data-blob'] && tag === 'A' ? '' : css, w].filter(Boolean).join('; ')); // a file chip is styled by the page; the editor tends to stamp a fixed text colour on it
+      if (w || cell || (css && !keep['data-blob'])) n.setAttribute('style', [keep['data-blob'] && tag === 'A' ? '' : css, w, cell].filter(Boolean).join('; ')); // a file chip is styled by the page; the editor tends to stamp a fixed text colour on it
     }
   })(body);
   return body.innerHTML;
@@ -6197,7 +6201,7 @@ function kbStartEdit(id, link = {}){
       ${btn('insertUnorderedList', ic('ul'), 'Маркированный список')}${btn('insertOrderedList', ic('ol'), 'Нумерованный список')}${btn('justifyLeft', ic('alignL'), 'По левому краю')}${btn('justifyCenter', ic('alignC'), 'По центру')}${btn('justifyRight', ic('alignR'), 'По правому краю')}
       <span class="kb-sep"></span>
       ${btn('kbLink', ic('link'), 'Ссылка')}${btn('kbImage', ic('image'), 'Вставить картинку')}${btn('kbFile', ic('clip'), 'Прикрепить файл')}${btn('insertHorizontalRule', ic('hr'), 'Разделитель')}${btn('kbTable', ic('table'), 'Вставить таблицу')}
-      <select class="sel" data-kb-call aria-label="Блок: заметка, подсказка, предупреждение"><option value="">${'Блок'}</option><option value="info">Заметка</option><option value="tip">Подсказка</option><option value="warn">Предупреждение</option><option value="danger">Важно</option><option value="none">Убрать блок</option></select>
+      <select class="sel" data-kb-call aria-label="Блок: заметка, подсказка, предупреждение"><option value="">Блок</option><optgroup label="Вставить (можно внутрь другого)"><option value="ins:info">Заметка</option><option value="ins:tip">Подсказка</option><option value="ins:warn">Предупреждение</option><option value="ins:danger">Важно</option></optgroup><optgroup label="Блок, где курсор"><option value="set:info">Сделать заметкой</option><option value="set:tip">Сделать подсказкой</option><option value="set:warn">Сделать предупреждением</option><option value="set:danger">Сделать «Важно»</option><option value="none">Убрать блок</option></optgroup></select>
       <span class="kb-sep"></span>
       ${btn('removeFormat', ic('clear'), 'Убрать оформление')}${btn('undo', ic('undo'), 'Отменить (Ctrl+Z)')}${btn('redo', ic('redo'), 'Повторить (Ctrl+Y)')}
       <span class="kb-imgbar" id="kb-tblbar" hidden><span class="kb-sep"></span><span class="note">Таблица:</span><button type="button" data-kb-tbl="row+">+ строка</button><button type="button" data-kb-tbl="col+">+ столбец</button><button type="button" data-kb-tbl="row-">− строка</button><button type="button" data-kb-tbl="col-">− столбец</button><button type="button" data-kb-tbl="del">Удалить таблицу</button></span>
@@ -6269,6 +6273,7 @@ document.addEventListener('selectionchange', () => {
 });
 // the table cell the cursor is in
 const kbCell = () => { const n = kbRange?.startContainer; return (n?.nodeType === 1 ? n : n?.parentElement)?.closest('#kb-ed td, #kb-ed th') || null; };
+const kbTsv = text => `<table><tbody>${text.replace(/\r/g, '').replace(/\n$/, '').split('\n').map(l => `<tr>${l.split('\t').map(c => `<td>${esc(c) || '<br>'}</td>`).join('')}</tr>`).join('')}</tbody></table><p><br></p>`;
 const KB_TABLE = `<table><thead><tr><th>Столбец 1</th><th>Столбец 2</th><th>Столбец 3</th></tr></thead><tbody>${'<tr><td><br></td><td><br></td><td><br></td></tr>'.repeat(2)}</tbody></table><p><br></p>`;
 function kbTable(op){
   const cell = kbCell(); if (!cell) return;
@@ -6284,13 +6289,44 @@ function kbTable(op){
   $('#kb-tblbar').hidden = !table.isConnected;
   $('#kb-ed').focus();
 }
+const kbEdge = e => {
+  const c = e.target.closest?.('#kb-ed td, #kb-ed th'); if (!c) return null;
+  const r = c.getBoundingClientRect();
+  return r.right - e.clientX <= 6 && c.nextElementSibling ? {c, mode: 'col'} : r.bottom - e.clientY <= 5 ? {c, mode: 'row'} : null;
+};
+let kbSizing = false;
+$('#kb-main').addEventListener('pointermove', e => {
+  const ed = $('#kb-ed'); if (!ed || kbSizing) return;
+  const g = kbEdge(e);
+  ed.classList.toggle('kb-rz-col', g?.mode === 'col'); ed.classList.toggle('kb-rz-row', g?.mode === 'row');
+});
+$('#kb-main').addEventListener('pointerdown', e => {
+  const g = kbEdge(e); if (!g || e.button > 0) return;
+  e.preventDefault();
+  const {c, mode} = g, table = c.closest('table'), i = c.cellIndex, tw = table.getBoundingClientRect().width, r0 = c.getBoundingClientRect(), x0 = e.clientX, y0 = e.clientY;
+  // every column gets its current width first, so the others stay put while one changes
+  if (mode === 'col' && !table.rows[0]?.cells[0]?.style.width) for (const row of table.rows) for (const x of row.cells) x.style.width = (x.getBoundingClientRect().width / tw * 100).toFixed(2) + '%';
+  kbSizing = true;
+  const n = c.parentElement.cells.length, k = i + 1 < n ? i + 1 : -1, pc = j => parseFloat(c.parentElement.cells[j]?.style.width) || 0, pi = pc(i), pk = pc(k);
+  const move = m => {
+    // the column takes the width from the next one, so the table keeps its width
+    if (mode === 'col'){
+      if (k < 0) return;
+      const sum = pi + pk, min = 30 / tw * 100, a = Math.min(sum - min, Math.max(min, pi + (m.clientX - x0) / tw * 100));
+      for (const row of table.rows){ if (row.cells[i]) row.cells[i].style.width = a.toFixed(2) + '%'; if (row.cells[k]) row.cells[k].style.width = (sum - a).toFixed(2) + '%'; }
+    }
+    else for (const x of c.parentElement.cells) x.style.height = Math.round(Math.max(22, r0.height + m.clientY - y0)) + 'px';
+  };
+  const end = () => { kbSizing = false; removeEventListener('pointermove', move); removeEventListener('pointerup', end); removeEventListener('pointercancel', end); };
+  addEventListener('pointermove', move); addEventListener('pointerup', end); addEventListener('pointercancel', end);
+});
 // a coloured box with a heading: note, tip, warning, important; «none» takes the box away
-function kbCallout(kind){
-  const n = kbRange?.startContainer, box = (n?.nodeType === 1 ? n : n?.parentElement)?.closest('#kb-ed .kb-call');
-  if (box){ if (kind === 'none') box.replaceWith(...box.childNodes); else box.className = `kb-call kb-c-${kind}`; return $('#kb-ed').focus(); }
-  if (kind === 'none') return;
-  const text = String(getSelection()).trim();
-  kbExec('insertHTML', `<div class="kb-call kb-c-${kind}"><p>${text ? esc(text) : '<br>'}</p></div><p><br></p>`);
+function kbCallout(v){
+  const n = kbRange?.startContainer, box = (n?.nodeType === 1 ? n : n?.parentElement)?.closest('#kb-ed .kb-call'), [op, kind] = v.split(':');
+  if (op === 'ins'){ const text = String(getSelection()).trim(); return kbExec('insertHTML', `<div class="kb-call kb-c-${kind}"><p>${text ? esc(text) : '<br>'}</p></div><p><br></p>`); }
+  if (!box) return toast('Поставьте курсор в блок, который хотите изменить');
+  if (op === 'none') box.replaceWith(...box.childNodes); else box.className = `kb-call kb-c-${kind}`;
+  $('#kb-ed').focus();
 }
 async function kbInsertFiles(files, asImages){
   if (!canAttach()) return toast('Картинки и файлы можно добавлять при работе с базой данных или общим JSON-файлом: в браузере для них нет места.');
@@ -6476,9 +6512,12 @@ $('#kb-main').addEventListener('keydown', e => {
 });
 $('#kb-main').addEventListener('paste', e => {
   if (e.target.closest('#kb-ed') == null) return;
-  const files = [...e.clipboardData.files], html = e.clipboardData.getData('text/html');
+  const files = [...e.clipboardData.files], html = e.clipboardData.getData('text/html'), text = e.clipboardData.getData('text/plain');
+  if (/<table[\s>]/i.test(html)){ e.preventDefault(); return kbExec('insertHTML', kbClean(html) + '<p><br></p>'); }
   if (files.length){ e.preventDefault(); return kbInsertFiles(files); }
-  if (html){ e.preventDefault(); kbExec('insertHTML', kbClean(html)); }
+  if (html){ e.preventDefault(); return kbExec('insertHTML', kbClean(html)); }
+  // cells copied as plain text (tabs between columns, a line per row) become a table too
+  if (/\t/.test(text) && /\n./.test(text.trim())){ e.preventDefault(); kbExec('insertHTML', kbTsv(text)); }
 });
 $('#kb-main').addEventListener('dragover', e => { const ed = e.target.closest('#kb-ed'); if (ed && [...e.dataTransfer.types].includes('Files')){ e.preventDefault(); ed.classList.add('kb-drop'); } });
 $('#kb-main').addEventListener('dragleave', e => { const ed = e.target.closest('#kb-ed'); if (ed && !ed.contains(e.relatedTarget)) ed.classList.remove('kb-drop'); });
@@ -6546,6 +6585,8 @@ addEventListener('storage', e => {
   const kf = kq.docs.find(d => d.folder && d.title === 'Отчёты');
   console.assert(kf && kq.docs.find(d => d.id === 'a').parent === kf.id && kq.docs.find(d => d.id === 'b').parent === kf.id && kq.docs.find(d => d.id === 'c').parent === '' && ['f', 'g'].some(id => kq.docs.find(d => d.id === id).parent === '')
     && migrate({version: 15, people: [], tasks: [], docs: [{id: 'a', title: 'A', section: 'Отчёты'}]}).docs.find(d => d.folder).id === kf.id, 'knowledge base: sections become folders, loops and article parents are cut');
+  console.assert(kbClean('<table><tr><td style="width: 25%; height: 40px; color: red" class="xl65">a</td><td style="width: 48pt; height: 15pt">b</td></tr></table>') === '<table><tbody><tr><td style="color: red; width: 25%; height: 40px">a</td><td>b</td></tr></tbody></table>'
+    && kbTsv('a\tb\r\nc\t\n') === '<table><tbody><tr><td>a</td><td>b</td></tr><tr><td>c</td><td><br></td></tr></tbody></table><p><br></p>', 'knowledge base: table cells keep their size, tab-separated text becomes a table');
   console.assert(kbClean('<div class="kb-call kb-c-warn" onclick="x()"><p>a</p></div><div class="evil">b</div>') === '<div class="kb-call kb-c-warn"><p>a</p></div><div>b</div>', 'knowledge base: callouts kept, other classes dropped');
   const dq = migrate({version: 14, people: [{id: 'a', name: 'A', dept: 'd1'}, {id: 'b', name: 'B', dept: 'gone'}], tasks: [], depts: [{id: 'd1', name: 'Бухгалтерия', head: 'a', deputy: 'ghost'}],
     cal: [{id: 'v', owner: 'dept:d1', title: 'Отпуск', start: '2026-11-10T00:00', end: '2026-11-12T23:59', allDay: true, kind: 'vac', who: 'a'}, {id: 'x', owner: 'a', title: 'x', start: '2026-11-10T10:00', kind: 'vac', who: 'b'}]});
