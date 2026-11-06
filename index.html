@@ -107,6 +107,8 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
 .p-row>div:nth-child(2){min-width:0}
 .ava{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:600 14px var(--f-display);color:#fff;flex:none}
 .ava.sm{width:22px;height:22px;font-size:9px}
+.ava,.me-ava{overflow:hidden}
+.ava > img,.me-ava > img{width:100%;height:100%;object-fit:cover;display:block}
 .p-name{font-weight:600}
 .p-role{font-size:12px;color:var(--muted)}
 .p-actions{margin-left:auto;display:flex;gap:6px}
@@ -469,8 +471,6 @@ header{position:relative;padding-right:98px}
 .cab-week{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
 .cab-week b{color:var(--fg)}
 /* six tiles: one row, or two rows of three, or three rows of two; never an orphan */
-.cab-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
-@media (max-width:1150px){.cab-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .cab-kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:2px;align-content:start}
 .cab-kpi .k{font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0}
 .cab-kpi .v{font:600 26px/1.1 var(--f-display);font-variant-numeric:tabular-nums}
@@ -480,13 +480,6 @@ header{position:relative;padding-right:98px}
 .cab-gauge{display:block;height:6px;border-radius:3px;background:var(--sunken);overflow:hidden;margin-top:6px}
 .cab-gauge i{display:block;height:100%;border-radius:3px;background:var(--accent)}
 .cab-kpi.bad .cab-gauge i{background:var(--high)}
-.cab-tabs{display:none;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
-.cab-tabs button{border:0;background:none;padding:10px 14px;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;gap:6px;align-items:center}
-.cab-tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent);font-weight:500}
-.cab-tabs .n{font:500 11px var(--f-mono);background:var(--sunken);border-radius:999px;padding:0 6px}
-.cab-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;align-items:start}
-.cab-side{display:grid;gap:14px;min-width:0}
-.cab-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .cab-panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:12px;align-content:start;min-width:0}
 .cab-ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .cab-ph h3{margin:0;font:500 12px var(--f-display);text-transform:uppercase;letter-spacing:.06em}
@@ -543,15 +536,29 @@ header{position:relative;padding-right:98px}
 .cab-tools input{flex:1 1 220px}
 #d-cabdone{width:min(820px,calc(100vw - 32px))}
 .wrap-cell{white-space:normal!important;min-width:220px}
-@media (max-width:1000px){.cab-stats{grid-template-columns:repeat(2,minmax(0,1fr))} .cab-grid{grid-template-columns:minmax(0,1fr)}}
+.cab-blocks{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;align-items:start}
+.cab-blocks > *{grid-column:span 6;position:relative;min-width:0}
+.cab-blocks > .cab-kpi{grid-column:span 2}
+.cab-blocks > .wide{grid-column:1/-1}
+.cab-blocks > [hidden]{display:none}
+@media (max-width:1150px){.cab-blocks > .cab-kpi{grid-column:span 4}}
+@media (max-width:1000px){.cab-blocks > .cab-panel{grid-column:1/-1}}
+@media (max-width:760px){.cab-blocks > .cab-kpi{grid-column:span 6}}
+.cab-blocks.editing > *{outline:2px dashed var(--line);outline-offset:3px}
+.cab-blocks.editing > .cab-kpi{padding-top:40px}
+.cab-blocks.editing > .cab-panel{padding-top:44px}
+.cab-blocks > .dragging{opacity:.45;outline-color:var(--accent)}
+.cab-wctl{position:absolute;top:6px;right:6px;display:flex;gap:4px;z-index:2}
+.cab-wctl button{width:30px;height:30px;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer}
+.cab-wctl button:hover,.cab-wctl button:focus-visible{border-color:var(--accent)}
+.cab-wctl [data-wdrag]{cursor:grab;touch-action:none}
+.cab-edit-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;border:1px solid var(--accent);border-radius:14px;background:var(--accent-soft)}
+.cab-edit-bar[hidden]{display:none}
+.cab-add{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1 1 100%}
 /* a one-column chart would otherwise scale up to the full width */
 .cab-chart{max-height:240px}
 .cab-heat{max-width:460px}
 @media (max-width:760px){
-  .cab-tabs{display:flex}
-  #v-cab [data-cpane]:not(.on){display:none}
-  .cab-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .cab-stats{grid-template-columns:minmax(0,1fr)}
 }
 /* stages: several people on one task, one after another */
 .ava-stack{display:inline-flex;align-items:center}
@@ -843,6 +850,18 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .bl-at{font:11px var(--f-mono);color:var(--muted);white-space:nowrap;padding-top:2px}
 .bl-s{grid-column:2/4;font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 #d-img{width:min(1000px,calc(100vw - 32px))}
+#d-photo{width:min(420px,calc(100vw - 32px))}
+.ph-box{position:relative;width:min(300px,100%);aspect-ratio:1;margin:12px auto 8px;overflow:hidden;border-radius:12px;background:var(--sunken);cursor:grab;touch-action:none;user-select:none}
+.ph-box:active{cursor:grabbing}
+.ph-box:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ph-box img{position:absolute;max-width:none;pointer-events:none}
+.ph-mask{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 400px rgba(0,0,0,.55);outline:2px solid #fff;outline-offset:-2px;pointer-events:none}
+.ph-zoom{display:flex;gap:10px;align-items:center;justify-content:center;font-size:18px;color:var(--muted)}
+.ph-zoom input{width:200px;accent-color:var(--accent)}
+.cab-ava-btn{padding:0;border:0;background:none;border-radius:50%;cursor:zoom-in}
+.cab-ava-btn:hover .ava,.cab-ava-btn:focus-visible .ava{outline:2px solid var(--accent);outline-offset:2px}
+.chm-photo{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.chm-photo .ava{width:64px;height:64px;font-size:20px}
 #d-img img{display:block;max-width:100%;max-height:calc(100dvh - 190px);margin:auto}
 .ch-bub{padding:7px 11px;border-radius:12px;background:var(--sunken);font-size:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
 .ch-m.mine .ch-bub{background:var(--accent-soft)}
@@ -1064,32 +1083,24 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 
   <main id="v-cab" class="cab" hidden>
     <div class="cab-who" id="cab-who"></div>
-    <div class="cab-kpis" id="cab-kpis"></div>
-    <!-- on a phone the three parts become tabs; on a wide screen everything is visible at once -->
-    <div class="cab-tabs" role="tablist" aria-label="Разделы кабинета">
-      <button type="button" role="tab" data-ctab="cur" aria-selected="true">Текущие <span class="n" id="cab-n-cur"></span></button>
-      <button type="button" role="tab" data-ctab="done" aria-selected="false">Выполненные</button>
-      <button type="button" role="tab" data-ctab="stat" aria-selected="false">Статистика</button>
-    </div>
-    <div class="cab-grid">
-      <section class="cab-panel" data-cpane="cur">
+    <div class="cab-edit-bar" id="cab-edit-bar" hidden></div>
+    <!-- blocks in the person's own order; on a phone they stack in one column -->
+    <div class="cab-blocks" id="cab-blocks">
+      <div class="cab-kpi" data-w="open"></div><div class="cab-kpi" data-w="over"></div><div class="cab-kpi" data-w="done30"></div><div class="cab-kpi" data-w="ontime"></div><div class="cab-kpi" data-w="load"></div><div class="cab-kpi" data-w="cycle"></div>
+      <section class="cab-panel" data-w="cur">
         <div class="cab-ph"><h3>Текущие задачи</h3><span class="count" id="cab-cur-cnt"></span><span class="spacer"></span>
           <div class="cab-chips" id="cab-filter" role="group" aria-label="Фильтр по статусу"><button type="button" data-cf="all">Все</button><button type="button" data-cf="new">Новые</button><button type="button" data-cf="progress">В работе</button><button type="button" data-cf="review">На проверке</button></div></div>
         <div class="cab-groups" id="cab-groups"></div>
       </section>
-      <div class="cab-side">
-        <section class="cab-panel" data-cpane="stat"><div class="cab-ph"><h3>План недели</h3><span class="count">часы по сроку задач</span></div>
+      <section class="cab-panel" data-w="done"><div class="cab-ph"><h3>Выполнено</h3><span class="count" id="cab-done-cnt"></span></div>
+          <div id="cab-done"></div></section>
+      <section class="cab-panel" data-w="week"><div class="cab-ph"><h3>План недели</h3><span class="count">часы по сроку задач</span></div>
           <svg class="cab-chart" id="cab-week" viewBox="0 0 320 130" role="img" aria-label="Запланированные часы по дням недели"></svg>
           <p class="note" id="cab-week-note"></p></section>
-        <section class="cab-panel" data-cpane="done"><div class="cab-ph"><h3>Выполнено</h3><span class="count" id="cab-done-cnt"></span></div>
-          <div id="cab-done"></div></section>
-      </div>
-    </div>
-    <div class="cab-stats" data-cpane="stat">
-      <section class="cab-panel"><div class="cab-ph"><h3>Закрыто по неделям</h3><span class="count">12 недель</span></div><svg class="cab-chart" id="cab-weeks" viewBox="0 0 320 150" role="img" aria-label="Закрыто задач по неделям"></svg></section>
-      <section class="cab-panel"><div class="cab-ph"><h3>Активность</h3><span class="count">закрыто по дням</span></div><div class="cab-heat" id="cab-heat"></div>
+      <section class="cab-panel" data-w="weeks"><div class="cab-ph"><h3>Закрыто по неделям</h3><span class="count">12 недель</span></div><svg class="cab-chart" id="cab-weeks" viewBox="0 0 320 150" role="img" aria-label="Закрыто задач по неделям"></svg></section>
+      <section class="cab-panel" data-w="heat"><div class="cab-ph"><h3>Активность</h3><span class="count">закрыто по дням</span></div><div class="cab-heat" id="cab-heat"></div>
         <div class="cab-legend">меньше <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> больше</div></section>
-      <section class="cab-panel"><div class="cab-ph"><h3>По проектам</h3><span class="count">часы закрытых, 30 дней</span></div><div class="cab-hbars" id="cab-proj"></div><div class="cab-ring" id="cab-ring"></div></section>
+      <section class="cab-panel" data-w="proj"><div class="cab-ph"><h3>По проектам</h3><span class="count">часы закрытых, 30 дней</span></div><div class="cab-hbars" id="cab-proj"></div><div class="cab-ring" id="cab-ring"></div></section>
     </div>
   </main>
 
@@ -1152,6 +1163,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 <dialog id="d-chatm"></dialog>
 <dialog id="d-bell"></dialog>
 <dialog id="d-img"></dialog>
+<dialog id="d-photo"></dialog>
 <div class="ch-emoji" id="ch-emoji" role="group" aria-label="Эмодзи" hidden></div>
 <dialog id="d-act" class="sheet"></dialog>
 <dialog id="d-help" aria-labelledby="help-h">
@@ -1312,7 +1324,11 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <li><b>Статистика:</b> закрыто по неделям за 12 недель с линией среднего, активность по дням, часы закрытых задач по проектам, доля закрытых вовремя.</li>
           <li><b>Время до готовности</b> — медиана дней от первого ухода задачи из «Новой» до «Готово» за 90 дней. Для старых задач дата начала берётся из истории, а если её там нет — дата создания.</li>
         </ul>
-        <p>На телефоне кабинет раскладывается во вкладки «Текущие», «Выполненные», «Статистика». Сравнения с коллегами в кабинете нет: только собственная динамика.</p>
+        <ul>
+          <li><b>Фото.</b> Кнопка «Фото» в своём кабинете: загрузите снимок и перетащите его так, чтобы в круг попала нужная часть, масштаб — ползунком или колесом мыши. Позже можно изменить область в кружке, не загружая фото заново. Нажатие на аватар в кабинете открывает фото целиком. Фото сотрудника может поменять и руководитель. Нужна база данных или общий JSON-файл.</li>
+          <li><b>Свои блоки.</b> «Настроить блоки» в своём кабинете: перетаскивайте блоки за значок с точками (мышью или пальцем, с клавиатуры — стрелками), убирайте ненужные крестиком, добавляйте обратно кнопками «+ …», растягивайте большие блоки на всю ширину. «Готово» сохраняет порядок, он виден и коллегам, открывшим ваш кабинет.</li>
+        </ul>
+        <p>На телефоне блоки идут одной колонкой в том же порядке. Сравнения с коллегами в кабинете нет: только собственная динамика.</p>
       </section>
 
       <section id="h-stages"><h3>Несколько исполнителей и этапы</h3>
@@ -1331,6 +1347,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         <p>Вкладка «Чат» (клавиша <kbd>9</kbd>): «Общий чат» для всей команды, чаты с несколькими участниками и личные диалоги с каждым сотрудником и руководителем. Сообщения подписываются именем, выбранным в «Я: …». Enter отправляет, Shift+Enter переносит строку. Номер задачи в тексте (например, PLN-101) становится ссылкой. Число на вкладке показывает непрочитанные.</p>
         <ul>
           <li><b>Чат с несколькими участниками.</b> «+ Новый чат» в списке диалогов: название и участники. Поиск находит сотрудника по имени или роли, Enter в поиске отмечает первого найденного. Чат видят только те, кто в него добавлен.</li>
+          <li><b>Фото чата.</b> В списке участников чата кнопка «Добавить фото чата»: загрузка и выбор области для кружка. Нажатие на кружок чата над перепиской открывает фото целиком.</li>
           <li><b>Состав.</b> Нажмите на название чата над перепиской: откроется список участников, из него можно перейти в профиль сотрудника. Там же «Изменить чат и состав»: новое название, добавить или убрать людей, выйти из чата.</li>
           <li><b>Аватар.</b> Нажатие на аватар сотрудника в переписке, в списке диалогов или над чатом открывает его профиль.</li>
           <li><b>Контекстное меню.</b> Правая кнопка мыши на диалоге: открыть, отметить прочитанным, участники, профиль, изменить чат, выйти. На сообщении: копировать текст, открыть задачу из текста, профиль автора, написать лично. На участнике в списке состава: профиль и личный диалог.</li>
@@ -1516,6 +1533,11 @@ const ICONS = {
   redo: '<path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
   smile: '<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/><path d="M9 9.5h.01M15 9.5h.01" stroke-width="2.6"/>',
   smilePlus: '<path d="M19 12.5A8 8 0 1 1 11.5 4.5"/><path d="M8 15a4 4 0 0 0 6 0"/><path d="M8.5 10.5h.01M13.5 10.5h.01" stroke-width="2.6"/><path d="M19 2v6M16 5h6"/>',
+  camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  layout: '<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>',
+  grip: '<path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="3"/>',
+  expand: '<path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
   comment: '<path d="M20.5 12a8.5 8.5 0 0 1-12.3 7.6L3.5 20.5l1-4.5A8.5 8.5 0 1 1 20.5 12z"/>'
 };
 const ic = (name, size = 18) => `<svg class="ic" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
@@ -1531,6 +1553,14 @@ const fmtSize = n => n < 1024 ? `${n} Б` : n < 1048576 ? `${Math.round(n / 1024
 const hoursWord =n => n%10===1 && n%100!==11 ? 'час' : (n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 'часа' : 'часов');
 
 /* ---------- schema ---------- */
+/* a photo: the whole picture (opened by a click) and a small square cut-out for the circles; z, x, y say how it was framed */
+const normPhoto = x => x && /^[\w-]{1,40}$/.test(x.full) && /^[\w-]{1,40}$/.test(x.thumb) ? {full: x.full, thumb: x.thumb,
+  z: Math.min(5, Math.max(1, +x.z || 1)), x: isFinite(+x.x) ? Math.min(1, Math.max(0, +x.x)) : .5, y: isFinite(+x.y) ? Math.min(1, Math.max(0, +x.y)) : .5} : null;
+/* blocks of the personal cabinet; a person's own order is kept on their card, «:w» = full width */
+const CAB_W = {open: 'Открыто', over: 'Просрочено', done30: 'Закрыто за 30 дней', ontime: 'Вовремя', load: 'Загрузка недели', cycle: 'Время до готовности',
+  cur: 'Текущие задачи', week: 'План недели', done: 'Выполнено за неделю', weeks: 'Закрыто по неделям', heat: 'Активность', proj: 'По проектам'};
+const CAB_DEFAULT = ['open', 'over', 'done30', 'ontime', 'load', 'cycle', 'cur', 'done', 'week', 'weeks', 'heat', 'proj'];
+const normCab = l => Array.isArray(l) ? [...new Map(l.map(String).filter(x => /^\w+(:w)?$/.test(x) && Object.hasOwn(CAB_W, x.split(':')[0])).map(x => [x.split(':')[0], x])).values()] : null;
 function normPerson(p){
   const s = (v, max) => String(v ?? '').slice(0, max);
   return {
@@ -1540,6 +1570,7 @@ function normPerson(p){
     hue: /^#[0-9a-f]{6}$/i.test(p.hue) ? p.hue : HUES[0],
     archived: !!p.archived,
     access: ACCESS[p.access] && Object.hasOwn(ACCESS, p.access) ? p.access : 'employee',
+    photo: normPhoto(p.photo), cab: normCab(p.cab),
   };
 }
 function normTask(t){
@@ -1614,7 +1645,7 @@ function mergeChat(a, b){
   return [...byId.values()].sort((x, y) => x.at.localeCompare(y.at) || x.id.localeCompare(y.id)).slice(-CHAT_MAX);
 }
 /* group chats: messages go to = room id; members hold person ids and 'boss' */
-const normRoom = r => ({id: String(r?.id ?? '').slice(0, 40), name: String(r?.name ?? '').trim().slice(0, 80), members: [...new Set(Array.isArray(r?.members) ? r.members.map(String) : [])], at: String(r?.at ?? '').slice(0, 40),
+const normRoom = r => ({id: String(r?.id ?? '').slice(0, 40), name: String(r?.name ?? '').trim().slice(0, 80), members: [...new Set(Array.isArray(r?.members) ? r.members.map(String) : [])], at: String(r?.at ?? '').slice(0, 40), photo: normPhoto(r?.photo),
   added: Object.fromEntries(Object.entries(r?.added && typeof r.added === 'object' ? r.added : {}).filter(([, a]) => typeof a?.at === 'string').map(([k, a]) => [k, {at: a.at.slice(0, 40), by: String(a.by ?? '').slice(0, 40)}]))});
 // shortcut: of two simultaneous edits of a room the later one wins; merge the member lists if people start losing edits
 function mergeRooms(a, b){
@@ -1739,7 +1770,8 @@ function migrate(raw){
   // v3 -> v4: links/files on tasks, file contents in blobs; blobs nobody refers to are dropped
   // v11 -> v12: knowledge base
   const docIds = new Set(), docs = (Array.isArray(raw.docs) ? raw.docs : []).filter(d => d && typeof d === 'object').map(normDoc).filter(d => d.id && !docIds.has(d.id) && docIds.add(d.id));
-  const used = new Set([...tasks.flatMap(t => t.files.map(f => f.id)), ...chat.flatMap(m => m.files.map(f => f.id)), ...docs.flatMap(d => kbBlobIds(d.html))]);
+  const used = new Set([...tasks.flatMap(t => t.files.map(f => f.id)), ...chat.flatMap(m => m.files.map(f => f.id)), ...docs.flatMap(d => kbBlobIds(d.html)),
+    ...[...people, ...(Array.isArray(raw.rooms) ? raw.rooms : []).map(r => ({photo: normPhoto(r?.photo)}))].flatMap(x => x.photo ? [x.photo.full, x.photo.thumb] : [])]);
   const blobs = {};
   for (const [id, b] of Object.entries(raw.blobs && typeof raw.blobs === 'object' ? raw.blobs : {}))
     if (used.has(id) && typeof b?.data === 'string' && b.data.startsWith('data:')) blobs[id] = {data: b.data};
@@ -1937,7 +1969,8 @@ const serverHandle = {
     const {data} = await api('load'), d = JSON.parse(data);
     d.blobs = {};
     for (const m of d.chat || []) for (const {id} of m.files || []) this.known.add(id);
-    for (const x of d.docs || []) kbBlobIds(String(x.html ?? '')).forEach(id => this.known.add(id)); // the same for pictures in articles // chat files load when their message is on screen
+    for (const x of d.docs || []) kbBlobIds(String(x.html ?? '')).forEach(id => this.known.add(id)); // the same for pictures in articles
+    for (const x of [...(d.people || []), ...(d.rooms || [])]) if (x?.photo) [x.photo.full, x.photo.thumb].forEach(id => this.known.add(id)); // and photos // chat files load when their message is on screen
     for (const t of d.tasks) for (const {id} of t.files || []){
       this.known.add(id);
       if (!db.blobs[id]) await api('blob&id=' + encodeURIComponent(id)).then(b => { d.blobs[id] = b; }).catch(() => {});
@@ -2112,10 +2145,12 @@ async function detachFile(){
   render();
 }
 
-const MERGE_LABELS = {html: 'Текст статьи', section: 'Раздел', access: 'Роль', title: 'Название', desc: 'Описание', prio: 'Приоритет', status: 'Статус', due: 'Срок', tag: 'Тег', stages: 'Исполнитель и этапы', checklist: 'Чек-лист', comments: 'Комментарии', links: 'Ссылки', files: 'Файлы', project: 'Проект', parent: 'Родительская задача', repeat: 'Повтор', name: 'Название', role: 'Должность', cap: 'Часов в неделю', hue: 'Цвет', archived: 'В архиве'};
+const MERGE_LABELS = {photo: 'Фото', cab: 'Блоки кабинета', html: 'Текст статьи', section: 'Раздел', access: 'Роль', title: 'Название', desc: 'Описание', prio: 'Приоритет', status: 'Статус', due: 'Срок', tag: 'Тег', stages: 'Исполнитель и этапы', checklist: 'Чек-лист', comments: 'Комментарии', links: 'Ссылки', files: 'Файлы', project: 'Проект', parent: 'Родительская задача', repeat: 'Повтор', name: 'Название', role: 'Должность', cap: 'Часов в неделю', hue: 'Цвет', archived: 'В архиве'};
 function clashValue(c, vals){
   const k = c.keys[0], v = vals[0];
   if (k === 'html') return kbText(v) || 'Пусто';
+  if (k === 'photo') return v ? 'Фото' : 'Без фото';
+  if (k === 'cab') return v ? v.map(x => CAB_W[x.split(':')[0]]).join(', ') : 'Как по умолчанию';
   if (k === 'status') return STATUS[v] || v;
   if (k === 'prio') return PRIO[v] || v;
   if (k === 'stages') return v.length ? v.map(x => `${x.title}: ${person(x.assignee)?.name || 'не назначен'}`).join(', ') : `${person(vals[1])?.name || 'Не назначен'}, ${vals[2]} ч`;
@@ -2395,7 +2430,17 @@ function dueChip(t){
   return `<span>до ${label}</span>`;
 }
 const stChip = t => `<span class="chip st st-${t.status}">${STATUS[t.status]}</span>`;
-const ava = (p, sm) => p ? `<span class="ava${sm ? ' sm' : ''}" style="background:${p.hue}" title="${esc(p.name)}">${esc(initials(p.name))}</span>` : '';
+// a photo in a circle: the cut-out is fetched once and kept; the initials show until it arrives
+const avaFailed = new Set(); let avaRedraw = false;
+function avaImg(ph){
+  if (!ph) return '';
+  const b = db.blobs[ph.thumb];
+  if (b) return `<img src="${esc(b.data)}" alt="">`;
+  if (onServer() && !avaFailed.has(ph.thumb) && !blobWait.has(ph.thumb))
+    chatBlob(ph.thumb).then(x => { if (!x) avaFailed.add(ph.thumb); else if (!avaRedraw){ avaRedraw = true; requestAnimationFrame(() => { avaRedraw = false; render(); }); } });
+  return '';
+}
+const ava = (p, sm) => p ? `<span class="ava${sm ? ' sm' : ''}" style="background:${p.hue}" title="${esc(p.name)}">${avaImg(p.photo) || esc(initials(p.name))}</span>` : '';
 const checkProgress = t => t.checklist.length ? `<span>☑ ${t.checklist.filter(c => c.done).length}/${t.checklist.length}</span>` : '';
 
 function card(t, kind){
@@ -2816,7 +2861,7 @@ function renderMe(){
   $('#me-sel').hidden = !!serverUser;
   $('#me-sel').innerHTML = `<option value="">Я: ${ME}</option>` + active().map(p => `<option value="${esc(p.id)}" ${p.id === meId ? 'selected' : ''}>Я: ${esc(p.name)}</option>`).join('');
   const p = person(meId), a = $('#me-ava');
-  a.textContent = p ? initials(p.name) : 'Р';
+  a.innerHTML = p ? avaImg(p.photo) || esc(initials(p.name)) : 'Р';
   a.style.background = p ? p.hue : 'var(--fg)';
   a.style.color = p ? '#fff' : 'var(--bg)';
   a.title = p ? `${p.name}: личный кабинет` : 'Руководитель: открыть кабинет сотрудника';
@@ -2837,9 +2882,101 @@ $('#me-ava').onclick = e => {
     ...(serverUser ? [] : ['-', {label: 'Работать как сотрудник…', run: () => $('#me-sel').focus()}])]);
 };
 
+/* ---------- photos: a picture and the part of it that goes into the circle ---------- */
+const PHOTO_SIDE = 256;
+const newBlobId = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+async function putBlob(id, data){
+  if (onServer() && !serverHandle.known.has(id)){ await api('blob', {id, data}); serverHandle.known.add(id); }
+  db.blobs[id] = {data};
+}
+const pickImage = () => new Promise(res => { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/png,image/jpeg,image/webp,image/gif'; i.onchange = () => res(i.files[0] || null); i.click(); });
+// the person moves and zooms the picture under a round frame; resolves with the framing and a square cut-out, or null
+function cropPhoto(src, start){
+  return new Promise(resolve => {
+    const d = $('#d-photo');
+    d.innerHTML = `<div class="d-head"><h2>Фото в кружке</h2><span class="spacer"></span><button type="button" class="close" aria-label="Закрыть">✕</button></div>
+      <div class="d-body"><p class="note">Перетащите фото, чтобы в круг попала нужная часть. Масштаб — ползунком, колесом мыши или клавишами + и −.</p>
+      <div class="ph-box" id="ph-box" tabindex="0" aria-label="Область фото: стрелки двигают, плюс и минус меняют масштаб"><img id="ph-img" alt="" draggable="false"><span class="ph-mask"></span></div>
+      <label class="ph-zoom"><span aria-hidden="true">−</span><input type="range" id="ph-z" min="1" max="5" step="0.01" aria-label="Масштаб"><span aria-hidden="true">+</span></label></div>
+      <div class="d-foot"><span class="spacer"></span><button type="button" class="btn" id="ph-cancel">Отмена</button><button type="button" class="btn primary" id="ph-ok">Сохранить</button></div>`;
+    const box = d.querySelector('#ph-box'), img = d.querySelector('#ph-img'), zi = d.querySelector('#ph-z');
+    let z = start?.z || 1, cx = start?.x ?? .5, cy = start?.y ?? .5, settled = false;
+    // answered by the buttons directly: the close event is not always delivered at once
+    const finish = r => { if (!settled){ settled = true; resolve(r); } if (d.open) d.close(); };
+    // k = screen pixels per picture pixel; the frame always stays inside the picture
+    const k = () => box.clientWidth / Math.min(img.naturalWidth, img.naturalHeight) * z;
+    const draw = () => {
+      const w = img.naturalWidth, h = img.naturalHeight, S = box.clientWidth; if (!w || !S) return;
+      const half = S / k() / 2;
+      cx = Math.min(1 - half / w, Math.max(half / w, cx)); cy = Math.min(1 - half / h, Math.max(half / h, cy));
+      Object.assign(img.style, {width: w * k() + 'px', height: h * k() + 'px', left: S / 2 - cx * w * k() + 'px', top: S / 2 - cy * h * k() + 'px'});
+      zi.value = z;
+    };
+    const zoom = n => { z = Math.min(5, Math.max(1, n)); draw(); };
+    img.onload = draw; img.src = src;
+    zi.oninput = () => zoom(+zi.value);
+    box.onwheel = e => { e.preventDefault(); zoom(z * (e.deltaY < 0 ? 1.1 : 1 / 1.1)); };
+    box.onpointerdown = e => {
+      try { box.setPointerCapture(e.pointerId); } catch {}
+      let x0 = e.clientX, y0 = e.clientY;
+      box.onpointermove = m => { cx -= (m.clientX - x0) / (img.naturalWidth * k()); cy -= (m.clientY - y0) / (img.naturalHeight * k()); x0 = m.clientX; y0 = m.clientY; draw(); };
+      box.onpointerup = box.onpointercancel = () => { box.onpointermove = null; };
+    };
+    box.onkeydown = e => {
+      const step = .02 / z, mv = {ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step]}[e.key];
+      if (mv){ e.preventDefault(); cx += mv[0]; cy += mv[1]; draw(); }
+      else if (e.key === '+' || e.key === '='){ e.preventDefault(); zoom(z * 1.1); }
+      else if (e.key === '-'){ e.preventDefault(); zoom(z / 1.1); }
+    };
+    d.querySelector('#ph-ok').onclick = () => {
+      const w = img.naturalWidth, h = img.naturalHeight; if (!w) return;
+      const side = Math.min(w, h) / z, c = document.createElement('canvas'), x = c.getContext('2d');
+      c.width = c.height = PHOTO_SIDE;
+      x.fillStyle = '#fff'; x.fillRect(0, 0, PHOTO_SIDE, PHOTO_SIDE);
+      x.drawImage(img, cx * w - side / 2, cy * h - side / 2, side, side, 0, 0, PHOTO_SIDE, PHOTO_SIDE);
+      finish({crop: {z, x: cx, y: cy}, thumb: c.toDataURL('image/jpeg', .85)});
+    };
+    d.querySelector('#ph-cancel').onclick = () => finish(null);
+    d.onclose = () => finish(null);
+    d.showModal();
+    box.focus();
+  });
+}
+// a new picture (fresh) or a new framing of the current one; set(photo) stores the result where it belongs
+async function editPhoto(cur, fresh, set){
+  if (!canAttach()) return toast('Фото можно добавить при работе с базой данных или общим JSON-файлом: в браузере для него нет места.');
+  let data, fullId = null;
+  if (fresh || !cur){
+    const f = await pickImage(); if (!f) return;
+    if (!/^image\/(png|jpeg|gif|webp)$/.test(f.type)) return toast('Нужна картинка: JPG, PNG, GIF или WebP');
+    const small = await shrinkImage(f);
+    if (small.size > FILE_MAX) return toast(`Фото больше ${fmtSize(FILE_MAX)}`);
+    try { data = await fileData(small); } catch { return toast('Не удалось прочитать фото'); }
+  } else {
+    const b = await chatBlob(cur.full); if (!b) return toast('Фото сейчас недоступно');
+    data = b.data; fullId = cur.full;
+  }
+  const r = await cropPhoto(data, fresh ? null : cur);
+  if (!r) return;
+  try {
+    if (!fullId){ fullId = newBlobId(); await putBlob(fullId, data); }
+    const thumb = newBlobId(); await putBlob(thumb, r.thumb);
+    set({full: fullId, thumb, ...r.crop});
+  } catch (e) { toast(`Фото не сохранилось: ${e.status ? e.message : 'возможно, оно больше лимита хостинга'}`); }
+}
+const openPhoto = (ph, name) => openChatFile({id: ph.full, name, type: 'image/jpeg', size: 0});
+function photoMenu(el, ph, name, set){
+  openCtx(...anchor(el), [
+    {label: ph ? 'Загрузить другое фото…' : 'Загрузить фото…', run: () => editPhoto(ph, true, set)},
+    ...(ph ? [{label: 'Изменить область в кружке', run: () => editPhoto(ph, false, set)}, {label: 'Открыть целиком', run: () => openPhoto(ph, name)}, '-', {label: 'Убрать фото', danger: true, run: () => set(null)}] : []),
+  ]);
+}
+const setPersonPhoto = pid => ph => { const p = person(pid); if (p) change(() => { p.photo = ph; }, ph ? 'Фото сохранено' : 'Фото убрано'); };
+const setRoomPhoto = id => ph => { const r = chatRoom(id); if (!r) return; db.rooms = mergeRooms(db.rooms, [{...r, photo: ph, at: stamp()}]); commit(); toast(ph ? 'Фото чата сохранено' : 'Фото чата убрано'); if ($('#d-chatm').open) openMembers(id); };
+
 /* ---------- personal cabinet: current tasks, done, statistics ---------- */
-let cabPid = null, cabWeek = 0, cabFilter = 'all', cabTab = 'cur';
-function openCab(pid){ if (!person(pid)) return; cabPid = pid; cabWeek = 0; setView('cab'); scrollTo(0, 0); }
+let cabPid = null, cabWeek = 0, cabFilter = 'all';
+function openCab(pid){ if (!person(pid)) return; if (pid !== cabPid) cabEditing = false; cabPid = pid; cabWeek = 0; setView('cab'); scrollTo(0, 0); }
 const medianOf = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
 // time to done counts from the first move out of «Новая»; tasks from before that field existed fall back to creation
 const cycleDays = t => (new Date(t.doneAt) - new Date(t.startedAt || t.createdAt)) / 864e5;
@@ -2859,29 +2996,31 @@ function renderCab(){
   const ws = shiftDay(thisWs, 7 * cabWeek), load = weekLoad(p.id, ws);
   const cyc = medianOf(done.filter(t => t.doneAt >= daysAgo(90)).map(cycleDays).filter(x => x >= 0));
 
-  $('#cab-who').innerHTML = `<span class="ava cab-ava" style="background:${p.hue}">${esc(initials(p.name))}</span>
+  const big = `<span class="ava cab-ava" style="background:${p.hue}">${avaImg(p.photo) || esc(initials(p.name))}</span>`;
+  $('#cab-who').innerHTML = `${p.photo ? `<button type="button" class="cab-ava-btn" data-photo-view title="Открыть фото" aria-label="Открыть фото: ${esc(p.name)}">${big}</button>` : big}
     <div class="cab-id"><div class="cab-name">${esc(p.name)}${me ? ' <span class="chip">это вы</span>' : ''}</div><div class="muted">${esc(p.role || 'Без роли')} · ${p.cap} ч в неделю</div></div>
     <span class="spacer"></span>
     <div class="cab-week"><button type="button" class="ibtn" data-cweek="-1" aria-label="Прошлая неделя">‹</button><span>Неделя <b class="num">${fmtDay(ws)} – ${fmtDay(shiftDay(ws, 6))}</b></span><button type="button" class="ibtn" data-cweek="1" aria-label="Следующая неделя">›</button>${cabWeek ? '<button type="button" class="btn small" data-cweek="0">К этой неделе</button>' : ''}</div>
+    ${me || canManagePeople() ? `<button type="button" class="btn small" data-photo-menu>${ic('camera', 15)} Фото</button>` : ''}
+    ${me && !cabEditing ? `<button type="button" class="btn small" data-cab-edit>${ic('layout', 15)} Настроить блоки</button>` : ''}
     ${me ? '' : `<button type="button" class="btn small primary" data-chat-to="${esc(p.id)}">Отправить сообщение</button><button type="button" class="btn small" data-person="${esc(p.id)}" ${canManagePeople() ? '' : 'hidden'}>Карточка сотрудника</button>`}`;
 
   const diff = done30.length - prev30.length;
   const tiles = [
-    {k: 'Открыто', v: open.length, d: `${open.filter(t => !t.seen).length} новых · ${open.reduce((s, t) => s + t.est, 0)} ч`},
-    {k: 'Просрочено', v: over.length, d: over.length ? `${over[0].id}: ${-daysTo(over[0].due)} дн.` : 'всё в срок', bad: over.length > 0},
-    {k: 'Закрыто за 30 дней', v: done30.length, d: diff ? `<span class="${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '▲' : '▼'} ${Math.abs(diff)}</span> к прошлым 30 дням` : 'как в прошлые 30 дней'},
-    {k: 'Вовремя', v: withDue.length ? Math.round(onTime.length / withDue.length * 100) + '%' : '—', d: withDue.length ? `${onTime.length} из ${withDue.length} со сроком` : 'нет закрытых со сроком'},
-    {k: cabWeek ? 'Загрузка той недели' : 'Загрузка недели', v: `${f1(load)}/${p.cap}`, d: load > p.cap ? 'часов, перегруз' : 'часов', gauge: Math.min(1, load / p.cap), bad: load > p.cap},
-    {k: 'Время до готовности', v: f1(cyc), d: cyc == null ? 'нет данных за 90 дней' : 'дней, медиана за 90 дней'},
+    {w: 'open', k: 'Открыто', v: open.length, d: `${open.filter(t => !t.seen).length} новых · ${open.reduce((s, t) => s + t.est, 0)} ч`},
+    {w: 'over', k: 'Просрочено', v: over.length, d: over.length ? `${over[0].id}: ${-daysTo(over[0].due)} дн.` : 'всё в срок', bad: over.length > 0},
+    {w: 'done30', k: 'Закрыто за 30 дней', v: done30.length, d: diff ? `<span class="${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '▲' : '▼'} ${Math.abs(diff)}</span> к прошлым 30 дням` : 'как в прошлые 30 дней'},
+    {w: 'ontime', k: 'Вовремя', v: withDue.length ? Math.round(onTime.length / withDue.length * 100) + '%' : '—', d: withDue.length ? `${onTime.length} из ${withDue.length} со сроком` : 'нет закрытых со сроком'},
+    {w: 'load', k: cabWeek ? 'Загрузка той недели' : 'Загрузка недели', v: `${f1(load)}/${p.cap}`, d: load > p.cap ? 'часов, перегруз' : 'часов', gauge: Math.min(1, load / p.cap), bad: load > p.cap},
+    {w: 'cycle', k: 'Время до готовности', v: f1(cyc), d: cyc == null ? 'нет данных за 90 дней' : 'дней, медиана за 90 дней'},
   ];
-  $('#cab-kpis').innerHTML = tiles.map(x => `<div class="cab-kpi${x.bad ? ' bad' : ''}"><span class="k">${x.k}</span><span class="v">${x.v}</span><span class="d">${x.d}</span>${x.gauge != null ? `<span class="cab-gauge"><i style="width:${x.gauge * 100}%"></i></span>` : ''}</div>`).join('');
+  for (const x of tiles){ const el = $(`#cab-blocks > [data-w="${x.w}"]`); el.classList.toggle('bad', !!x.bad); el.innerHTML = `<span class="k">${x.k}</span><span class="v">${x.v}</span><span class="d">${x.d}</span>${x.gauge != null ? `<span class="cab-gauge"><i style="width:${x.gauge * 100}%"></i></span>` : ''}`; }
 
   /* current tasks by due date */
   const endWeek = shiftDay(thisWs, 6);
   const bucket = t => !t.due ? 'none' : t.due < today ? 'over' : t.due === today ? 'today' : t.due <= endWeek ? 'week' : 'later';
   const list = open.filter(t => cabFilter === 'all' || t.status === cabFilter).sort((a, b) => (a.due || '9').localeCompare(b.due || '9') || byPrio(a, b));
   document.querySelectorAll('[data-cf]').forEach(b => b.setAttribute('aria-pressed', b.dataset.cf === cabFilter));
-  $('#cab-n-cur').textContent = open.length;
   $('#cab-cur-cnt').textContent = `${open.length} · ${open.reduce((s, t) => s + t.est, 0)} ч`;
   $('#cab-groups').innerHTML = [['over', 'Просрочено'], ['today', 'Сегодня'], ['week', 'На этой неделе'], ['later', 'Позже'], ['none', 'Без срока']].map(([g, label]) => {
     const items = list.filter(t => bucket(t) === g); if (!items.length) return '';
@@ -2955,15 +3094,70 @@ function renderCab(){
       <circle cx="18" cy="18" r="15.9" fill="none" stroke="${pct >= .8 ? 'var(--low)' : pct >= .5 ? 'var(--med)' : 'var(--high)'}" stroke-width="4" stroke-dasharray="${pct * 100} 100" transform="rotate(-90 18 18)" stroke-linecap="round"/></svg>
     <div><b class="num">${Math.round(pct * 100)}%</b><div class="note">закрыто вовремя<br>${onTime.length} из ${withDue.length} со сроком</div></div>` : '';
 
-  /* phone: one part at a time */
-  document.querySelectorAll('[data-ctab]').forEach(b => b.setAttribute('aria-selected', b.dataset.ctab === cabTab));
-  document.querySelectorAll('#v-cab [data-cpane]').forEach(el => el.classList.toggle('on', el.dataset.cpane === cabTab));
+  cabApply();
 }
+// order, visibility and width of the blocks; while editing, the draft is shown
+let cabEditing = false, cabDraft = [];
+const cabLayout = () => cabEditing ? cabDraft : person(cabPid)?.cab || CAB_DEFAULT;
+const cabFromDom = () => [...$('#cab-blocks').children].filter(el => !el.hidden).map(el => el.dataset.w + (el.classList.contains('wide') ? ':w' : ''));
+function cabApply(){
+  const box = $('#cab-blocks'), lay = cabLayout(), on = new Set(lay.map(x => x.split(':')[0]));
+  for (const x of lay){ const [w, wide] = x.split(':'), el = box.querySelector(`:scope > [data-w="${w}"]`); if (!el) continue; box.appendChild(el); el.hidden = false; el.classList.toggle('wide', !!wide); }
+  for (const el of box.children){
+    const n = CAB_W[el.dataset.w], c = el.querySelector(':scope > .cab-wctl');
+    if (!on.has(el.dataset.w)) el.hidden = true;
+    if (cabEditing && !c) el.insertAdjacentHTML('afterbegin', `<span class="cab-wctl"><button type="button" data-wdrag aria-label="Переместить «${n}»: перетащите или нажимайте стрелки" title="Перетащите, чтобы переместить">${ic('grip', 16)}</button>${el.classList.contains('cab-panel') ? `<button type="button" data-wwide aria-label="Ширина «${n}»: половина или вся строка" title="Половина или вся ширина">${ic('expand', 16)}</button>` : ''}<button type="button" data-wdel aria-label="Убрать «${n}»" title="Убрать блок">${ic('x', 16)}</button></span>`);
+    if (!cabEditing && c) c.remove();
+  }
+  box.classList.toggle('editing', cabEditing);
+  const bar = $('#cab-edit-bar'), off = Object.keys(CAB_W).filter(w => !on.has(w));
+  bar.hidden = !cabEditing;
+  if (cabEditing) bar.innerHTML = `<b>Настройка блоков</b><span class="note">Перетаскивайте блоки за значок с точками, убирайте крестиком.</span>
+    ${off.length ? `<span class="cab-add"><span class="note">Добавить:</span>${off.map(w => `<button type="button" class="btn small" data-wadd="${w}">+ ${CAB_W[w]}</button>`).join('')}</span>` : ''}
+    <span class="spacer"></span><button type="button" class="btn small" data-wreset>Как было по умолчанию</button><button type="button" class="btn small" data-wcancel>Отмена</button><button type="button" class="btn small primary" data-wsave>Готово</button>`;
+}
+// dragging a block by its handle: mouse and finger alike
+$('#cab-blocks').addEventListener('pointerdown', e => {
+  const h = e.target.closest('[data-wdrag]'); if (!h) return;
+  e.preventDefault();
+  const el = h.closest('[data-w]'), box = $('#cab-blocks');
+  let speed = 0, raf = 0;
+  const roll = () => { if (speed){ scrollBy(0, speed); raf = requestAnimationFrame(roll); } else raf = 0; };
+  try { h.setPointerCapture(e.pointerId); } catch {} el.classList.add('dragging');
+  h.onpointermove = m => {
+    speed = m.clientY < 70 ? -14 : m.clientY > innerHeight - 70 ? 14 : 0;
+    if (speed && !raf) raf = requestAnimationFrame(roll);
+    const t = document.elementFromPoint(m.clientX, m.clientY)?.closest('#cab-blocks > [data-w]');
+    if (!t || t === el) return;
+    const r = t.getBoundingClientRect(), before = r.width > box.clientWidth * .7 ? m.clientY < r.top + r.height / 2 : m.clientX < r.left + r.width / 2;
+    const ref = before ? t : t.nextSibling;
+    if (ref !== el && ref !== el.nextSibling) box.insertBefore(el, ref);
+  };
+  h.onpointerup = h.onpointercancel = () => { h.onpointermove = h.onpointerup = h.onpointercancel = null; speed = 0; el.classList.remove('dragging'); cabDraft = cabFromDom(); };
+});
+$('#cab-blocks').addEventListener('keydown', e => {
+  const h = e.target.closest('[data-wdrag]'), dir = {ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1}[e.key]; if (!h || !dir) return;
+  e.preventDefault();
+  const i = cabDraft.findIndex(x => x.split(':')[0] === h.closest('[data-w]').dataset.w), j = i + dir;
+  if (i < 0 || j < 0 || j >= cabDraft.length) return;
+  [cabDraft[i], cabDraft[j]] = [cabDraft[j], cabDraft[i]];
+  cabApply(); h.focus();
+});
 $('#v-cab').addEventListener('click', e => {
   let b;
+  const p = person(cabPid), w = e.target.closest('[data-w]')?.dataset.w;
+  if (e.target.closest('[data-photo-view]')) return openPhoto(p.photo, `Фото: ${p.name}`);
+  if ((b = e.target.closest('[data-photo-menu]'))) return photoMenu(b, p.photo, `Фото: ${p.name}`, setPersonPhoto(p.id));
+  if (e.target.closest('[data-cab-edit]')){ cabDraft = [...(p.cab || CAB_DEFAULT)]; cabEditing = true; return renderCab(); }
+  if (e.target.closest('[data-wdel]')){ cabDraft = cabDraft.filter(x => x.split(':')[0] !== w); return cabApply(); }
+  if (e.target.closest('[data-wwide]')){ cabDraft = cabDraft.map(x => x.split(':')[0] === w ? (x.endsWith(':w') ? w : w + ':w') : x); return cabApply(); }
+  if ((b = e.target.closest('[data-wadd]'))){ cabDraft.push(b.dataset.wadd); cabApply(); return $(`#cab-blocks > [data-w="${b.dataset.wadd}"]`).scrollIntoView({block: 'nearest', behavior: 'smooth'}); }
+  if (e.target.closest('[data-wreset]')){ cabDraft = [...CAB_DEFAULT]; return cabApply(); }
+  if (e.target.closest('[data-wcancel]')){ cabEditing = false; return renderCab(); }
+  if (e.target.closest('[data-wsave]')){ const next = cabDraft; cabEditing = false; return change(() => { p.cab = eqJ(next, CAB_DEFAULT) ? null : next; }, 'Блоки кабинета сохранены'); }
+  if (e.target.closest('[data-wdrag]')) return;
   if ((b = e.target.closest('[data-cweek]'))){ const n = +b.dataset.cweek; cabWeek = n ? cabWeek + n : 0; return renderCab(); }
   if ((b = e.target.closest('[data-cf]'))){ cabFilter = b.dataset.cf; return renderCab(); }
-  if ((b = e.target.closest('[data-ctab]'))){ cabTab = b.dataset.ctab; return renderCab(); }
   if (e.target.closest('#cab-all-done')) return openCabDone(cabPid);
   if (e.target.closest('[data-take],[data-review],[data-stage-done],[data-person]')) return; // the document handler does these
   if ((b = e.target.closest('[data-cab-open]'))) openTask(b.dataset.cabOpen, {asEmployee: cabPid === meId});
@@ -4180,7 +4374,7 @@ const chatRoom = id => db.rooms.find(r => r.id === id);
 const inRoom = r => r.members.includes(chatMe());
 const chatPeer = m => { const r = chatRoom(m.to); return m.to === 'all' ? 'all' : r ? (inRoom(r) ? r.id : null) : m.from === chatMe() ? m.to : m.to === chatMe() ? m.from : null; };
 const chatName = id => id === 'all' ? 'Общий чат' : chatRoom(id)?.name || (id === 'boss' ? ME : person(id)?.name || 'Бывший сотрудник');
-const chatAva = id => id === 'all' ? '<span class="ava ch-all" aria-hidden="true">#</span>' : chatRoom(id) ? `<span class="ava ch-all" aria-hidden="true">${esc(initials(chatRoom(id).name))}</span>` : person(id) ? ava(person(id)) : `<span class="ava ch-all" aria-hidden="true">${id === 'boss' ? 'Р' : '?'}</span>`;
+const chatAva = id => id === 'all' ? '<span class="ava ch-all" aria-hidden="true">#</span>' : chatRoom(id) ? `<span class="ava ch-all" aria-hidden="true">${avaImg(chatRoom(id).photo) || esc(initials(chatRoom(id).name))}</span>` : person(id) ? ava(person(id)) : `<span class="ava ch-all" aria-hidden="true">${id === 'boss' ? 'Р' : '?'}</span>`;
 const chatReadKey = () => 'planerka.chatread.' + chatMe();
 // group chats keep reading marks per person and per browser, so reading there doesn't write to the shared data; private dialogs also share theirs (see shareRead)
 function chatRead(){
@@ -4277,7 +4471,7 @@ function renderChat(read, toBottom){
   $('#ch-side').innerHTML = q ? chatSearchHtml(q, ['all', ...peers], row) : '<button type="button" class="btn small ch-new" data-room-new>+ Новый чат</button>' + ['all', ...peers].map(row).join('');
   const mb = $('#ch-mute'), off = chatMuted(chatWith);
   mb.innerHTML = bellIcon(off); mb.setAttribute('aria-pressed', off); mb.title = off ? 'Уведомления из этого чата выключены. Включить' : 'Уведомления из этого чата включены. Выключить'; mb.setAttribute('aria-label', mb.title);
-  $('#ch-title').innerHTML = group ? `<button type="button" class="ch-members" data-members aria-label="Участники: ${esc(chatName(chatWith))}">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">Участников: ${chatMembers(chatWith).length}</span></span></button>`
+  $('#ch-title').innerHTML = group ? `${room?.photo ? `<button type="button" class="ch-ava-btn" data-room-photo title="Открыть фото чата" aria-label="Открыть фото чата">${chatAva(chatWith)}</button>` : ''}<button type="button" class="ch-members" data-members aria-label="Участники: ${esc(chatName(chatWith))}">${room?.photo ? '' : chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">Участников: ${chatMembers(chatWith).length}</span></span></button>`
     : person(chatWith) ? `<button type="button" class="ch-members" data-cab="${esc(chatWith)}" aria-label="Профиль: ${esc(chatName(chatWith))}">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">${esc(person(chatWith).role || 'Открыть профиль')}</span></span></button>`
     : `<div class="ch-members">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">${chatWith === 'boss' ? '' : 'Нет в команде'}</span></span></div>`;
   const box = $('#ch-msgs'), bottom = toBottom || box.scrollHeight - box.scrollTop - box.clientHeight < 60, top = box.scrollTop;
@@ -4299,7 +4493,7 @@ const chatMembers = id => chatRoom(id)?.members || ['boss', ...active().map(p =>
 function openMembers(id = chatWith){
   const room = chatRoom(id), d = $('#d-chatm');
   d.innerHTML = `<div class="d-head"><h2>${esc(chatName(id))}</h2><button class="close" aria-label="Закрыть">✕</button></div>
-    <div class="d-body"><div class="ch-list">${chatMembers(id).map(m => {
+    <div class="d-body">${room ? `<div class="chm-photo">${room.photo ? `<button type="button" class="cab-ava-btn" id="chm-photo-view" aria-label="Открыть фото чата">${chatAva(id)}</button>` : chatAva(id)}<button type="button" class="btn small" id="chm-photo">${ic('camera', 15)} ${room.photo ? 'Фото чата' : 'Добавить фото чата'}</button></div>` : ''}<div class="ch-list">${chatMembers(id).map(m => {
       const p = person(m), inner = `${chatAva(m)}<span class="ch-who">${esc(chatName(m))}${m === chatMe() ? ' (вы)' : ''}</span><span class="ch-prev">${esc(p ? p.role || 'Открыть профиль' : '')}</span>`;
       return p ? `<button type="button" class="ch-row" data-cab="${esc(m)}">${inner}</button>` : `<div class="ch-row ch-row-static">${inner}</div>`;
     }).join('')}</div><label class="ch-mute-opt"><input type="checkbox" id="chm-mute" ${chatMuted(id) ? '' : 'checked'}> Уведомления из этого чата</label></div>
@@ -4307,6 +4501,8 @@ function openMembers(id = chatWith){
   d.onclick = e => {
     if (e.target.closest('[data-cab]')) d.close(); // the page-wide handler opens the profile
     if (e.target.closest('#chm-edit')){ d.close(); openRoomEditor(id); }
+    if (e.target.closest('#chm-photo-view')) return openPhoto(room.photo, `Фото чата «${room.name}»`);
+    if (e.target.closest('#chm-photo')) return photoMenu(e.target.closest('#chm-photo'), room.photo, `Фото чата «${room.name}»`, setRoomPhoto(id));
   };
   d.onchange = e => { if (e.target.id === 'chm-mute') toggleMute(id); };
   d.oncontextmenu = e => {
@@ -4700,7 +4896,7 @@ async function openChatFile(f){
   const save = async () => download(f.name, await (await fetch(b.data)).blob());
   if (!chatIsImg(f)) return save();
   const d = $('#d-img');
-  d.innerHTML = `<div class="d-head"><h2>${esc(f.name)}</h2><span class="spacer"></span><button type="button" class="close" aria-label="Закрыть">✕</button></div><div class="d-body"><img src="${esc(b.data)}" alt="${esc(f.name)}"></div><div class="d-foot"><span class="note">${fmtSize(f.size)}</span><span class="spacer"></span><button type="button" class="btn" id="img-dl">Скачать</button></div>`;
+  d.innerHTML = `<div class="d-head"><h2>${esc(f.name)}</h2><span class="spacer"></span><button type="button" class="close" aria-label="Закрыть">✕</button></div><div class="d-body"><img src="${esc(b.data)}" alt="${esc(f.name)}"></div><div class="d-foot"><span class="note">${f.size ? fmtSize(f.size) : ''}</span><span class="spacer"></span><button type="button" class="btn" id="img-dl">Скачать</button></div>`;
   d.querySelector('#img-dl').onclick = save;
   d.showModal();
 }
@@ -4818,7 +5014,10 @@ $('#ch-side').onclick = e => {
   const hit = e.target.closest('[data-jump]'); if (hit) return jumpToMsg(hit.dataset.jump);
   const b = e.target.closest('[data-chat]'); if (b) openChat(b.dataset.chat);
 };
-$('#ch-title').onclick = e => { if (e.target.closest('[data-members]')) openMembers(); };
+$('#ch-title').onclick = e => {
+  if (e.target.closest('[data-room-photo]')) return openPhoto(chatRoom(chatWith).photo, `Фото чата «${chatName(chatWith)}»`);
+  if (e.target.closest('[data-members]')) openMembers();
+};
 $('#ch-back').onclick = () => { chatOpen = false; renderChatBits(); };
 $('#ch-q').oninput = () => renderChatBits();
 $('#ch-mute').onclick = () => toggleMute(chatWith);
@@ -5218,6 +5417,7 @@ addEventListener('storage', e => {
   console.assert(!/script|onerror|onclick|onmouseover|javascript|iframe|svg|url\(|https:\/\/e\.ru\/t/.test(clean) && clean.includes('color: red') && clean.includes('href="https://e.ru"') && clean.includes('<b>e</b>') && clean.includes('data-blob="f1"'), 'kb: dangerous html removed, formatting kept: ' + clean);
   console.assert(emo(esc('ок 👍 ❤ ❤️ <b>')).match(/<img class="emo"/g)?.length === 3 && emo('🦄').includes('data:image') && emo('🦩').includes('data-cdn') && emo('a → b ✕ ©') === 'a → b ✕ ©' && emo(esc('<b>')) === '&lt;b&gt;', 'emoji: built-in pictures with or without FE0F, the CDN for the rest, symbols and text untouched');
   console.assert(emoKey('❤️') === '2764' && emoKey('👍🏻') === '1f44d-1f3fb' && emoKey('🧑‍💻') === '1f9d1-200d-1f4bb' && Object.keys(EMOJI_SVG).length === EMOJI.length, 'emoji: Twemoji file names, every picker emoji has a picture');
+  console.assert(normCab(['cur:w', 'cur', 'x', 'heat', 'open:z', 7]).join() === 'cur,heat' && normCab(null) === null && normPhoto({full: 'a', thumb: 'b', z: 99, x: -1}).z === 5 && normPhoto({full: 'a b', thumb: 'b'}) === null, 'cabinet blocks and photos are cleaned');
   const sized = kbClean('<img data-blob="f2" class="kb-sel" style="width: 40%; height: 900px"><img data-blob="f3" style="width: 300px"><img data-blob="f4" style="width: 250%">');
   console.assert(sized.includes('style="width: 40%"') && !sized.includes('class') && !sized.includes('900px') && !sized.includes('300px') && sized.includes('width: 100%'), 'kb: picture width kept in percent only: ' + sized);
   const c11 = migrate({version: 11, people: [], tasks: [], docs: [{id: 'd', title: '', html: '<img data-blob="k1">'}, {id: 'd', title: 'dup'}, null], blobs: {k1: {data: 'data:x'}, k2: {data: 'data:y'}}});
