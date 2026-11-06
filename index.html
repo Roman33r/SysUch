@@ -488,6 +488,25 @@ header{position:relative;padding-right:98px}
 .ach-medal.t1{background:#F1C3A5;color:#7A3B12;border:1px solid #D9875A}
 .ach-medal.t2{background:#E3E6EA;color:#3B424A;border:1px solid #A7AFB8}
 .ach-medal.t3{background:#FFE08A;color:#6B4A00;border:1px solid #E0A800}
+.ach-medal.tm{background:#E5DBFF;color:#4C2A99;border:1px solid #9775FA}
+.ach-acts{display:flex;gap:6px;flex-wrap:wrap}
+.ad-icons{display:flex;flex-wrap:wrap;gap:4px}
+.ad-ic input{position:absolute;opacity:0;pointer-events:none}
+.ad-ic span{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--fg)}
+.ad-ic input:checked + span{border-color:var(--accent);background:var(--accent-soft)}
+.ad-ic input:focus-visible + span{outline:2px solid var(--accent)}
+.ad-steps{display:flex;gap:6px}
+.ad-steps input{width:90px}
+.lbg-media,.lbg-el{position:absolute;inset:0;width:100%;height:100%}
+.cab-who.lbg > .lbg-media{position:absolute;z-index:0}
+.lbg-el{object-fit:cover;display:block}
+.lbg-shade{position:absolute;inset:0;background:rgba(0,0,0,.4)}
+.bg-prev{position:relative;min-height:110px;display:flex;align-items:center;padding:18px 20px;margin-bottom:12px}
+.look-sw{position:relative;overflow:hidden}
+.look-sw > svg{position:relative}
+.look-up{position:relative;display:grid}
+.look-x{position:absolute;top:4px;right:4px;width:22px;height:22px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer}
+.look-add .look-sw{border-style:dashed;color:var(--accent)}
 .ach-list{display:grid;gap:10px}
 .ach-item{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}
 .ach-item .ach-medal{width:34px;height:34px}
@@ -1420,7 +1439,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
       <section class="cab-panel" data-w="weeks"><div class="cab-ph"><h3 id="cab-weeks-h">Закрыто по неделям</h3><span class="count" id="cab-weeks-n"></span></div><svg class="cab-chart" id="cab-weeks" viewBox="0 0 320 150" role="img" aria-label="Закрыто задач по периодам"></svg></section>
       <section class="cab-panel" data-w="heat"><div class="cab-ph"><h3>Активность</h3><span class="count" id="cab-heat-n">закрыто по дням</span></div><div class="cab-heat" id="cab-heat"></div>
         <div class="cab-legend">меньше <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> больше</div></section>
-      <section class="cab-panel" data-w="ach"><div class="cab-ph"><h3>Достижения</h3><span class="count" id="cab-ach-n"></span></div><div class="ach-list" id="cab-ach"></div></section>
+      <section class="cab-panel" data-w="ach"><div class="cab-ph"><h3>Достижения</h3><span class="count" id="cab-ach-n"></span><span class="spacer"></span><span class="ach-acts" id="cab-ach-acts"></span></div><div class="ach-list" id="cab-ach"></div></section>
       <section class="cab-panel" data-w="proj"><div class="cab-ph"><h3>По проектам</h3><span class="count" id="cab-proj-n"></span></div><div class="cab-hbars" id="cab-proj"></div><div class="cab-ring" id="cab-ring"></div></section>
     </div>
   </main>
@@ -1474,6 +1493,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 <dialog id="d-depts"></dialog>
 <dialog id="d-ask" class="d-ask"></dialog>
 <dialog id="d-look" class="d-look"></dialog>
+<dialog id="d-achdef" class="d-look"></dialog>
 <dialog id="d-store"></dialog>
 <dialog id="d-conflict"></dialog>
 <dialog id="d-login"></dialog>
@@ -1678,6 +1698,8 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
         <ul>
           <li><b>Фото.</b> Кнопка «Фото» в своём кабинете: загрузите снимок и перетащите его так, чтобы в круг попала нужная часть, масштаб — ползунком или колесом мыши. Позже можно изменить область в кружке, не загружая фото заново. Нажатие на аватар в кабинете открывает фото целиком. Фото сотрудника может поменять и руководитель. Нужна база данных или общий JSON-файл.</li>
           <li><b>Достижения.</b> Считаются сами по истории работы: задачи в срок, серия рабочих дней, недели без просрочек, статьи в базе знаний и к задачам, этапы в срок, закрытые часы, первые шаги. У каждого три ступени: бронза — медаль в профиле, серебро — рамка аватара, золото — фон профиля. Блок «Достижения» в кабинете показывает, сколько осталось до следующей ступени.</li>
+          <li><b>Свои достижения.</b> Руководитель в блоке «Достижения» нажимает «+ Достижение». Автоматическое: что считать (задачи в срок, закрытые задачи, часы, этапы, статьи, серия дней, недели без просрочек), фильтр по проекту, тегу и приоритету, три ступени и награды — рамка за серебро, фон за золото. Можно сделать его только для отдела. Ручное — награда, которую руководитель вручает кнопкой «Вручить» с подписью «за что»; её можно снять.</li>
+          <li><b>Свои фоны.</b> В «Гардеробе» руководитель загружает фоны в каталог («В каталог»): картинку, GIF или короткое видео MP4/WebM до 5 МБ, выбирает видимую часть и делает фон доступным всем или наградой (её выбирают в достижении). Сотрудник с золотом в любом достижении загружает свой фон. Видео легче GIF и ставится на паузу, если в системе отключена анимация. Нужна база данных или общий JSON-файл.</li>
           <li><b>Гардероб.</b> Кнопка «Гардероб» в своём кабинете: фон профиля (часть фонов анимированные), рамка аватара и до трёх медалей рядом с именем. Закрытое показано с замком и условием. Фон и медали видят коллеги в вашем кабинете, рамку — на аватаре везде: в команде, чате, списке сотрудников. Тем, у кого в системе отключена анимация, фоны и рамки показываются неподвижными.</li>
           <li><b>Свои блоки.</b> «Настроить блоки» в своём кабинете: перетаскивайте блоки за значок с точками (мышью или пальцем, с клавиатуры — стрелками), убирайте ненужные крестиком, добавляйте обратно кнопками «+ …», меняйте размер за правый нижний угол — ширина и высота прилипают к сетке. «Готово» сохраняет порядок, он виден и коллегам, открывшим ваш кабинет.</li>
         </ul>
@@ -1852,7 +1874,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 19;
+const SCHEMA = 20;
 const CHAT_MAX = 2000, CHAT_TEXT_MAX = 2000; // localStorage holds about 5 MB per site, so old messages drop off
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
@@ -1972,8 +1994,24 @@ const LOOK_BG = {'': {name: 'Без фона'}, sky: {name: 'Синий'}, mint:
   confetti: {name: 'Конфетти', ach: 'mentor'}, waves: {name: 'Волны', ach: 'team'}, stripes: {name: 'Финишная прямая', ach: 'marathon'}, space: {name: 'Космос', ach: 'pioneer'}};
 const LOOK_FRAME = {'': {name: 'Без рамки'}, scope: {name: 'Прицел', ach: 'sniper'}, fire: {name: 'Пламя', ach: 'streak'}, fresh: {name: 'Свежесть', ach: 'clean'}, ink: {name: 'Чернила', ach: 'writer'},
   laurel: {name: 'Лавры', ach: 'mentor'}, link: {name: 'Связка', ach: 'team'}, finish: {name: 'Финиш', ach: 'marathon'}, compass: {name: 'Компас', ach: 'pioneer'}};
-const normLook = l => ({bg: Object.hasOwn(LOOK_BG, l?.bg) ? l.bg : '', frame: Object.hasOwn(LOOK_FRAME, l?.frame) ? l.frame : '',
-  badges: [...new Set(Array.isArray(l?.badges) ? l.badges.map(String) : [])].filter(id => ACH.some(a => a.id === id)).slice(0, 3)});
+// own achievements: counted by a rule, or handed out by a manager
+const ACH_METRIC = {ontime: 'задач закрыто в срок', closed: 'задач закрыто', hours: 'часов закрытой работы', stages: 'этапов сделано в срок', docs: 'статей в базе знаний', docsTask: 'статей к задачам', streak: 'рабочих дней подряд с закрытой задачей', clean: 'недель без просрочек'};
+const ACH_ICONS = ['medal', 'target', 'flame', 'sparkles', 'book2', 'school', 'users', 'run', 'compass', 'checklist', 'calendar', 'clock', 'chartBar', 'bookmark', 'comment', 'palette', 'folder', 'camera'];
+const BG_MIME = /^(image\/(png|jpeg|webp|gif)|video\/(mp4|webm))$/;
+function normAchDef(x){
+  const s = (v, max) => String(v ?? '').slice(0, max), st = (Array.isArray(x.steps) ? x.steps : []).map(n => Math.max(1, Math.round(+n) || 0)).filter(Boolean);
+  const steps = st.length === 3 ? [...st].sort((a, b) => a - b) : [5, 20, 50];
+  return {id: s(x.id, 40), name: s(x.name, 60).trim() || 'Достижение', icon: ACH_ICONS.includes(x.icon) ? x.icon : 'medal', manual: !!x.manual,
+    metric: Object.hasOwn(ACH_METRIC, x.metric) ? x.metric : 'closed', proj: s(x.proj, 40), tag: s(x.tag, 40), prio: Object.hasOwn(PRIO, x.prio) ? x.prio : '', dept: s(x.dept, 40),
+    steps, frame: Object.hasOwn(LOOK_FRAME, x.frame) ? x.frame : '', bg: /^(u:[\w-]{1,40}|[a-z]{0,20})$/.test(x.bg ?? '') && (String(x.bg ?? '').startsWith('u:') || Object.hasOwn(LOOK_BG, x.bg ?? '')) ? x.bg ?? '' : '',
+    note: s(x.note, 300), author: s(x.author, 40), at: s(x.at, 40)};
+}
+const normAward = x => ({id: String(x.id ?? '').slice(0, 40), def: String(x.def ?? '').slice(0, 40), to: String(x.to ?? '').slice(0, 40), by: String(x.by ?? '').slice(0, 40), note: String(x.note ?? '').slice(0, 300), at: String(x.at ?? '').slice(0, 40)});
+// an uploaded background: in the shared catalogue (owner '') or a person's own; y = which part of it shows in the strip
+const normBg = x => ({id: String(x.id ?? '').slice(0, 40), name: String(x.name ?? '').trim().slice(0, 60) || 'Фон', blob: /^[\w-]{1,40}$/.test(x.blob) ? x.blob : '', mime: BG_MIME.test(x.mime) ? x.mime : 'image/jpeg',
+  y: Math.min(100, Math.max(0, Math.round(+x.y) || 50)), free: !!x.free, owner: String(x.owner ?? '').slice(0, 40), at: String(x.at ?? '').slice(0, 40)});
+const normLook = l => ({bg: Object.hasOwn(LOOK_BG, l?.bg) || /^u:[\w-]{1,40}$/.test(l?.bg ?? '') ? l.bg : '', frame: Object.hasOwn(LOOK_FRAME, l?.frame) ? l.frame : '',
+  badges: [...new Set(Array.isArray(l?.badges) ? l.badges.map(String) : [])].filter(id => /^[\w-]{1,40}$/.test(id)).slice(0, 3)});
 /* blocks of the personal cabinet; a person's own order and sizes are kept on their card: «name:CxR» = C of 12 columns, R grid rows («:w» from older versions = full width) */
 const CAB_W = {open: 'Открыто', over: 'Просрочено', done30: 'Закрыто за период', ontime: 'Вовремя', load: 'Загрузка', cycle: 'Время до готовности',
   cur: 'Текущие задачи', week: 'План', done: 'Выполнено', weeks: 'Закрыто по периодам', heat: 'Активность', proj: 'По проектам', ach: 'Достижения'};
@@ -1998,7 +2036,7 @@ function normPerson(p){
     hue: /^#[0-9a-f]{6}$/i.test(p.hue) ? p.hue : HUES[0],
     archived: !!p.archived,
     access: ACCESS[p.access] && Object.hasOwn(ACCESS, p.access) ? p.access : 'employee',
-    photo: normPhoto(p.photo), cab: normCab(p.cab), dept: s(p.dept, 40), look: normLook(p.look),
+    photo: normPhoto(p.photo), cab: normCab(p.cab), dept: s(p.dept, 40), look: normLook(p.look), ...(p.achAll ? {achAll: true} : {}),
   };
 }
 function normTask(t){
@@ -2156,7 +2194,7 @@ function merge3(base, mine, theirs){
     notes.push(`Номер ${old} одновременно заняли двое, ваша задача теперь ${id}.`);
   }
   const data = {...t, nextId: next, ...chatOf(mine, theirs), blobs: {...theirs.blobs, ...mine.blobs}, savedAt: mine.savedAt};
-  for (const coll of ['people', 'tasks', 'projects', 'templates', 'docs', 'cal', 'calShare', 'depts']){
+  for (const coll of ['people', 'tasks', 'projects', 'templates', 'docs', 'cal', 'calShare', 'depts', 'achDefs', 'awards', 'bgs']){
     const B = new Map(base[coll].map(x => [x.id, x])), M = new Map(m[coll].map(x => [x.id, x])), T = new Map(t[coll].map(x => [x.id, x]));
     data[coll] = [];
     const kept = x => { if (coll === 'tasks') notes.push(`${x.id} удалили с одной стороны и изменили с другой: задача оставлена.`); data[coll].push(x); };
@@ -2222,6 +2260,10 @@ function migrate(raw){
   // v12 -> v13: calendar
   const uniq = (l, norm, ok) => { const ids = new Set(); return (Array.isArray(l) ? l : []).filter(x => x && typeof x === 'object').map(norm).filter(x => x.id && ok(x) && !ids.has(x.id) && ids.add(x.id)); };
   const cal = uniq(raw.cal, normEv, e => e.start), calShare = uniq(raw.calShare, normShare, () => true);
+  // v19 -> v20: own achievements, awards handed out, uploaded backgrounds; an award of a deleted achievement or person goes
+  const bgs = uniq(raw.bgs, normBg, b => b.blob), bgIds = new Set(bgs.map(b => 'u:' + b.id));
+  const achDefs = uniq(raw.achDefs, normAchDef, () => true).map(d => d.bg.startsWith('u:') && !bgIds.has(d.bg) ? {...d, bg: ''} : d), defIds = new Set(achDefs.map(d => d.id));
+  const awards = uniq(raw.awards, normAward, a => defIds.has(a.def) && pids.has(a.to));
   // v14 -> v15: departments; people of a department that is gone are left without one
   const depts = uniq(raw.depts, normDept, () => true), dids = new Set(depts.map(d => d.id));
   depts.forEach(d => { if (!pids.has(d.head)) d.head = ''; if (!pids.has(d.deputy)) d.deputy = ''; });
@@ -2246,14 +2288,14 @@ function migrate(raw){
     if (!folderIds.has(d.parent)){ d.parent = ''; continue; }
     for (let p = d.parent, n = 0; p; p = byDocId.get(p)?.parent, n++) if (p === d.id || n > 200){ d.parent = ''; break; }
   }
-  const used = new Set([...tasks.flatMap(t => t.files.map(f => f.id)), ...chat.flatMap(m => m.files.map(f => f.id)), ...docs.flatMap(d => kbBlobIds(d.html)),
+  const used = new Set([...bgs.map(b => b.blob), ...tasks.flatMap(t => t.files.map(f => f.id)), ...chat.flatMap(m => m.files.map(f => f.id)), ...docs.flatMap(d => kbBlobIds(d.html)),
     ...[...people, ...(Array.isArray(raw.rooms) ? raw.rooms : []).map(r => ({photo: normPhoto(r?.photo)}))].flatMap(x => x.photo ? [x.photo.full, x.photo.thumb] : [])]);
   const blobs = {};
   for (const [id, b] of Object.entries(raw.blobs && typeof raw.blobs === 'object' ? raw.blobs : {}))
     if (used.has(id) && typeof b?.data === 'string' && b.data.startsWith('data:')) blobs[id] = {data: b.data};
   // v8 -> v9: group chats; people who no longer exist leave them
   const rooms = mergeRooms((Array.isArray(raw.rooms) ? raw.rooms : []).map(normRoom).filter(r => r.id && r.name).map(r => ({...r, members: r.members.filter(m => m === 'boss' || pids.has(m))})), []);
-  return {version: SCHEMA, nextId, people, tasks, projects, templates, docs, cal, calShare, depts, events, chat, rooms, marks: normMarks(raw.marks), blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null, revs: (Array.isArray(raw.revs) ? raw.revs : []).map(String).slice(-REVS_MAX)};
+  return {version: SCHEMA, nextId, people, tasks, projects, templates, docs, cal, calShare, depts, achDefs, awards, bgs, events, chat, rooms, marks: normMarks(raw.marks), blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null, revs: (Array.isArray(raw.revs) ? raw.revs : []).map(String).slice(-REVS_MAX)};
 }
 
 function demo(){
@@ -3644,33 +3686,60 @@ function achStreak(days){
   }
   return best;
 }
-function achValues(pid){
-  const today = addDays(0), mine = db.tasks.filter(t => t.status === 'done' && t.doneAt && t.assignee === pid && !staged(t));
-  const stages = db.tasks.filter(staged).flatMap(t => t.stages.filter(x => x.done && x.assignee === pid && x.doneAt).map(x => ({...x, due: x.due || t.due})));
-  const sday = x => isoDay(new Date(x.doneAt)), docs = db.docs.filter(d => !d.folder && d.author === pid);
-  const bad = new Set([...mine.filter(isLate).map(t => weekStart(doneDay(t))), ...db.tasks.filter(t => t.assignee === pid && t.status !== 'done' && t.due && t.due < today).map(t => weekStart(t.due))]);
+// every metric of a person, over the tasks that pass the filter (project, tag, priority)
+function achCounts(pid, f = {}){
+  const ok = t => !!t && (!f.proj || t.project === f.proj) && (!f.tag || t.tag === f.tag) && (!f.prio || t.prio === f.prio);
+  const today = addDays(0), mine = db.tasks.filter(t => t.status === 'done' && t.doneAt && t.assignee === pid && !staged(t) && ok(t));
+  const stages = db.tasks.filter(t => staged(t) && ok(t)).flatMap(t => t.stages.filter(x => x.done && x.assignee === pid && x.doneAt).map(x => ({...x, due: x.due || t.due})));
+  const sday = x => isoDay(new Date(x.doneAt));
+  const docs = db.docs.filter(d => !d.folder && d.author === pid && (!(f.tag || f.prio) || ok(byId(d.task))) && (!f.proj || d.project === f.proj || byId(d.task)?.project === f.proj));
+  const bad = new Set([...mine.filter(isLate).map(t => weekStart(doneDay(t))), ...db.tasks.filter(t => t.assignee === pid && t.status !== 'done' && t.due && t.due < today && ok(t)).map(t => weekStart(t.due))]);
   const weeks = new Set([...mine.map(t => weekStart(doneDay(t))), ...stages.map(x => weekStart(sday(x)))].filter(w => w < weekStart(today) && !bad.has(w)));
-  return {sniper: mine.filter(t => t.due && !isLate(t)).length, streak: achStreak([...mine.map(doneDay), ...stages.map(sday)]), clean: weeks.size,
-    writer: docs.length, mentor: docs.filter(d => d.task).length, team: stages.filter(x => !x.due || sday(x) <= x.due).length,
-    marathon: Math.round(mine.reduce((n, t) => n + t.est, 0) + stages.reduce((n, x) => n + x.est, 0)), pioneer: (mine.length + stages.length > 0) + (docs.length > 0) + !!person(pid)?.photo};
+  return {ontime: mine.filter(t => t.due && !isLate(t)).length, closed: mine.length, streak: achStreak([...mine.map(doneDay), ...stages.map(sday)]), clean: weeks.size,
+    docs: docs.length, docsTask: docs.filter(d => d.task).length, stages: stages.filter(x => !x.due || sday(x) <= x.due).length,
+    hours: Math.round(mine.reduce((n, t) => n + t.est, 0) + stages.reduce((n, x) => n + x.est, 0)), firsts: (mine.length + stages.length > 0) + (docs.length > 0) + !!person(pid)?.photo};
 }
+function achValues(pid){
+  const c = achCounts(pid);
+  return {sniper: c.ontime, streak: c.streak, clean: c.clean, writer: c.docs, mentor: c.docsTask, team: c.stages, marathon: c.hours, pioneer: c.firsts};
+}
+// own achievements a person takes part in: everyone's, or their department's
+const achDefsFor = pid => db.achDefs.filter(d => !d.dept || person(pid)?.dept === d.dept);
 const achCache = new Map();
 // [{...achievement, value, tier 0..3, next}] for a person, counted once per saved state
 function achOf(pid){
-  const c = achCache.get(pid); if (c && c.at === db.savedAt && c.n === db.tasks.length + db.docs.length) return c.list;
-  const v = achValues(pid), list = ACH.map(a => { const tier = a.steps.filter(x => v[a.id] >= x).length; return {...a, value: v[a.id], tier, next: a.steps[tier]}; });
-  achCache.set(pid, {at: db.savedAt, n: db.tasks.length + db.docs.length, list});
+  const key = [db.savedAt, db.tasks.length, db.docs.length, db.achDefs.length, db.awards.length, person(pid)?.achAll].join('|'), c = achCache.get(pid);
+  if (c && c.key === key) return c.list;
+  const all = !!person(pid)?.achAll, v = achValues(pid), keyOf = (map, id) => Object.keys(map).find(k => map[k].ach === id) || '';
+  const tierOf = (steps, n) => all ? 3 : steps.filter(x => n >= x).length;
+  const list = [...ACH.map(a => ({...a, value: v[a.id], frame: keyOf(LOOK_FRAME, a.id), bg: keyOf(LOOK_BG, a.id)})),
+    ...achDefsFor(pid).filter(d => !d.manual).map(d => ({...d, custom: true, what: ACH_METRIC[d.metric], value: achCounts(pid, d)[d.metric]})),
+    ...db.achDefs.filter(d => d.manual && (all || db.awards.some(a => a.def === d.id && a.to === pid))).map(d => ({...d, custom: true, what: 'вручается руководителем', steps: [1, 1, 1], value: 1, awards: db.awards.filter(a => a.def === d.id && a.to === pid)}))]
+    .map(a => { const tier = tierOf(a.steps, a.value); return {...a, tier, next: tier < 3 ? a.steps[tier] : undefined}; });
+  achCache.set(pid, {key, list});
   return list;
 }
-const lookOpen = (pid, item, need) => !item.ach || (achOf(pid).find(a => a.id === item.ach)?.tier || 0) >= need;
+// a frame opens with silver of an achievement that gives it, a background with gold; free ones and one's own uploads are always open
+const frameOpen = (pid, k) => !k || achOf(pid).some(a => a.frame === k && a.tier >= 2);
+function bgOpen(pid, k){
+  if (!k) return true;
+  if (k.startsWith('u:')){ const u = db.bgs.find(b => 'u:' + b.id === k); if (!u) return false; if (u.owner) return u.owner === pid; if (u.free) return true; }
+  else if (!LOOK_BG[k]?.ach) return !!LOOK_BG[k];
+  return achOf(pid).some(a => a.bg === k && a.tier >= 3);
+}
+// the right to upload one's own background: gold in any achievement
+const canOwnBg = pid => achOf(pid).some(a => a.tier >= 3);
 // what a person wears: only what they have earned, and their best medals when none are chosen
 function lookOf(p){
   const l = p?.look || normLook(), got = achOf(p.id).filter(a => a.tier);
-  return {bg: lookOpen(p.id, LOOK_BG[l.bg], 3) ? l.bg : '', frame: lookOpen(p.id, LOOK_FRAME[l.frame], 2) ? l.frame : '',
+  return {bg: bgOpen(p.id, l.bg) ? l.bg : '', frame: frameOpen(p.id, l.frame) ? l.frame : '',
     badges: (l.badges.length ? l.badges.map(id => got.find(a => a.id === id)).filter(Boolean) : [...got].sort((a, b) => b.tier - a.tier)).slice(0, 3)};
 }
-const medal = (a, size = 15) => `<span class="ach-medal t${a.tier}" title="${esc(a.name)}${a.tier ? ' — ' + TIER[a.tier] : ''}">${ic(a.icon, size)}</span>`;
-const achReward = a => [`медаль в профиле`, `рамка «${Object.values(LOOK_FRAME).find(x => x.ach === a.id).name}»`, `фон «${Object.values(LOOK_BG).find(x => x.ach === a.id).name}»`];
+// an uploaded background under the header, darkened so the name reads on any picture
+const bgHead = k => { const b = k?.startsWith('u:') && db.bgs.find(x => 'u:' + x.id === k); return b ? `<span class="lbg-media">${bgMedia(b)}<span class="lbg-shade"></span></span>` : ''; };
+const medal = (a, size = 15) => `<span class="ach-medal t${a.tier}${a.manual ? ' tm' : ''}" title="${esc(a.name)}${a.manual ? ' — награда' : a.tier ? ' — ' + TIER[a.tier] : ''}">${ic(a.icon, size)}</span>`;
+const bgName = k => k.startsWith('u:') ? db.bgs.find(b => 'u:' + b.id === k)?.name || 'свой фон' : LOOK_BG[k]?.name || '';
+const achReward = a => ['медаль в профиле', a.frame ? `рамка «${LOOK_FRAME[a.frame].name}»` : 'медаль серебра', a.bg ? `фон «${bgName(a.bg)}»` : 'золотая медаль'];
 function renderCab(){
   const p = person(cabPid); if (!p) return setView('team');
   const me = cabPid === meId, today = addDays(0), thisWs = weekStart(today);
@@ -3689,8 +3758,8 @@ function renderCab(){
   const cyc = medianOf(done30.map(cycleDays).filter(x => x >= 0));
 
   const look = lookOf(p), big = `<span class="ava cab-ava${look.frame ? ' fr-' + look.frame : ''}" style="background:${p.hue}">${avaImg(p.photo) || esc(initials(p.name))}</span>`;
-  $('#cab-who').className = 'cab-who' + (look.bg ? ' lbg lbg-' + look.bg : '');
-  $('#cab-who').innerHTML = `${p.photo ? `<button type="button" class="cab-ava-btn" data-photo-view title="Открыть фото" aria-label="Открыть фото: ${esc(p.name)}">${big}</button>` : big}
+  $('#cab-who').className = 'cab-who' + (look.bg ? ' lbg lbg-' + look.bg.replace(':', '-') : '');
+  $('#cab-who').innerHTML = `${bgHead(look.bg)}${p.photo ? `<button type="button" class="cab-ava-btn" data-photo-view title="Открыть фото" aria-label="Открыть фото: ${esc(p.name)}">${big}</button>` : big}
     <div class="cab-id"><div class="cab-name">${esc(p.name)}${me ? ' <span class="chip">это вы</span>' : ''}${look.badges.length ? `<span class="ach-row">${look.badges.map(a => medal(a)).join('')}</span>` : ''}</div><div class="muted">${esc(p.role || 'Без роли')} · ${p.cap} ч в неделю${seenText(p.id) ? ' · ' + seenHtml(p.id) : ''}</div></div>
     <span class="spacer"></span>
     <div class="cab-per"><span class="seg" role="group" aria-label="Период статистики">${Object.entries(CAB_PER).map(([k, x]) => `<button type="button" data-cper="${k}" aria-pressed="${k === v}">${x[0]}</button>`).join('')}</span>
@@ -3700,6 +3769,7 @@ function renderCab(){
     ${me && !cabEditing ? `<button type="button" class="btn small" data-cab-edit>${ic('layout', 15)} Настроить блоки</button>` : ''}
     ${me ? '' : `<button type="button" class="btn small primary" data-chat-to="${esc(p.id)}">Отправить сообщение</button><button type="button" class="btn small" data-person="${esc(p.id)}" ${canManagePeople() ? '' : 'hidden'}>Карточка сотрудника</button>`}`;
 
+  hydrateBg($('#cab-who'));
   const diff = done30.length - prev30.length;
   const tiles = [
     {w: 'open', k: 'Открыто', v: open.length, d: `${open.filter(t => !t.seen).length} новых · ${open.reduce((s, t) => s + t.est, 0)} ч`},
@@ -3783,10 +3853,15 @@ function renderCab(){
 
   /* achievements and the way to the next tier */
   const al = achOf(p.id);
-  $('#cab-ach-n').textContent = `получено ступеней: ${al.reduce((n, a) => n + a.tier, 0)} из ${al.length * 3}`;
+  const auto = al.filter(a => !a.manual);
+  $('#cab-ach-n').textContent = `ступеней: ${auto.reduce((n, a) => n + a.tier, 0)} из ${auto.length * 3}${al.length > auto.length ? ` · наград: ${al.length - auto.length}` : ''}${p.achAll ? ' · всё открыто временно' : ''}`;
+  $('#cab-ach-acts').innerHTML = canManagePeople() ? `<button type="button" class="btn small" data-ach-new>+ Достижение</button><button type="button" class="btn small" data-ach-give>Вручить</button>` : '';
   $('#cab-ach').innerHTML = al.map(a => {
-    const prev = a.steps[a.tier - 1] || 0, pct = a.next ? Math.min(100, (a.value - prev) / (a.next - prev) * 100) : 100;
-    return `<div class="ach-item">${medal(a, 18)}<div><div class="ach-h"><b>${esc(a.name)}</b><span class="note">${a.tier ? TIER[a.tier] : 'ещё нет'}</span></div>
+    const prev = a.steps[a.tier - 1] || 0, pct = a.next ? Math.min(100, (a.value - prev) / (a.next - prev) * 100) : 100, edit = a.custom && canManagePeople() ? `<button type="button" class="linkish note" data-ach-edit="${esc(a.id)}">изменить</button>` : '';
+    if (a.manual) return `<div class="ach-item">${medal(a, 18)}<div><div class="ach-h"><b>${esc(a.name)}</b><span class="note">награда ${edit}</span></div>
+      ${(a.awards || []).map(w => `<span class="note">${w.note ? `«${esc(w.note)}» — ` : ''}${esc(chatName(w.by))}, ${esc(fmtStamp(w.at))}${canManagePeople() ? ` <button type="button" class="linkish note" data-ach-take="${esc(w.id)}">снять</button>` : ''}</span>`).join('<br>') || '<span class="note">открыто временно</span>'}
+      ${a.frame || a.bg ? `<span class="note">Открывает: ${[a.frame && `рамку «${LOOK_FRAME[a.frame].name}»`, a.bg && `фон «${esc(bgName(a.bg))}»`].filter(Boolean).join(', ')}</span>` : ''}</div></div>`;
+    return `<div class="ach-item">${medal(a, 18)}<div><div class="ach-h"><b>${esc(a.name)}</b><span class="note">${a.tier ? TIER[a.tier] : 'ещё нет'} ${edit}</span></div>
       <span class="cab-gauge"><i style="width:${pct}%"></i></span>
       <span class="note">${a.next ? `${f1(a.value)} из ${a.next} — ${a.what}. Дальше: ${TIER[a.tier + 1]}, ${achReward(a)[a.tier]}` : `${f1(a.value)} — ${a.what}. Все ступени взяты`}</span></div></div>`;
   }).join('');
@@ -3797,45 +3872,175 @@ function renderCab(){
 function openLook(pid){
   const p = person(pid); if (!p) return;
   const d = $('#d-look'), al = achOf(pid), sel = {...normLook(p.look)};
-  const cond = (item, need) => { const a = al.find(x => x.id === item.ach); return `${a.name}: ${TIER[need]} — ${a.steps[need - 1]} ${a.what}`; };
+  // what opens a locked item: every achievement that gives it
+  const by = (field, k, need) => al.filter(a => a[field] === k).map(a => a.manual ? `награда «${a.name}»` : `${a.name}: ${TIER[need]} — ${a.steps[need - 1]} ${a.what}`).join(' или ') || 'пока ничем не открывается';
+  const bgCond = k => by('bg', k, 3), frCond = k => by('frame', k, 2);
   const draw = () => {
     const prev = {...lookOf({...p, look: sel})};
     d.innerHTML = `<div class="d-head"><h2>Гардероб</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
       <div class="d-body">
-        <div class="look-prev cab-who${prev.bg ? ' lbg lbg-' + prev.bg : ''}"><span class="ava cab-ava${prev.frame ? ' fr-' + prev.frame : ''}" style="background:${p.hue}">${avaImg(p.photo) || esc(initials(p.name))}</span>
+        <div class="look-prev cab-who${prev.bg ? ' lbg lbg-' + prev.bg.replace(':', '-') : ''}">${bgHead(prev.bg)}<span class="ava cab-ava${prev.frame ? ' fr-' + prev.frame : ''}" style="background:${p.hue}">${avaImg(p.photo) || esc(initials(p.name))}</span>
           <div class="cab-id"><div class="cab-name">${esc(p.name)}<span class="ach-row">${prev.badges.map(a => medal(a)).join('')}</span></div><div class="muted">${esc(p.role || 'Без роли')}</div></div></div>
         <h3 class="look-h">Фон профиля <span class="note">открывается золотом</span></h3>
-        <div class="look-grid">${Object.entries(LOOK_BG).map(([k, x]) => { const ok = lookOpen(pid, x, 3);
-          return `<button type="button" class="look-tile${k === sel.bg ? ' on' : ''}" data-lbg="${k}" ${ok ? '' : 'aria-disabled="true"'} title="${esc(ok ? x.name : cond(x, 3))}"><span class="look-sw lbg${k ? ' lbg-' + k : ''}">${ok ? '' : ic('lock', 16)}</span><span>${esc(x.name)}</span>${ok ? '' : `<small>${esc(cond(x, 3))}</small>`}</button>`; }).join('')}</div>
+        <div class="look-grid">${Object.entries(LOOK_BG).map(([k, x]) => { const ok = bgOpen(pid, k);
+          return `<button type="button" class="look-tile${k === sel.bg ? ' on' : ''}" data-lbg="${k}" ${ok ? '' : 'aria-disabled="true"'} title="${esc(ok ? x.name : bgCond(k))}"><span class="look-sw lbg${k ? ' lbg-' + k : ''}">${ok ? '' : ic('lock', 16)}</span><span>${esc(x.name)}</span>${ok ? '' : `<small>${esc(bgCond(k))}</small>`}</button>`; }).join('')}
+          ${db.bgs.filter(b => !b.owner || b.owner === pid).map(b => { const k = 'u:' + b.id, ok = bgOpen(pid, k), del = (b.owner === pid || (!b.owner && canManagePeople()));
+            return `<span class="look-up"><button type="button" class="look-tile${k === sel.bg ? ' on' : ''}" data-lbg="${k}" ${ok ? '' : 'aria-disabled="true"'} title="${esc(ok ? b.name : bgCond(k))}"><span class="look-sw">${bgMedia(b, true)}${ok ? '' : ic('lock', 16)}</span><span>${esc(b.name)}</span><small>${b.owner ? 'ваш' : b.free ? 'каталог, для всех' : ok ? 'каталог' : esc(bgCond(k))}</small></button>${del ? `<button type="button" class="look-x" data-bgdel="${esc(b.id)}" aria-label="Удалить фон «${esc(b.name)}»">${ic('x', 12)}</button>` : ''}</span>`; }).join('')}
+          ${canOwnBg(pid) ? '<button type="button" class="look-tile look-add" data-bgup="own"><span class="look-sw">' + ic('palette', 18) + '</span><span>Загрузить свой фон</span><small>открыто золотом</small></button>' : '<button type="button" class="look-tile" aria-disabled="true" title="Свой фон открывается золотом в любом достижении"><span class="look-sw">' + ic('lock', 16) + '</span><span>Свой фон</span><small>золото в любом достижении</small></button>'}
+          ${canManagePeople() ? '<button type="button" class="look-tile look-add" data-bgup="cat"><span class="look-sw">' + ic('folderPlus', 18) + '</span><span>В каталог</span><small>фон для команды или награды</small></button>' : ''}</div>
         <h3 class="look-h">Рамка аватара <span class="note">открывается серебром</span></h3>
-        <div class="look-grid">${Object.entries(LOOK_FRAME).map(([k, x]) => { const ok = lookOpen(pid, x, 2);
-          return `<button type="button" class="look-tile${k === sel.frame ? ' on' : ''}" data-lfr="${k}" ${ok ? '' : 'aria-disabled="true"'} title="${esc(ok ? x.name : cond(x, 2))}"><span class="ava${k ? ' fr-' + k : ''}" style="background:${p.hue}">${ok ? (avaImg(p.photo) || esc(initials(p.name))) : ic('lock', 16)}</span><span>${esc(x.name)}</span>${ok ? '' : `<small>${esc(cond(x, 2))}</small>`}</button>`; }).join('')}</div>
+        <div class="look-grid">${Object.entries(LOOK_FRAME).map(([k, x]) => { const ok = frameOpen(pid, k);
+          return `<button type="button" class="look-tile${k === sel.frame ? ' on' : ''}" data-lfr="${k}" ${ok ? '' : 'aria-disabled="true"'} title="${esc(ok ? x.name : frCond(k))}"><span class="ava${k ? ' fr-' + k : ''}" style="background:${p.hue}">${ok ? (avaImg(p.photo) || esc(initials(p.name))) : ic('lock', 16)}</span><span>${esc(x.name)}</span>${ok ? '' : `<small>${esc(frCond(k))}</small>`}</button>`; }).join('')}</div>
         <h3 class="look-h">Медали в профиле <span class="note">до трёх; не выбрано — показываются лучшие</span></h3>
-        <div class="look-medals">${al.map(a => `<button type="button" class="look-medal${sel.badges.includes(a.id) ? ' on' : ''}" data-lmd="${a.id}" ${a.tier ? '' : 'aria-disabled="true"'} aria-pressed="${sel.badges.includes(a.id)}">${medal(a)}<span>${esc(a.name)}</span><small>${a.tier ? TIER[a.tier] : `нужно ${a.steps[0]}: ${esc(a.what)}`}</small></button>`).join('')}</div>
+        <div class="look-medals">${al.map(a => `<button type="button" class="look-medal${sel.badges.includes(a.id) ? ' on' : ''}" data-lmd="${a.id}" ${a.tier ? '' : 'aria-disabled="true"'} aria-pressed="${sel.badges.includes(a.id)}">${medal(a)}<span>${esc(a.name)}</span><small>${a.manual ? 'награда' : a.tier ? TIER[a.tier] : `нужно ${a.steps[0]}: ${esc(a.what)}`}</small></button>`).join('')}</div>
       </div>
       <div class="d-foot"><span class="note">Фон и медали видят коллеги в вашем кабинете, рамку — на аватаре везде.</span><span class="spacer"></span><button type="button" class="btn" data-lclose>Отмена</button><button type="button" class="btn primary" data-lsave>Сохранить</button></div>`;
   };
   d.onclick = e => {
     let b;
+    if (e.target.closest('[data-bgdel],[data-bgup]')) return bgAct(e);
     if (e.target.closest('[data-lclose]')) return d.close();
     if ((b = e.target.closest('[aria-disabled="true"]'))) return toast(b.title || 'Пока не открыто');
-    if ((b = e.target.closest('[data-lbg]'))){ sel.bg = b.dataset.lbg; return draw(); }
-    if ((b = e.target.closest('[data-lfr]'))){ sel.frame = b.dataset.lfr; return draw(); }
-    if ((b = e.target.closest('[data-lmd]'))){ const id = b.dataset.lmd; sel.badges = sel.badges.includes(id) ? sel.badges.filter(x => x !== id) : [...sel.badges, id].slice(-3); return draw(); }
+    if ((b = e.target.closest('[data-lbg]'))){ sel.bg = b.dataset.lbg; draw(); return hydrateBg(d); }
+    if ((b = e.target.closest('[data-lfr]'))){ sel.frame = b.dataset.lfr; draw(); return hydrateBg(d); }
+    if ((b = e.target.closest('[data-lmd]'))){ const id = b.dataset.lmd; sel.badges = sel.badges.includes(id) ? sel.badges.filter(x => x !== id) : [...sel.badges, id].slice(-3); draw(); return hydrateBg(d); }
+
     if (e.target.closest('[data-lsave]')){ d.close(); change(() => { const x = person(pid); if (x) x.look = normLook(sel); }, 'Гардероб сохранён'); }
   };
+  // uploading and deleting backgrounds; called from the window's click handler
+  const bgAct = async e => {
+    let b;
+    if ((b = e.target.closest('[data-bgdel]'))){
+      e.stopPropagation();
+      const bg = db.bgs.find(x => x.id === b.dataset.bgdel); if (!bg) return;
+      if (!await askConfirm(`Удалить фон «${bg.name}»?`, `<p>${bg.owner ? 'Фон пропадёт из вашего гардероба.' : 'Фон пропадёт из каталога и у всех, кто его надел.'}</p>`, 'Удалить')) return;
+      if (sel.bg === 'u:' + bg.id) sel.bg = '';
+      change(() => { db.bgs = db.bgs.filter(x => x.id !== bg.id); db.achDefs.forEach(x => { if (x.bg === 'u:' + bg.id) x.bg = ''; }); }, 'Фон удалён');
+      return draw(), hydrateBg(d);
+    }
+    if ((b = e.target.closest('[data-bgup]'))){ const own = b.dataset.bgup === 'own', made = await uploadBg(own ? pid : ''); if (made){ if (own) sel.bg = 'u:' + made; draw(); hydrateBg(d); } }
+  };
   draw();
+  hydrateBg(d);
+  d.showModal();
+}
+// pictures and videos of uploaded backgrounds arrive after the page, like photos
+function bgMedia(b, thumb){
+  const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches, pos = `object-position:50% ${b.y}%`;
+  return b.mime.startsWith('video/') ? `<video class="lbg-el" data-bg-blob="${esc(b.blob)}" muted loop playsinline ${motion && !thumb ? 'autoplay' : ''} preload="metadata" style="${pos}"></video>` : `<img class="lbg-el" data-bg-blob="${esc(b.blob)}" alt="" style="${pos}">`;
+}
+const hydrateBg = box => box.querySelectorAll('[data-bg-blob]').forEach(el => { if (!el.src) chatBlob(el.dataset.bgBlob).then(x => { if (x){ el.src = x.data; if (el.autoplay) el.play?.().catch(() => {}); } }); });
+// upload a background: into the catalogue (owner '') or one's own; resolves with its id
+async function uploadBg(owner){
+  if (!canAttach()) return toast('Фоны можно загружать при работе с базой данных или общим JSON-файлом'), null;
+  const f = await new Promise(res => { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm'; i.onchange = () => res(i.files[0] || null); i.click(); });
+  if (!f) return null;
+  if (!BG_MIME.test(f.type)) return toast('Нужна картинка (JPG, PNG, WebP, GIF) или видео MP4/WebM'), null;
+  if (f.size > FILE_MAX) return toast(`Файл больше ${fmtSize(FILE_MAX)}. Для анимации лучше короткое видео: оно легче GIF`), null;
+  let data; try { data = await fileData(f); } catch { return toast('Не удалось прочитать файл'), null; }
+  const opts = await askBg(data, f.type, f.name.replace(/\.[^.]+$/, '').slice(0, 60), !owner); if (!opts) return null;
+  const blob = newBlobId(), id = 'bg' + Date.now().toString(36);
+  try { await putBlob(blob, data); } catch (e) { return toast(`Фон не сохранился: ${e.status ? e.message : 'возможно, он больше лимита хостинга'}`), null; }
+  change(() => { db.bgs.push(normBg({id, blob, mime: f.type, name: opts.name, y: opts.y, free: opts.free, owner, at: stamp()})); if (!owner) addEvent(`${actor()} добавил фон «${opts.name}» в каталог`); }, owner ? 'Свой фон загружен' : `Фон «${opts.name}» в каталоге`);
+  return id;
+}
+// name, the visible part of the picture and, in the catalogue, whether it is free for everyone
+function askBg(data, mime, name, cat){
+  return new Promise(res => {
+    const d = $('#d-ask'); let done = false;
+    const fin = v => { if (done) return; done = true; if (d.open) d.close(); res(v); };
+    d.innerHTML = `<form><div class="d-head"><h2>${cat ? 'Фон в каталог' : 'Свой фон'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
+      <div class="d-body"><div class="cab-who lbg look-prev bg-prev">${mime.startsWith('video/') ? `<video class="lbg-el" src="${esc(data)}" muted loop playsinline autoplay></video>` : `<img class="lbg-el" src="${esc(data)}" alt="">`}<span class="lbg-shade"></span><b style="position:relative;z-index:1">Так фон ляжет за именем</b></div>
+        <div class="field"><label for="bg-y">Какая часть видна: верх ← → низ</label><input type="range" id="bg-y" min="0" max="100" step="1" value="50"></div>
+        <div class="field"><label for="bg-name">Название</label><input class="ask-in" id="bg-name" maxlength="60" value="${esc(name)}"></div>
+        ${cat ? '<label class="chk"><input type="checkbox" id="bg-free"> Доступен всем сразу (иначе — только как награда за достижение)</label>' : ''}</div>
+      <div class="d-foot"><span class="spacer"></span><button type="button" class="btn" data-ask="0">Отмена</button><button class="btn primary">Сохранить</button></div></form>`;
+    const el = d.querySelector('.lbg-el'), y = d.querySelector('#bg-y');
+    y.oninput = () => { el.style.objectPosition = `50% ${y.value}%`; };
+    d.querySelector('form').onsubmit = e => { e.preventDefault(); fin({name: d.querySelector('#bg-name').value.trim() || 'Фон', y: +y.value, free: !!d.querySelector('#bg-free')?.checked}); };
+    d.querySelector('[data-ask="0"]').onclick = () => fin(null);
+    d.querySelector('.close').onclick = () => fin(null);
+    d.addEventListener('close', () => fin(null), {once: true});
+    d.showModal();
+  });
+}
+// the constructor of an own achievement: a rule with three thresholds, or an award handed out by hand
+function openAchDef(id){
+  if (!canManagePeople()) return;
+  const d = $('#d-achdef'), cur = id ? db.achDefs.find(x => x.id === id) : null, x = cur ? {...cur} : normAchDef({id: '', name: '', steps: [5, 20, 50]});
+  const opt = (list, v) => list.map(([k, l]) => `<option value="${esc(k)}" ${k === v ? 'selected' : ''}>${esc(l)}</option>`).join('');
+  const tags = [...new Set(db.tasks.map(t => t.tag).filter(Boolean))].sort();
+  const bgs = [['', 'Нет'], ...Object.entries(LOOK_BG).filter(([k, b]) => k && !['sky', 'mint', 'graphite'].includes(k)).map(([k, b]) => [k, b.name]), ...db.bgs.filter(b => !b.owner).map(b => ['u:' + b.id, `${b.name} (загруженный)`])];
+  d.innerHTML = `<form id="ad-form" novalidate><div class="d-head"><h2>${cur ? 'Достижение' : 'Новое достижение'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
+    <div class="d-body">
+      <div class="fields"><div class="field"><label for="ad-name">Название</label><input id="ad-name" maxlength="60" value="${esc(x.name === 'Достижение' && !cur ? '' : x.name)}" placeholder="Например, «Мастер 1С»"></div>
+        <div class="field"><span class="k">Значок</span><div class="ad-icons" role="radiogroup" aria-label="Значок">${ACH_ICONS.map(k => `<label class="ad-ic"><input type="radio" name="ad-icon" value="${k}" ${k === x.icon ? 'checked' : ''}><span>${ic(k, 16)}</span></label>`).join('')}</div></div></div>
+      <div class="set-row"><span>Как получить</span><div class="seg" role="group"><button type="button" data-ad-kind="0" aria-pressed="${!x.manual}">Считать автоматически</button><button type="button" data-ad-kind="1" aria-pressed="${x.manual}">Вручать вручную</button></div></div>
+      <div id="ad-auto" ${x.manual ? 'hidden' : ''}>
+        <div class="fields"><div class="field"><label for="ad-metric">Что считать</label><select class="sel" id="ad-metric">${opt(Object.entries(ACH_METRIC), x.metric)}</select></div>
+          <div class="field"><label for="ad-proj">Проект</label><select class="sel" id="ad-proj"><option value="">Любой</option>${opt(db.projects.map(p => [p.id, p.name]), x.proj)}</select></div></div>
+        <div class="fields"><div class="field"><label for="ad-tag">Тег задачи</label><input id="ad-tag" list="ad-tags" maxlength="40" value="${esc(x.tag)}" placeholder="Любой"><datalist id="ad-tags">${tags.map(t => `<option value="${esc(t)}">`).join('')}</datalist></div>
+          <div class="field"><label for="ad-prio">Приоритет</label><select class="sel" id="ad-prio"><option value="">Любой</option>${opt(Object.entries(PRIO), x.prio)}</select></div></div>
+        <div class="field"><span class="k">Ступени: бронза, серебро, золото</span><div class="ad-steps">${x.steps.map((n, i) => `<input type="number" min="1" step="1" value="${n}" aria-label="${TIER[i + 1]}" data-ad-step="${i}">`).join('')}</div></div>
+      </div>
+      <div class="fields"><div class="field"><label for="ad-dept">Для кого</label><select class="sel" id="ad-dept"><option value="">Все сотрудники</option>${opt(db.depts.map(p => [p.id, 'Отдел: ' + p.name]), x.dept)}</select></div>
+        <div class="field"><label for="ad-frame" id="ad-frame-l">${x.manual ? 'Рамка при вручении' : 'Рамка за серебро'}</label><select class="sel" id="ad-frame">${opt(Object.entries(LOOK_FRAME).map(([k, f]) => [k, k ? f.name : 'Нет']), x.frame)}</select></div>
+        <div class="field"><label for="ad-bg" id="ad-bg-l">${x.manual ? 'Фон при вручении' : 'Фон за золото'}</label><select class="sel" id="ad-bg">${opt(bgs, x.bg)}</select></div></div>
+      <p class="note">Бронза любого достижения — медаль в профиле. Достижение сразу считается по уже сделанной работе. Загрузить свои фоны в каталог можно в «Гардеробе».</p>
+    </div>
+    <div class="d-foot">${cur ? '<button type="button" class="btn danger" data-ad-del>Удалить</button>' : ''}<span class="spacer"></span><button type="button" class="btn" data-ad-cancel>Отмена</button><button class="btn primary">Сохранить</button></div></form>`;
+  let manual = x.manual;
+  d.querySelectorAll('[data-ad-kind]').forEach(b => b.onclick = () => { manual = b.dataset.adKind === '1'; d.querySelectorAll('[data-ad-kind]').forEach(y => y.setAttribute('aria-pressed', y === b)); d.querySelector('#ad-auto').hidden = manual; d.querySelector('#ad-frame-l').textContent = manual ? 'Рамка при вручении' : 'Рамка за серебро'; d.querySelector('#ad-bg-l').textContent = manual ? 'Фон при вручении' : 'Фон за золото'; });
+  d.querySelector('[data-ad-cancel]').onclick = () => d.close();
+  d.querySelector('[data-ad-del]')?.addEventListener('click', async () => {
+    const n = db.awards.filter(a => a.def === id).length;
+    if (!await askConfirm(`Удалить «${cur.name}»?`, `<p>Достижение пропадёт у всех${n ? `, вместе с ${n} врученными наградами` : ''}. Открытые им рамки и фоны снимутся.</p>`, 'Удалить')) return;
+    d.close(); change(() => { db.achDefs = db.achDefs.filter(a => a.id !== id); db.awards = db.awards.filter(a => a.def !== id); addEvent(`${actor()} удалил достижение «${cur.name}»`); }, 'Достижение удалено');
+  });
+  d.querySelector('#ad-form').onsubmit = e => {
+    e.preventDefault();
+    const name = d.querySelector('#ad-name').value.trim(); if (!name){ d.querySelector('#ad-name').focus(); return toast('Введите название'); }
+    const steps = [...d.querySelectorAll('[data-ad-step]')].map(i => Math.max(1, Math.round(+i.value) || 1));
+    if (!manual && !(steps[0] < steps[1] && steps[1] < steps[2])) return toast('Ступени должны расти: бронза меньше серебра, серебро меньше золота');
+    const next = normAchDef({...x, id: x.id || 'ad' + Date.now().toString(36), name, icon: d.querySelector('[name=ad-icon]:checked')?.value, manual, metric: d.querySelector('#ad-metric').value, proj: d.querySelector('#ad-proj').value,
+      tag: d.querySelector('#ad-tag').value.trim(), prio: d.querySelector('#ad-prio').value, dept: d.querySelector('#ad-dept').value, steps, frame: d.querySelector('#ad-frame').value, bg: d.querySelector('#ad-bg').value, author: x.author || chatMe(), at: stamp()});
+    d.close();
+    change(() => { db.achDefs = [...db.achDefs.filter(a => a.id !== next.id), next]; addEvent(`${actor()} ${cur ? 'изменил' : 'создал'} достижение «${name}»`); }, cur ? 'Достижение сохранено' : manual ? `«${name}» создано — вручите его кнопкой «Вручить»` : `Достижение «${name}» создано`);
+  };
+  d.showModal();
+  d.querySelector('#ad-name').focus();
+}
+// a manager hands out an award with a few words on what for
+function openAward(pid){
+  const defs = db.achDefs.filter(x => x.manual);
+  if (!defs.length) return toast('Сначала создайте награду: «+ Достижение» → «Вручать вручную»');
+  const d = $('#d-achdef');
+  d.innerHTML = `<form id="aw-form" novalidate><div class="d-head"><h2>Вручить награду</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
+    <div class="d-body">
+      <div class="field"><label for="aw-def">Награда</label><select class="sel" id="aw-def">${defs.map(x => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select></div>
+      <div class="field"><label for="aw-to">Кому</label><select class="sel" id="aw-to">${active().map(p => `<option value="${esc(p.id)}" ${p.id === pid ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></div>
+      <div class="field"><label for="aw-note">За что</label><input id="aw-note" maxlength="300" placeholder="Например, «ночью починила оплату перед релизом»"></div>
+    </div>
+    <div class="d-foot"><span class="spacer"></span><button type="button" class="btn" data-aw-cancel>Отмена</button><button class="btn primary">Вручить</button></div></form>`;
+  d.querySelector('[data-aw-cancel]').onclick = () => d.close();
+  d.querySelector('#aw-form').onsubmit = e => {
+    e.preventDefault();
+    const w = normAward({id: 'aw' + Date.now().toString(36), def: d.querySelector('#aw-def').value, to: d.querySelector('#aw-to').value, by: chatMe(), note: d.querySelector('#aw-note').value.trim(), at: stamp()});
+    const def = db.achDefs.find(x => x.id === w.def);
+    d.close();
+    change(() => { db.awards.push(w); addEvent(`${actor()} вручил награду «${def.name}»: ${chatName(w.to)}${w.note ? ` — «${w.note}»` : ''}`); }, `Награда «${def.name}» вручена: ${chatName(w.to)}`);
+  };
   d.showModal();
 }
 // a new tier of one's own achievements is announced once; the first look only remembers what is there
 function achNotice(){
-  const pid = meId; if (!pid || !person(pid)) return;
+  const pid = meId; if (!pid || !person(pid) || person(pid).achAll) return; // opened for a check, nothing to announce
   const k = 'planerka.ach.' + pid, now = Object.fromEntries(achOf(pid).map(a => [a.id, a.tier]));
   let was = null; try { was = JSON.parse(localStorage.getItem(k) || 'null'); } catch {}
   try { localStorage.setItem(k, JSON.stringify(now)); } catch {}
   if (!was) return;
   const up = achOf(pid).filter(a => a.tier > (was[a.id] || 0));
-  if (up.length) toast(`Достижение «${up[0].name}»: ${TIER[up[0].tier]}. Открыто: ${achReward(up[0])[up[0].tier - 1]}${up.length > 1 ? ` и ещё ${up.length - 1}` : ''}`, null, {label: 'Гардероб', run: () => openLook(pid)});
+  if (up.length) toast(`${up[0].manual ? `Вам вручена награда «${up[0].name}»` : `Достижение «${up[0].name}»: ${TIER[up[0].tier]}`}. Открыто: ${achReward(up[0])[up[0].tier - 1]}${up.length > 1 ? ` и ещё ${up.length - 1}` : ''}`, null, {label: 'Гардероб', run: () => openLook(pid)});
 }
 // order, visibility and width of the blocks; while editing, the draft is shown
 let cabEditing = false, cabDraft = [];
@@ -3910,6 +4115,10 @@ $('#v-cab').addEventListener('click', e => {
   if (e.target.closest('[data-photo-view]')) return openPhoto(p.photo, `Фото: ${p.name}`);
   if ((b = e.target.closest('[data-photo-menu]'))) return photoMenu(b, p.photo, `Фото: ${p.name}`, setPersonPhoto(p.id));
   if (e.target.closest('[data-look]')) return openLook(p.id);
+  if (e.target.closest('[data-ach-new]')) return openAchDef(null);
+  if ((b = e.target.closest('[data-ach-edit]'))) return openAchDef(b.dataset.achEdit);
+  if (e.target.closest('[data-ach-give]')) return openAward(p.id);
+  if ((b = e.target.closest('[data-ach-take]'))){ const w = db.awards.find(x => x.id === b.dataset.achTake); if (w) change(() => { db.awards = db.awards.filter(x => x.id !== w.id); addEvent(`${actor()} снял награду «${db.achDefs.find(d => d.id === w.def)?.name}»: ${chatName(w.to)}`); }, 'Награда снята'); return; }
   if (e.target.closest('[data-cab-edit]')){ cabDraft = (p.cab || CAB_DEFAULT).map(x => cabStr(cabSize(x))); cabEditing = true; return renderCab(); }
   if (e.target.closest('[data-wdel]')){ cabDraft = cabDraft.filter(x => x.split(':')[0] !== w); return cabApply(); }
   if ((b = e.target.closest('[data-wadd]'))){ cabDraft.push(cabStr(cabSize(b.dataset.wadd))); cabApply(); return $(`#cab-blocks > [data-w="${b.dataset.wadd}"]`).scrollIntoView({block: 'nearest', behavior: 'smooth'}); }
@@ -4759,6 +4968,11 @@ function drawSettings(){
     <section><h4 class="sec-t">Справка и команды</h4><div class="row">
       <button type="button" class="btn" data-set-act="help">Справка <kbd>F1</kbd></button>
       <button type="button" class="btn" data-set-act="pal">Команды <kbd>${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K'}</kbd></button></div></section>
+    ${canManagePeople() ? `<section><h4 class="sec-t">Достижения — проверка (временно)</h4>
+      <p class="note">Открывает сотруднику все достижения, рамки и фоны, чтобы посмотреть, как они выглядят. «Вернуть как было» убирает это: останется только заработанное, сама работа не меняется. Видно всем, поэтому не забудьте вернуть.</p>
+      <div class="set-row"><select class="sel" id="st-achp">${active().map(p => `<option value="${esc(p.id)}">${esc(p.name)}${p.achAll ? ' — открыто' : ''}</option>`).join('')}</select>
+        <button type="button" class="btn" data-set-act="achall">Открыть все достижения</button><button type="button" class="btn" data-set-act="achback">Вернуть как было</button></div>
+      ${db.people.some(p => p.achAll) ? `<p class="note">Сейчас открыто: ${db.people.filter(p => p.achAll).map(p => esc(p.name)).join(', ')}</p>` : ''}</section>` : ''}
     <section><button type="button" class="btn danger" data-set-act="reset">Сбросить мои настройки</button></section>
   </div>`;
   d.onclick = e => {
@@ -4767,6 +4981,11 @@ function drawSettings(){
     if ((b = e.target.closest('[data-set-act]'))){
       const a = b.dataset.setAct;
       if (a === 'reset'){ prefs = {...PREF_DEFAULT}; savePrefs(); applyPrefs(); return drawSettings(); }
+      if (a === 'achall' || a === 'achback'){
+        const p = person(d.querySelector('#st-achp').value); if (!p) return;
+        change(() => { if (a === 'achall') p.achAll = true; else delete p.achAll; }, a === 'achall' ? `${p.name}: все достижения открыты временно` : `${p.name}: достижения как были`);
+        return drawSettings();
+      }
       d.close();
       if (a === 'help') openHelp(); if (a === 'pal') openPalette();
     }
@@ -6828,8 +7047,12 @@ addEventListener('storage', e => {
   const dq = migrate({version: 14, people: [{id: 'a', name: 'A', dept: 'd1'}, {id: 'b', name: 'B', dept: 'gone'}], tasks: [], depts: [{id: 'd1', name: 'Бухгалтерия', head: 'a', deputy: 'ghost'}],
     cal: [{id: 'v', owner: 'dept:d1', title: 'Отпуск', start: '2026-11-10T00:00', end: '2026-11-12T23:59', allDay: true, kind: 'vac', who: 'a'}, {id: 'x', owner: 'a', title: 'x', start: '2026-11-10T10:00', kind: 'vac', who: 'b'}]});
   console.assert(dq.depts[0].deputy === '' && dq.people[0].dept === 'd1' && dq.people[1].dept === '' && dq.cal[0].kind === 'vac' && dq.cal[0].end === '2026-11-12T23:59' && evOccur(dq.cal[0], '2026-11-11', '2026-11-11').length === 1 && evOccur(dq.cal[0], '2026-11-13', '2026-11-13').length === 0, 'departments and absences');
+  const a20 = migrate({version: 19, people: [{id: 'a', name: 'A', achAll: true}], tasks: [], achDefs: [{id: 'd1', name: 'X', steps: [9, 3, 5], metric: 'nope', bg: 'u:gone', frame: 'fire'}, {id: 'd2', manual: true}],
+    awards: [{id: 'w1', def: 'd2', to: 'a'}, {id: 'w2', def: 'dx', to: 'a'}, {id: 'w3', def: 'd2', to: 'ghost'}], bgs: [{id: 'b1', blob: 'k1', mime: 'video/mp4', y: 130}, {id: 'b2', blob: ''}], blobs: {k1: {data: 'data:v'}}});
+  console.assert(a20.achDefs[0].steps.join() === '3,5,9' && a20.achDefs[0].metric === 'closed' && a20.achDefs[0].bg === '' && a20.achDefs[0].frame === 'fire' && a20.awards.map(w => w.id).join() === 'w1'
+    && a20.bgs.length === 1 && a20.bgs[0].y === 100 && a20.blobs.k1 && a20.people[0].achAll === true && normPerson({id: 'b', name: 'B'}).achAll === undefined, 'own achievements, awards and backgrounds are cleaned');
   console.assert(achStreak(['2026-11-05', '2026-11-06', '2026-11-09', '2026-11-11', '2026-11-12', '2026-11-12']) === 3 && achStreak([]) === 0 && achStreak(['2026-11-07']) === 0
-    && JSON.stringify(normLook({bg: 'stars', frame: 'nope', badges: ['sniper', 'x', 'sniper', 'team', 'clean', 'writer']})) === '{"bg":"stars","frame":"","badges":["sniper","team","clean"]}', 'achievements: streaks skip days off, looks are cleaned');
+    && JSON.stringify(normLook({bg: 'stars', frame: 'nope', badges: ['sniper', 'x', 'sniper', 'team', 'clean', 'writer']})) === '{"bg":"stars","frame":"","badges":["sniper","x","team"]}', 'achievements: streaks skip days off, looks are cleaned');
   console.assert(perStart('quarter', '2026-11-06') === '2026-10-01' && perEnd('quarter', '2026-10-01') === '2026-12-31' && perStart('week', '2026-11-06', -1) === '2026-10-26' && perStart('year', '2026-11-06', 1) === '2027-01-01' && perStart('month', '2026-03-31', -1) === '2026-02-01' && planBuckets('year', '2026-01-01', '2026-12-31').length === 12 && workDays('2026-11-02', '2026-11-08') === 4, 'cabinet periods');
   console.assert(normCab(['cur:w', 'cur', 'x', 'heat', 'open:z', 7]).join() === 'cur:6x8,heat:6x10' && normCab(['cur:w', 'open:99x1']).join() === 'cur:12x8,open:12x2' && normCab(null) === null && normPhoto({full: 'a', thumb: 'b', z: 99, x: -1}).z === 5 && normPhoto({full: 'a b', thumb: 'b'}) === null, 'cabinet blocks and photos are cleaned');
   const sized = kbClean('<img data-blob="f2" class="kb-sel" style="width: 40%; height: 900px"><img data-blob="f3" style="width: 300px"><img data-blob="f4" style="width: 250%">');
