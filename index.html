@@ -649,6 +649,29 @@ input.proj-name:focus{outline:none;border-color:var(--line);background:var(--sun
   body.nav-side .me-ava{top:14px;right:14px}
   body.nav-side .bell-btn{position:relative;top:0;right:0;flex:none;align-self:flex-start}
   body.nav-side .toast{left:calc(50% + 118px)}
+  /* grouped side menu: small headings between the groups */
+  body.nav-side:not(.nav-rail) .nv-grp{display:block;margin:10px 12px 2px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  body.nav-side:not(.nav-rail) .nv-grp:first-child{margin-top:4px}
+  body.nav-side .nav-toggle{display:inline-flex;gap:8px;align-items:center}
+  body.nav-side header .seg[aria-label="Вид"] button{display:flex;gap:10px}
+  /* the rail: icons only, names show on hover */
+  body.nav-rail{padding-left:calc(84px + max(16px, env(safe-area-inset-left,0px)))}
+  body.nav-rail header{width:68px;padding:14px 8px;align-items:center;scrollbar-width:none}
+  body.nav-rail header::-webkit-scrollbar{display:none}
+  body.nav-rail header .logo{font-size:0;margin:2px 0 8px;padding:0}
+  body.nav-rail header .logo::before{content:"П";font-size:24px}
+  body.nav-rail header .seg[aria-label="Вид"]{padding:4px;align-items:center}
+  body.nav-rail header .seg[aria-label="Вид"] button{width:44px;height:40px;padding:0;justify-content:center;position:relative}
+  body.nav-rail .nv-tx,body.nav-rail #store-label,body.nav-rail .set-lbl,body.nav-rail #me-sel{display:none}
+  body.nav-rail .nv-grp{display:block;width:28px;height:1px;margin:6px auto;background:var(--line);font-size:0}
+  body.nav-rail .nv-grp:first-child{display:none}
+  body.nav-rail #chat-badge{position:absolute;top:2px;right:2px}
+  body.nav-rail header .btn{width:44px;height:40px;padding:0;justify-content:center}
+  body.nav-rail #new-task{font-size:0}
+  body.nav-rail #new-task::before{content:"+";font-size:22px;line-height:1}
+  body.nav-rail .me-ava{position:static;margin:4px auto 0}
+  body.nav-rail .bell-btn{align-self:center}
+  body.nav-rail .toast{left:calc(50% + 42px)}
 }
 /* compact density */
 body.compact{font-size:14px}
@@ -972,6 +995,32 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .ic{flex:none;vertical-align:middle}
 .meta .ic{vertical-align:-2px;margin-right:2px}
 .set-btn{display:inline-flex;align-items:center;gap:6px}
+header .seg[aria-label="Вид"] button{display:inline-flex;align-items:center;gap:6px}
+body.nav-text header [data-view] > .ic{display:none}
+body.nav-icons:not(.nav-side) header [data-view] .nv-tx{display:none}
+body.nav-icons:not(.nav-side) header .seg[aria-label="Вид"] button{padding:7px 9px}
+.nv-grp{display:none}
+.nav-toggle{display:none}
+/* cards: icons in the meta line, or the old text marks instead */
+body:not(.card-icons) .task .meta .ic{display:none}
+body.card-icons .ci-dot{display:none}
+.ci-dot{font-style:normal}
+.task .meta > span > .ic:first-child{margin-right:3px;vertical-align:-2px}
+body.prio-bar .task.pr-high{box-shadow:inset 3px 0 0 var(--high),var(--shadow)}
+body.prio-bar .task.pr-med{box-shadow:inset 3px 0 0 var(--med),var(--shadow)}
+body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
+/* phone: a bar of the main views at the bottom */
+.bbar{display:none}
+@media (max-width:600px){
+  body.bbar-on{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  body.bbar-on header .seg[aria-label="Вид"]{display:none}
+  body.bbar-on .bbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:15;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line)}
+  .bbar button{position:relative;display:grid;justify-items:center;gap:2px;padding:4px 0;border:0;background:none;color:var(--muted);font-size:11px;cursor:pointer}
+  .bbar button[aria-pressed="true"]{color:var(--accent)}
+  .bbar .badge{position:absolute;top:0;left:calc(50% + 6px)}
+  .bbar .badge[hidden]{display:none}
+  body.bbar-on .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
 .kb-empty{padding:48px 12px;text-align:center;color:var(--muted)}
 .kb-empty h2{margin:0 0 8px;color:var(--fg);font:600 20px var(--f-display)}
 @media (max-width:760px){
@@ -1102,11 +1151,13 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
     <select class="sel" id="me-sel" aria-label="Кто работает" title="Кто сейчас работает в Планёрке"></select>
     <button class="btn store-btn" id="store-btn" title="Где хранятся данные"><span class="sdot" id="store-dot"></span><span id="store-label">Браузер</span></button>
     <button type="button" class="bell-btn" id="bell-btn" aria-label="Уведомления" title="Уведомления"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9"/><path d="M10 20a2.2 2.2 0 0 0 4 0"/></svg><span class="badge" id="bell-badge" hidden></span></button>
+    <button type="button" class="btn nav-toggle" id="nav-toggle"></button>
     <button type="button" class="btn set-btn" id="set-btn" title="Настройки: внешний вид, меню, справка и команды" aria-label="Настройки"><span class="set-lbl">Настройки</span></button>
     <button type="button" class="me-ava" id="me-ava" aria-label="Личный кабинет" title="Личный кабинет"></button>
   </header>
 
   <div class="banner" id="banner" hidden></div>
+  <nav class="bbar" id="bbar" aria-label="Разделы"></nav>
 
   <div class="filters" role="search">
     <input type="search" id="q" placeholder="Поиск по названию, описанию, номеру" aria-label="Поиск задач" autocomplete="off">
@@ -1532,6 +1583,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
       </section>
 
       <section id="h-settings"><h3>Настройки</h3>
+        <p><b>Меню.</b> Расположение: сверху, сбоку или узкой полосой из одних значков (название — при наведении; кнопка «Свернуть меню» внизу бокового меню переключает между боковым и узким). Пункты: значок и название, только название или только значок. Порядок: по группам «Работа», «Команда», «Знания», «Аналитика» или подряд. На телефоне вместо меню сверху можно включить панель внизу: «Задачи», «Календарь», «Чат», «Знания» и «Ещё». В карточках задач можно включить значки срока, оценки и чек-листа и цветную полосу приоритета слева. Значки — набор Tabler Icons (лицензия MIT).</p>
         <p>Кнопка «Настройки» с шестерёнкой в шапке. Настройки хранятся в этом браузере, и у каждого свои: у руководителя и у каждого сотрудника из «Я: …». Смена человека сразу меняет и вид Планёрки.</p>
         <ul>
           <li><b>Тема:</b> светлая, тёмная или как в системе.</li>
@@ -1676,6 +1728,27 @@ const REPEAT_UNITS = {day: 'день', week: 'неделя', month: 'месяц'
 const $ = s => document.querySelector(s);
 /* interface icons are drawn here rather than taken from emoji fonts, which differ between systems or are missing */
 const ICONS = {
+  // from Tabler Icons (MIT, © Paweł Kuna), drawn with the same stroke settings as the rest
+  book2: '<path d="M19 4v16h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12z"/><path d="M19 16h-12a2 2 0 0 0 -2 2"/><path d="M9 8h6"/>',
+  calendarDue: '<path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/><path d="M12 16m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>',
+  calendar: '<path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/><path d="M11 15h1"/><path d="M12 15v3"/>',
+  chartBar: '<path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 20h14"/>',
+  checklist: '<path d="M9.615 20h-2.615a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8"/><path d="M14 19l2 2l4 -4"/><path d="M9 8h4"/><path d="M9 12h2"/>',
+  clock: '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 7v5l3 3"/>',
+  database: '<path d="M12 6m-8 0a8 3 0 1 0 16 0a8 3 0 1 0 -16 0"/><path d="M4 6v6a8 3 0 0 0 16 0v-6"/><path d="M4 12v6a8 3 0 0 0 16 0v-6"/>',
+  dots: '<path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>',
+  folders: '<path d="M9 4h3l2 2h5a2 2 0 0 1 2 2v7a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><path d="M17 17v2a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2h2"/>',
+  history: '<path d="M12 8l0 4l2 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/>',
+  layoutColumns: '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M12 4l0 16"/>',
+  layoutKanban: '<path d="M4 4l6 0"/><path d="M14 4l6 0"/><path d="M4 8m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/><path d="M14 8m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/>',
+  layoutSidebarLeftCollapse: '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M9 4v16"/><path d="M15 10l-2 2l2 2"/>',
+  layoutSidebarLeftExpand: '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M9 4v16"/><path d="M14 10l2 2l-2 2"/>',
+  messages: '<path d="M21 14l-3 -3h-7a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1h9a1 1 0 0 1 1 1v10"/><path d="M14 15v2a1 1 0 0 1 -1 1h-7l-3 3v-10a1 1 0 0 1 1 -1h2"/>',
+  plus: '<path d="M12 5l0 14"/><path d="M5 12l14 0"/>',
+  reportAnalytics: '<path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/><path d="M9 17v-5"/><path d="M12 17v-1"/><path d="M15 17v-3"/>',
+  sitemap: '<path d="M3 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/><path d="M15 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/><path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/><path d="M6 15v-1a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v1"/><path d="M12 9l0 3"/>',
+  template: '<path d="M4 4m0 1a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1z"/><path d="M4 12m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 12l6 0"/><path d="M14 16l6 0"/><path d="M14 20l6 0"/>',
+  users: '<path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>',
   gear: '<path d="M21.5 8.8L22.0 11.3L19.6 12.5L19.2 14.4L21.0 16.4L19.5 18.6L17.0 17.7L15.4 18.8L15.2 21.5L12.7 22.0L11.5 19.6L9.6 19.2L7.6 21.0L5.4 19.5L6.3 17.0L5.2 15.4L2.5 15.2L2.0 12.7L4.4 11.5L4.8 9.6L3.0 7.6L4.5 5.4L7.0 6.3L8.6 5.2L8.8 2.5L11.3 2.0L12.5 4.4L14.4 4.8L16.4 3.0L18.6 4.5L17.7 7.0L18.8 8.6z"/><circle cx="12" cy="12" r="3"/>',
   link: '<path d="M10 13.5a4.5 4.5 0 0 0 6.4.4l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.6 1.6"/><path d="M14 10.5a4.5 4.5 0 0 0-6.4-.4l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.6-1.6"/>',
   image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15.5l-5-5L6.5 20"/>',
@@ -2660,14 +2733,16 @@ function presenceUpdate(seen, now){
   if (key !== presenceKey){ presenceKey = key; if (db) render(); }
 }
 const ava = (p, sm) => p ? `<span class="ava${sm ? ' sm' : ''}${isOnline(p.id) ? ' on' : ''}" style="background:${p.hue}" title="${esc(p.name)}">${avaImg(p.photo) || esc(initials(p.name))}</span>` : '';
-const checkProgress = t => t.checklist.length ? `<span>☑ ${t.checklist.filter(c => c.done).length}/${t.checklist.length}</span>` : '';
+const checkProgress = t => t.checklist.length ? `<span>${ic('checklist', 13)}<i class="ci-dot">☑ </i>${t.checklist.filter(c => c.done).length}/${t.checklist.length}</span>` : '';
 
+// the due chip with a calendar icon in front; plain without icons
+const cardDue = t => dueChip(t).replace(/^<span class="([^"]*)">/, m => m + ic('calendarDue', 12));
 function card(t, kind){
   const head = kind === 'mini'
     ? (t.seen ? stChip(t) : '<span class="new-tag">Новая</span>')
     : `<span class="chip p-${t.prio}"><span class="dot"></span>${PRIO[t.prio]}</span>`;
   const pr = t.project && project(t.project);
-  const meta = kind === 'mini' ? '' : `<div class="meta">${pr ? `<span class="chip"><span class="pdot" style="background:${pr.hue}"></span>${esc(pr.name)}</span>` : ''}${t.repeat ? `<span title="Повторяется: ${esc(repeatLabel(t.repeat))}">↻</span>` : ''}${t.tag ? `<span class="chip">${esc(t.tag)}</span>` : ''}${dueChip(t)}${t.est ? `<span>· ${t.est} ч</span>` : ''}${checkProgress(t)}${t.comments.length ? `<span title="Комментарии">${ic('comment', 13)}${t.comments.length}</span>` : ''}${t.links.length + t.files.length ? `<span title="Вложения">${ic('clip', 13)}${t.links.length + t.files.length}</span>` : ''}</div>`;
+  const meta = kind === 'mini' ? '' : `<div class="meta">${pr ? `<span class="chip"><span class="pdot" style="background:${pr.hue}"></span>${esc(pr.name)}</span>` : ''}${t.repeat ? `<span title="Повторяется: ${esc(repeatLabel(t.repeat))}">↻</span>` : ''}${t.tag ? `<span class="chip">${esc(t.tag)}</span>` : ''}${cardDue(t)}${t.est ? `<span>${ic('clock', 13)}<i class="ci-dot">· </i>${t.est} ч</span>` : ''}${checkProgress(t)}${t.comments.length ? `<span title="Комментарии">${ic('comment', 13)}${t.comments.length}</span>` : ''}${t.links.length + t.files.length ? `<span title="Вложения">${ic('clip', 13)}${t.links.length + t.files.length}</span>` : ''}</div>`;
   const who = kind === 'board' ? `<div class="meta"><span class="who">${t.assignee ? ava(person(t.assignee), true) + esc(person(t.assignee)?.name) : 'Без исполнителя'}</span></div>` : '';
   // tree marks: a subtask names its parent, a parent shows how many subtasks are done
   const par = t.parent && byId(t.parent), sub = kids(t.id).length ? rollup(t) : null;
@@ -2675,7 +2750,7 @@ function card(t, kind){
   const stg = staged(t) ? `<div class="meta"><span class="chip" title="Этапы">этап ${Math.min(t.stages.filter(s => s.done).length + 1, t.stages.length)}/${t.stages.length}</span><span class="ava-stack">${t.stages.map(s => { const sp = person(s.assignee); return sp ? `<span class="${s === curStage(t) ? 'now' : s.done ? 'past' : ''}" title="${esc(s.title)}: ${esc(sp.name)}${s.done ? ', готово' : ''}">${ava(sp, true)}</span>` : ''; }).join('')}</span></div>` : '';
   const tree = (par ? `<div class="parent-of" title="Входит в ${esc(par.id)}">↳ <span>в ${esc(par.id)} · ${esc(par.title)}</span></div>` : '') +
     (sub && kind !== 'mini' ? `<div class="meta"><span class="prog" title="Готово подзадач"><i><b style="width:${sub.done / sub.total * 100}%"></b></i>подзадачи ${sub.done}/${sub.total}</span></div>` : '');
-  return `<button class="task" draggable="true" data-id="${esc(t.id)}" aria-label="${esc(t.title)}, открыть">
+  return `<button class="task pr-${t.prio}" draggable="true" data-id="${esc(t.id)}" aria-label="${esc(t.title)}, открыть">
     <div class="top"><span class="id">${esc(t.id)}</span>${head}</div><h3>${esc(t.title)}</h3>${tree}${stg}${meta}${who}</button>`;
 }
 const byPrio = (a, b) => ({high:0, med:1, low:2}[a.prio] - {high:0, med:1, low:2}[b.prio]) || (a.due || '9').localeCompare(b.due || '9');
@@ -4166,7 +4241,7 @@ function openTplEditor(id){
 }
 
 /* ---------- personal settings: kept in this browser, separately for each person chosen in «Я: …» ---------- */
-const PREF_DEFAULT = {theme: 'system', accent: 'blue', density: 'normal', width: 'normal', nav: 'top', hidden: [], start: 'last'};
+const PREF_DEFAULT = {theme: 'system', accent: 'blue', density: 'normal', width: 'normal', nav: 'top', navIcons: 'both', navGroups: 'on', bottomBar: 'on', cardIcons: 'on', prioBar: 'on', hidden: [], start: 'last'};
 const VIEW_NAMES = {team: 'Распределение', board: 'Канбан', tree: 'Дерево', proj: 'Проекты', tpl: 'Шаблоны', load: 'Загрузка', log: 'Журнал', report: 'Отчёты', cal: 'Календарь', chat: 'Чат', kb: 'База знаний', people: 'Сотрудники'};
 const ACCENTS = {blue: ['Синий', '#2B54E0'], green: ['Зелёный', '#0F7A55'], violet: ['Фиолетовый', '#6A4BC4'], orange: ['Оранжевый', '#C2570C'], graphite: ['Графит', '#3D4451']};
 const prefKey = () => 'planerka.prefs.' + (meId || 'boss');
@@ -4182,11 +4257,44 @@ function loadPrefs(){
   applyPrefs();
 }
 const savePrefs = () => { try { localStorage.setItem(prefKey(), JSON.stringify(prefs)); } catch {} };
+/* the menu: each view gets a Tabler icon; the text sits in a span so the menu can show icons, text or both */
+const VIEW_ICONS = {team: 'layoutColumns', board: 'layoutKanban', tree: 'sitemap', proj: 'folders', tpl: 'template', load: 'chartBar', log: 'history', report: 'reportAnalytics', cal: 'calendar', chat: 'messages', kb: 'book2', people: 'users'};
+const NAV_GROUPS = [['Работа', ['team', 'board', 'tree', 'cal']], ['Команда', ['chat', 'people']], ['Знания', ['kb', 'proj', 'tpl']], ['Аналитика', ['load', 'report', 'log']]];
+const navSeg = $('header .seg[aria-label="Вид"]'), navBtns = [...navSeg.children];
+for (const b of navBtns){
+  const t = [...b.childNodes].find(n => n.nodeType === 3 && n.data.trim()), sp = document.createElement('span');
+  sp.className = 'nv-tx'; sp.textContent = t.data.trim(); t.replaceWith(sp);
+  b.insertAdjacentHTML('afterbegin', ic(VIEW_ICONS[b.dataset.view], 18));
+  b.title = sp.textContent;
+}
+const navHeads = NAV_GROUPS.map(([name]) => Object.assign(document.createElement('span'), {className: 'nv-grp', textContent: name}));
+$('#nav-toggle').onclick = () => { prefs.nav = prefs.nav === 'rail' ? 'side' : 'rail'; savePrefs(); applyPrefs(); };
+// on a phone: the main views under the thumb, the rest behind «Ещё»
+const BBAR = ['team', 'cal', 'chat', 'kb'];
+$('#bbar').innerHTML = BBAR.map(v => `<button type="button" data-view="${v}">${ic(VIEW_ICONS[v], 22)}<span>${{team: 'Задачи', cal: 'Календарь', chat: 'Чат', kb: 'Знания'}[v]}</span>${v === 'chat' ? '<span class="badge" id="bbar-badge" hidden></span>' : ''}</button>`).join('')
+  + `<button type="button" id="bbar-more" aria-haspopup="menu">${ic('dots', 22)}<span>Ещё</span></button>`;
+$('#bbar-more').onclick = e => { const r = e.currentTarget.getBoundingClientRect(); openCtx(r.right - 220, r.top - 8, Object.entries(VIEW_NAMES).filter(([v]) => !BBAR.includes(v) && !prefs.hidden.includes(v)).map(([v, l]) => ({label: l, icon: ic(VIEW_ICONS[v], 16), checked: view === v, run: () => setView(v)}))); };
+function navLayout(){
+  const grouped = prefs.navGroups !== 'off', btn = v => navBtns.find(b => b.dataset.view === v);
+  navSeg.replaceChildren(...(grouped ? NAV_GROUPS.flatMap(([, ids], i) => [navHeads[i], ...ids.map(btn)]) : navBtns));
+  // a group whose every tab is switched off loses its heading too
+  NAV_GROUPS.forEach(([, ids], i) => { navHeads[i].hidden = ids.every(v => prefs.hidden.includes(v)); });
+  const t = $('#nav-toggle'), rail = prefs.nav === 'rail';
+  t.innerHTML = ic(rail ? 'layoutSidebarLeftExpand' : 'layoutSidebarLeftCollapse', 18) + `<span class="nv-tx">${rail ? 'Развернуть меню' : 'Свернуть меню'}</span>`;
+  t.title = rail ? 'Развернуть меню' : 'Свернуть меню в узкую полосу';
+}
 function applyPrefs(){
   const r = document.documentElement;
   r.dataset.theme = prefs.theme === 'system' ? (sysDark.matches ? 'dark' : 'light') : prefs.theme;
   r.dataset.accent = prefs.accent;
-  document.body.classList.toggle('nav-side', prefs.nav === 'side');
+  document.body.classList.toggle('nav-side', prefs.nav === 'side' || prefs.nav === 'rail');
+  document.body.classList.toggle('nav-rail', prefs.nav === 'rail');
+  document.body.classList.toggle('nav-icons', prefs.navIcons === 'icons');
+  document.body.classList.toggle('nav-text', prefs.navIcons === 'text');
+  document.body.classList.toggle('bbar-on', prefs.bottomBar !== 'off');
+  document.body.classList.toggle('card-icons', prefs.cardIcons !== 'off');
+  document.body.classList.toggle('prio-bar', prefs.prioBar !== 'off');
+  navLayout();
   document.body.classList.toggle('compact', prefs.density === 'compact');
   document.body.classList.toggle('full', prefs.width === 'full');
   document.querySelectorAll('header [data-view]').forEach(b => b.hidden = prefs.hidden.includes(b.dataset.view));
@@ -4204,10 +4312,15 @@ function drawSettings(){
       <div class="set-row"><span>Тема</span>${seg('theme', {light: 'Светлая', dark: 'Тёмная', system: 'Как в системе'})}</div>
       <div class="set-row"><span>Цвет акцента</span><div class="set-acc">${Object.entries(ACCENTS).map(([k, [l, c]]) => `<button type="button" data-pref="accent" data-val="${k}" aria-pressed="${prefs.accent === k}" title="${l}" aria-label="${l}" style="background:${c}"></button>`).join('')}</div></div>
       <div class="set-row"><span>Плотность</span>${seg('density', {normal: 'Обычная', compact: 'Компактная'})}</div>
+      <div class="set-row"><span>Значки в карточках</span>${seg('cardIcons', {on: 'Показывать', off: 'Не показывать'})}</div>
+      <div class="set-row"><span>Полоса приоритета</span>${seg('prioBar', {on: 'Показывать', off: 'Не показывать'})}</div>
       <div class="set-row"><span>Ширина страницы</span>${seg('width', {normal: 'Обычная', full: 'Вся ширина окна'})}</div>
     </section>
     <section><h4 class="sec-t">Меню</h4>
-      <div class="set-row"><span>Расположение</span>${seg('nav', {top: 'Сверху', side: 'Сбоку'})}</div>
+      <div class="set-row"><span>Расположение</span>${seg('nav', {top: 'Сверху', side: 'Сбоку', rail: 'Узкая полоса'})}</div>
+      <div class="set-row"><span>Пункты меню</span>${seg('navIcons', {both: 'Значок и название', text: 'Только название', icons: 'Только значок'})}</div>
+      <div class="set-row"><span>Порядок пунктов</span>${seg('navGroups', {on: 'По группам', off: 'Подряд'})}</div>
+      <div class="set-row"><span>На телефоне</span>${seg('bottomBar', {on: 'Панель внизу', off: 'Меню сверху'})}</div>
       <div class="set-row top"><span>Вкладки в меню</span><div class="set-checks">${Object.entries(VIEW_NAMES).map(([v, l]) => `<label class="chk"><input type="checkbox" data-vis="${v}" ${prefs.hidden.includes(v) ? '' : 'checked'}> ${l}</label>`).join('')}</div></div>
       <div class="set-row"><span>Открывать при запуске</span><select id="set-start" class="sel"><option value="last">Последний открытый вид</option>${Object.entries({...VIEW_NAMES, cab: 'Личный кабинет'}).map(([v, l]) => `<option value="${v}" ${prefs.start === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
       <p class="note">На телефоне меню всегда сверху. Скрытые вкладки по-прежнему открываются из палитры команд и цифрами на клавиатуре.</p>
@@ -4682,6 +4795,7 @@ function renderChatBits(toBottom = false){
   }
   const n = [...new Set(db.chat.map(chatPeer))].filter(c => c && !chatMuted(c)).reduce((a, c) => a + chatUnread(c, read), 0), b = $('#chat-badge');
   b.hidden = !n; b.textContent = n;
+  const bb = $('#bbar-badge'); if (bb){ bb.hidden = !n; bb.textContent = n; }
   renderBell(read);
   if (view === 'chat') renderChat(read, toBottom);
 }
