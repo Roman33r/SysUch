@@ -991,7 +991,11 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .cal-side,.cal-day,.cal-main{background:var(--surface);border:1px solid var(--line);border-radius:14px;min-width:0}
 .cal-side{padding:12px;display:grid;gap:6px;font-size:14px}
 .cal-side h3{margin:4px 0 2px;font:500 12px var(--f-display);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.cal-side label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.cal-side label{display:flex;gap:8px;align-items:flex-start;cursor:pointer;min-width:0}
+.cal-side label input,.cal-side label .cal-sw{margin-top:4px;flex:none}
+.cal-nm{min-width:0;overflow-wrap:anywhere}
+.cal-nm small{display:block;font-size:12px;color:var(--muted)}
+.cal-side .btn{width:100%;white-space:normal;display:inline-flex;gap:6px;align-items:center;justify-content:center}
 .cal-side input{accent-color:var(--accent)}
 .cal-sw{width:10px;height:10px;border-radius:3px;flex:none}
 .cal-main{overflow:hidden;--cal-line:color-mix(in srgb,var(--fg) 13%,var(--surface));--cal-day:color-mix(in srgb,var(--fg) 4%,var(--surface))}
@@ -2077,7 +2081,7 @@ function remember(work, revs, mtime){
   file.work = work; file.mtime = mtime; file.rev = revs.at(-1) || '';
   file.history.set(file.rev, work);
   if (file.history.size > REVS_MAX) file.history.delete(file.history.keys().next().value);
-  idbSet('base', {name: file.name, work, rev: file.rev});
+  idbSet('base', {name: file.name, work, rev: file.rev, savedAt: db?.savedAt || ''});
 }
 // the newest version of ours the file's author had seen. Older than file.work when two people wrote at the same moment and one write overwrote the other
 function baseFor(data){
@@ -2269,7 +2273,12 @@ async function useHandle(h){
 async function loadFromHandle(){
   const f = await file.handle.getFile();
   const saved = await idbGet('base');
-  if (saved?.name === file.name && saved.work){
+  // another tab may have saved newer data than this page read when it opened (it sat on the login screen, say)
+  try { const ls = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (ls?.savedAt && ls.savedAt > (db.savedAt || '')) db = {...migrate(ls), blobs: db.blobs}; } catch {}
+  // a browser copy older than the remembered base would look like «I deleted everything since»: the server wins then
+  // a base kept by an older version has no date: the safe way then is the plain load below, which asks if the browser has newer edits
+  const stale = !saved?.savedAt || (db.savedAt || '') < saved.savedAt;
+  if (saved?.name === file.name && saved.work && !stale){
     // what changed on both sides while the file was closed is merged like any other change
     file.work = saved.work; file.rev = saved.rev || ''; file.history.set(file.rev, saved.work); file.mtime = 0;
     const merged = await pullFile(f);
@@ -2280,7 +2289,7 @@ async function loadFromHandle(){
   }
   const data = await parseFile(f);
   // local edits made while the file was unreachable must not vanish silently
-  if (db.savedAt && data.savedAt && db.savedAt > data.savedAt && !sameData(db, data))
+  if (!stale && db.savedAt && data.savedAt && db.savedAt > data.savedAt && !sameData(db, data))
     return conflict(data, f.lastModified, `В браузере есть изменения новее, чем ${onServer() ? 'на сервере' : 'в файле'}.`);
   Object.assign(data, chatOf(db, data));
   db = data; remember(workKey(data), data.revs, f.lastModified); saveLocal(); render();
@@ -2361,6 +2370,13 @@ function askClashes(r, data, k, mtime){
 }
 
 let pending = null;
+// what the other side has and this browser doesn't: lost if the browser copy is written over it
+function calLoss(mine, theirs){
+  const miss = (coll, key = x => x.id) => { const have = new Set(mine[coll].map(key)); return theirs[coll].filter(x => !have.has(key(x))).length; };
+  const n = {задач: miss('tasks'), статей: miss('docs'), событий: miss('cal'), сотрудников: miss('people')}, ph = theirs.people.filter(p => p.photo && !mine.people.find(q => q.id === p.id)?.photo).length;
+  const parts = Object.entries(n).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).concat(ph ? [`фото сотрудников: ${ph}`] : []);
+  return parts.length ? `Только ${onServer() ? 'на сервере' : 'в файле'} есть — ${parts.join(', ')}. Если записать данные браузера, это пропадёт.` : 'Если сомневаетесь, возьмите данные с сервера: версия браузера останется в резервной копии.';
+}
 function conflict(data, mtime, reason){
   pending = {data, mtime};
   Object.assign(data, chatOf(db, data)); db.chat = data.chat; db.rooms = data.rooms; db.marks = data.marks; // messages survive whichever version wins
@@ -2368,9 +2384,12 @@ function conflict(data, mtime, reason){
   d.innerHTML = `<div class="d-head"><h2>Данные ${onServer() ? 'на сервере' : 'в файле'} и в браузере различаются</h2></div>
     <div class="d-body"><p class="note">${esc(reason)}</p>
     <p class="note">${onServer() ? 'На сервере' : 'Файл'} сохранён: ${data.savedAt ? fmtStamp(data.savedAt) : 'неизвестно'} · в браузере: ${db.savedAt ? fmtStamp(db.savedAt) : 'неизвестно'}. Вторую версию сохраню в резервную копию, её можно будет восстановить в меню хранения.</p></div>
-    <div class="d-foot"><button class="btn" id="cf-file">Взять данные ${onServer() ? 'с сервера' : 'из файла'}</button><span class="spacer"></span><button class="btn primary" id="cf-local">Записать ${onServer() ? 'на сервер' : 'в файл'} данные браузера</button></div>`;
+    <p class="note">${calLoss(db, data)}</p></div>
+    <div class="d-foot"><button class="btn danger" id="cf-local">Записать ${onServer() ? 'на сервер' : 'в файл'} данные браузера</button><span class="spacer"></span><button class="btn primary" id="cf-file">Взять данные ${onServer() ? 'с сервера' : 'из файла'}</button></div>`;
   d.querySelector('#cf-file').onclick = () => { backupLocal('Версия браузера при расхождении'); db = pending.data; remember(workKey(db), db.revs, pending.mtime); saveLocal(); d.close(); render(); };
-  d.querySelector('#cf-local').onclick = async () => {
+  d.querySelector('#cf-local').onclick = async e => {
+    const b = e.currentTarget;
+    if (!b.dataset.armed){ b.dataset.armed = 1; b.textContent = `Точно заменить? ${onServer() ? 'Сервер' : 'Файл'} потеряет своё`; return; }
     snapshot(pending.data, 'Версия файла при расхождении');
     db.blobs = {...pending.data.blobs, ...db.blobs}; // the browser copy has no attachment contents; keep the file's
     db.revs = pending.data.revs;
@@ -5367,7 +5386,7 @@ function renderCal(){
     : v === 'quarter' ? `${['I', 'II', 'III', 'IV'][Math.floor((+from.slice(5, 7) - 1) / 3)]} квартал ${from.slice(0, 4)}` : from.slice(0, 4);
   // calendars: mine and those shared with me
   const me = chatMe();
-  $('#cal-side').innerHTML = `<h3>Календари</h3>${calOwners().map((o, i) => `<label><input type="checkbox" data-cal-on="${esc(o)}" ${ui.calOff.includes(o) ? '' : 'checked'}><span class="cal-sw" style="background:${person(o)?.hue || CAL_COLORS[i % 5]}"></span>${o === me ? 'Мой' : esc(chatName(o))}${o === me ? '' : `<span class="note" title="${esc(CAL_LEVEL[calLevel(o)])}">· ${calLevel(o) === 'busy' ? 'занят' : calLevel(o) === 'edit' ? 'правка' : 'просмотр'}</span>`}</label>`).join('')}
+  $('#cal-side').innerHTML = `<h3>Календари</h3>${calOwners().map((o, i) => `<label><input type="checkbox" data-cal-on="${esc(o)}" ${ui.calOff.includes(o) ? '' : 'checked'}><span class="cal-sw" style="background:${person(o)?.hue || CAL_COLORS[i % 5]}"></span><span class="cal-nm">${o === me ? 'Мой' : esc(chatName(o))}${o === me ? '' : `<small title="${esc(CAL_LEVEL[calLevel(o)])}">${calLevel(o) === 'busy' ? 'только «занят»' : calLevel(o) === 'edit' ? 'просмотр и правка' : 'просмотр'}</small>`}</span></label>`).join('')}
     <label><input type="checkbox" data-cal-tasks ${ui.calNoTasks ? '' : 'checked'}><span class="cal-sw" style="background:var(--accent)"></span>Сроки задач</label>
     <button type="button" class="btn small" data-cal-share style="margin-top:8px">${ic('lockOpen', 15)} Доступ к моему календарю</button>
     <p class="note">Коллеги, которым вы дали доступ, увидят ваш календарь у себя в этом списке.</p>`;
