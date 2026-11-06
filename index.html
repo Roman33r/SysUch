@@ -970,6 +970,22 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .kb-call::before{display:block;margin-bottom:4px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--cc)}
 .kb-call > :last-child{margin-bottom:0}
 .kb-call .kb-call{margin:8px 0}
+.kb-check{list-style:none;padding-left:0;margin:6px 0 10px}
+.kb-check li{position:relative;padding-left:28px;margin:4px 0}
+.kb-check li::before{content:"";position:absolute;left:0;top:.25em;width:17px;height:17px;box-sizing:border-box;border:2px solid var(--muted);border-radius:5px;cursor:pointer;background:var(--surface)}
+.kb-check li[data-done]::before{background:var(--low);border-color:var(--low)}
+.kb-check li[data-done]::after{content:"";position:absolute;left:6px;top:calc(.25em + 2px);width:4px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);pointer-events:none}
+.kb-check li[data-done]{color:var(--muted);text-decoration:line-through}
+.kb-fold{margin:10px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.kb-fold-h{position:relative;padding:8px 12px 8px 34px;font-weight:600;cursor:pointer;border-radius:10px}
+.kb-doc .kb-fold-h:hover,.kb-doc .kb-fold-h:focus-visible{background:var(--sunken)}
+.kb-fold-h::before{content:"";position:absolute;left:14px;top:50%;width:6px;height:6px;border:solid var(--muted);border-width:0 2px 2px 0;transform:translateY(-50%) rotate(-45deg);transition:transform .15s}
+.kb-fold.open > .kb-fold-h::before,.kb-ed .kb-fold-h::before{transform:translateY(-70%) rotate(45deg)}
+.kb-fold-b{padding:2px 14px 8px 34px}
+.kb-fold-b > :last-child{margin-bottom:0}
+.kb-doc .kb-fold:not(.open) > .kb-fold-b{display:none}
+.kb-ed .kb-fold{border-style:dashed}
+.kb-ed .kb-fold-h{cursor:text}
 .kb-c-info{--cc:var(--accent)} .kb-c-info::before{content:"Заметка"}
 .kb-c-tip{--cc:var(--low)} .kb-c-tip::before{content:"Подсказка"}
 .kb-c-warn{--cc:var(--med)} .kb-c-warn::before{content:"Предупреждение"}
@@ -1551,6 +1567,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
           <li><b>Папки.</b> Кнопка с папкой создаёт папку, «⋯» у папки (или правая кнопка) — статья или папка внутри, переименовать, вынести, удалить. Вложенность любая. Статьи и папки перетаскиваются мышью на другую папку или на пустое место списка (верхний уровень). При удалении папки её содержимое переезжает на уровень выше. Разделы из прежних версий стали папками.</li>
           <li><b>Написать.</b> «+ Статья»: название, папка и текст. Ctrl+S или «Сохранить».</li>
           <li><b>Таблица.</b> Кнопка с таблицей вставляет таблицу 3×3 с заголовком. Когда курсор в ячейке, в панели появляются «+ строка», «+ столбец», «− строка», «− столбец» и «Удалить таблицу». Таблицу из Excel, Google Таблиц или Word скопируйте и вставьте через Ctrl+V. Ширину столбца меняет перетаскивание правой границы ячейки, высоту строки — нижней.</li>
+          <li><b>Чек-лист и сворачиваемый текст.</b> Кнопка с галочками вставляет чек-лист: Enter добавляет пункт, квадратик слева отмечает его (в редакторе отметка сохраняется, при чтении — только на вашем экране). Кнопка со стрелкой вставляет сворачиваемый текст: заголовок и скрытый под ним текст, который раскрывается нажатием при чтении.</li>
           <li><b>Блоки.</b> Список «Блок» → «Вставить»: заметка, подсказка, предупреждение или важно — цветная рамка с заголовком. Выделенный текст попадёт в блок. Если курсор уже в блоке, новый блок вставится внутрь него, например предупреждение в заметке. «Блок, где курсор» меняет вид ближайшего блока или убирает его.</li>
           <li><b>Оформление.</b> Стиль абзаца (заголовок, цитата, код), шрифт, размер, цвет текста и фона, жирный (Ctrl+B), наклонный (Ctrl+I), подчёркнутый (Ctrl+U), зачёркнутый, списки, выравнивание, ссылки, разделитель, «Убрать оформление».</li>
           <li><b>Картинки и файлы.</b> Кнопка с картинкой, перетаскивание в текст или вставка из буфера (Ctrl+V). Кнопка со скрепкой прикрепляет любой файл, в статье он скачивается по нажатию. До 5 МБ каждый, большие фото уменьшаются. Нужна база данных или общий JSON-файл.</li>
@@ -1766,7 +1783,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 17;
+const SCHEMA = 18;
 const CHAT_MAX = 2000, CHAT_TEXT_MAX = 2000; // localStorage holds about 5 MB per site, so old messages drop off
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
@@ -1961,8 +1978,8 @@ const ABSENT = {vac: ['Отпуск', 'в отпуске', '#0F8A6A'], away: ['�
 const normShare = x => ({id: String(x.id ?? '').slice(0, 40), list: (Array.isArray(x.list) ? x.list : []).filter(y => y && Object.hasOwn(CAL_LEVEL, y.level) && y.to).map(y => ({to: String(y.to).slice(0, 40), level: y.level}))});
 const normDoc = d => { const s = (v, max) => String(v ?? '').slice(0, max);
   return {id: s(d.id, 40), title: s(d.title, 200).trim() || 'Без названия', section: s(d.section, 60).trim(), folder: !!d.folder, parent: s(d.parent, 40), html: d.folder ? '' : s(d.html, KB_HTML_MAX), task: s(d.task, 40), project: s(d.project, 40), author: s(d.author, 40), createdAt: s(d.createdAt, 40), updatedAt: s(d.updatedAt, 40), updatedBy: s(d.updatedBy, 40)}; };
-const KB_START_AT = '2026-11-06T00:00:00.000Z';
-const KB_HOWTO = `<p>Здесь собраны инструкции команды: как сделать отчёт, где лежат документы, что проверить перед закрытием месяца. Писать может любой сотрудник, изменить статью — автор и руководители.</p><h2>1. Выберите или создайте папку</h2><p>Слева — дерево папок. Кнопка с папкой рядом с «+ Статья» создаёт папку на верхнем уровне. У каждой папки есть меню «⋯» (или правая кнопка мыши): новая статья в папке, папка внутри, переименовать, вынести, удалить. Вложенность любая.</p><div class="kb-call kb-c-tip"><p>Статьи и папки можно перетаскивать мышью на другую папку. На пустое место списка — чтобы вынести на верхний уровень.</p></div><h2>2. Напишите статью</h2><ol><li>Нажмите «+ Статья» или «Новая статья в папке» в меню папки.</li><li>Введите название — по нему статью будут искать.</li><li>Выберите папку, а если инструкция к задаче или проекту — укажите их: статья появится в меню задачи («Инструкции к задаче»).</li><li>Напишите текст и нажмите «Сохранить» или Ctrl+S.</li></ol><h2>3. Оформление</h2><table><thead><tr><th style="width: 30%">Что нужно</th><th style="width: 70%">Как сделать</th></tr></thead><tbody><tr><td>Заголовок, цитата, код</td><td>Список «Стиль» на панели</td></tr><tr><td>Жирный, наклонный, подчёркнутый</td><td>Кнопки Ж, К, Ч или Ctrl+B, Ctrl+I, Ctrl+U</td></tr><tr><td>Списки</td><td>Кнопки маркированного и нумерованного списка</td></tr><tr><td>Картинка</td><td>Кнопка с картинкой, перетаскивание или Ctrl+V. Нажмите на картинку, чтобы изменить её ширину</td></tr><tr><td>Файл</td><td>Кнопка со скрепкой: файл можно будет скачать из статьи</td></tr><tr><td>Таблица</td><td>Кнопка с таблицей или Ctrl+V из Excel. Ширину столбца и высоту строки меняйте, перетаскивая границу ячейки</td></tr><tr><td>Ссылка на задачу</td><td>Просто напишите номер, например PLN-1: он станет ссылкой</td></tr></tbody></table><h2>4. Блоки: заметки, подсказки, предупреждения</h2><p>Список «Блок» на панели вставляет цветную рамку с заголовком. Блок можно вставить внутрь другого — например, предупреждение в заметку.</p><div class="kb-call kb-c-info"><p>Заметка — пояснение или контекст.</p><div class="kb-call kb-c-warn"><p>Предупреждение — то, что легко сделать неправильно.</p></div></div><div class="kb-call kb-c-tip"><p>Подсказка — способ сделать быстрее или удобнее.</p></div><div class="kb-call kb-c-danger"><p>Важно — то, что нельзя пропустить: иначе потеряются данные или деньги.</p></div><h2>5. Как найти статью</h2><p>Поиск сверху ищет по названию, тексту, номеру и названию задачи, проекту и папке. Фильтры «Все задачи» и «Все проекты» оставляют статьи одной задачи или проекта.</p><div class="kb-call kb-c-tip"><p>Эту статью и папку «Планёрка» можно менять и удалять, как любые другие.</p></div>`;
+const KB_START_AT = '2026-11-06T00:00:00.000Z', KB_HOWTO_AT = '2026-11-07T00:00:00.000Z';
+const KB_HOWTO = `<p>Здесь собраны инструкции команды: как сделать отчёт, где лежат документы, что проверить перед закрытием месяца. Писать может любой сотрудник, изменить статью — автор и руководители.</p><h2>1. Выберите или создайте папку</h2><p>Слева — дерево папок. Кнопка с папкой рядом с «+ Статья» создаёт папку на верхнем уровне. У каждой папки есть меню «⋯» (или правая кнопка мыши): новая статья в папке, папка внутри, переименовать, вынести, удалить. Вложенность любая.</p><div class="kb-call kb-c-tip"><p>Статьи и папки можно перетаскивать мышью на другую папку. На пустое место списка — чтобы вынести на верхний уровень.</p></div><h2>2. Напишите статью</h2><ol><li>Нажмите «+ Статья» или «Новая статья в папке» в меню папки.</li><li>Введите название — по нему статью будут искать.</li><li>Выберите папку, а если инструкция к задаче или проекту — укажите их: статья появится в меню задачи («Инструкции к задаче»).</li><li>Напишите текст и нажмите «Сохранить» или Ctrl+S.</li></ol><h2>3. Оформление</h2><table><thead><tr><th style="width: 30%">Что нужно</th><th style="width: 70%">Как сделать</th></tr></thead><tbody><tr><td>Заголовок, цитата, код</td><td>Список «Стиль» на панели</td></tr><tr><td>Жирный, наклонный, подчёркнутый</td><td>Кнопки Ж, К, Ч или Ctrl+B, Ctrl+I, Ctrl+U</td></tr><tr><td>Списки</td><td>Кнопки маркированного и нумерованного списка</td></tr><tr><td>Картинка</td><td>Кнопка с картинкой, перетаскивание или Ctrl+V. Нажмите на картинку, чтобы изменить её ширину</td></tr><tr><td>Файл</td><td>Кнопка со скрепкой: файл можно будет скачать из статьи</td></tr><tr><td>Таблица</td><td>Кнопка с таблицей или Ctrl+V из Excel. Ширину столбца и высоту строки меняйте, перетаскивая границу ячейки</td></tr><tr><td>Ссылка на задачу</td><td>Просто напишите номер, например PLN-1: он станет ссылкой</td></tr></tbody></table><h2>4. Блоки: заметки, подсказки, предупреждения</h2><p>Список «Блок» на панели вставляет цветную рамку с заголовком. Блок можно вставить внутрь другого — например, предупреждение в заметку.</p><div class="kb-call kb-c-info"><p>Заметка — пояснение или контекст.</p><div class="kb-call kb-c-warn"><p>Предупреждение — то, что легко сделать неправильно.</p></div></div><div class="kb-call kb-c-tip"><p>Подсказка — способ сделать быстрее или удобнее.</p></div><div class="kb-call kb-c-danger"><p>Важно — то, что нельзя пропустить: иначе потеряются данные или деньги.</p></div><h2>5. Чек-лист и сворачиваемый текст</h2><p><b>Чек-лист</b> — кнопка с галочками на панели. Каждая строка — пункт, Enter добавляет следующий. Квадратик слева отмечает пункт: в редакторе отметка сохраняется вместе со статьёй, а при чтении — только у вас на экране, пока открыта статья. Удобно для порядка действий: каждый идёт по списку и отмечает сделанное.</p><ul class="kb-check"><li data-done="1">Сформировать отчёт за месяц</li><li>Сверить суммы УУ и БУ</li><li>Отправить отчёт руководителю</li></ul><p><b>Сворачиваемый текст</b> — кнопка со стрелкой. Сверху заголовок, под ним текст, который при чтении скрыт, пока не нажать на заголовок. В редакторе он всегда раскрыт. Подходит для длинных подробностей, примеров и ответов на частые вопросы.</p><div class="kb-fold"><div class="kb-fold-h">Нажмите, чтобы раскрыть пример</div><div class="kb-fold-b"><p>Внутри сворачиваемого текста можно писать что угодно: списки, таблицы, картинки и даже блоки.</p><div class="kb-call kb-c-tip"><p>Например, подсказку.</p></div></div></div><h2>6. Как найти статью</h2><p>Поиск сверху ищет по названию, тексту, номеру и названию задачи, проекту и папке. Фильтры «Все задачи» и «Все проекты» оставляют статьи одной задачи или проекта.</p><div class="kb-call kb-c-tip"><p>Эту статью и папку «Планёрка» можно менять и удалять, как любые другие.</p></div>`;
 const kbBlobIds = html => [...html.matchAll(/data-blob="([\w-]{1,40})"/g)].map(m => m[1]);
 // key -> {at, v}: each person writes only their own keys, the later write wins, so two copies merge without conflicts
 const normMarks = o => Object.fromEntries(Object.entries(o && typeof o === 'object' ? o : {}).filter(([, x]) => typeof x?.at === 'string').map(([k, x]) => [k.slice(0, 120), {at: x.at.slice(0, 40), v: typeof x.v === 'boolean' ? x.v : String(x.v ?? '').slice(0, 40)}]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
@@ -2121,8 +2138,10 @@ function migrate(raw){
   // v16 -> v17: a starter folder with an article on writing articles; fixed ids, so two computers upgrading apart add the same ones
   if (v < 17 && !docIds.has('kb-planerka')){
     docIds.add('kb-planerka'); docs.push(normDoc({id: 'kb-planerka', folder: true, title: 'Планёрка', author: 'boss', createdAt: KB_START_AT, updatedAt: KB_START_AT}));
-    if (!docIds.has('kb-howto')){ docIds.add('kb-howto'); docs.push(normDoc({id: 'kb-howto', parent: 'kb-planerka', title: 'Как создавать инструкции', html: KB_HOWTO, author: 'boss', createdAt: KB_START_AT, updatedAt: KB_START_AT})); }
+    if (!docIds.has('kb-howto')){ docIds.add('kb-howto'); docs.push(normDoc({id: 'kb-howto', parent: 'kb-planerka', title: 'Как создавать инструкции', html: KB_HOWTO, author: 'boss', createdAt: KB_START_AT, updatedAt: KB_HOWTO_AT})); }
   }
+  // v17 -> v18: the starter article learns about checklists and folding text, unless someone already changed it
+  if (v < 18){ const h = docs.find(d => d.id === 'kb-howto'); if (h && h.updatedAt === KB_START_AT){ h.html = KB_HOWTO; h.updatedAt = KB_HOWTO_AT; } }
   // a parent must be an existing folder and never the doc itself or one inside it
   const folderIds = new Set(docs.filter(d => d.folder).map(d => d.id)), byDocId = new Map(docs.map(d => [d.id, d]));
   for (const d of docs){
@@ -6077,7 +6096,9 @@ function kbClean(html){
         if (/^[\w\s,'"-]{1,80}$/.test(attr('face'))) keep.face = attr('face');
         if (/^[1-7]$/.test(attr('size'))) keep.size = attr('size');
       }
-      if (tag === 'DIV' && /^kb-call kb-c-(info|tip|warn|danger)$/.test(attr('class').trim())) keep.class = attr('class').trim();
+      if (tag === 'DIV' && /^(kb-call kb-c-(info|tip|warn|danger)|kb-fold|kb-fold-h|kb-fold-b)$/.test(attr('class').trim())) keep.class = attr('class').trim();
+      if (tag === 'UL' && attr('class').trim() === 'kb-check') keep.class = 'kb-check';
+      if (tag === 'LI' && attr('data-done') === '1') keep['data-done'] = '1';
       if (tag === 'TD' || tag === 'TH') for (const k of ['colspan', 'rowspan']) if (/^\d{1,2}$/.test(attr(k))) keep[k] = attr(k);
       const cell = (tag === 'TD' || tag === 'TH') ? [/^\d{1,4}(\.\d+)?(px|%)$/.test(n.style.width) ? `width: ${n.style.width}` : '', /^\d{1,4}(\.\d+)?px$/.test(n.style.height) ? `height: ${n.style.height}` : ''].filter(Boolean).join('; ') : '';
       const w = /* read before the attributes go */ tag === 'IMG' && /^\d{1,3}(\.\d+)?%$/.test(n.style.width) ? `width: ${Math.min(100, parseFloat(n.style.width))}%` : '';
@@ -6180,6 +6201,7 @@ function kbShow(){
   const w = document.createTreeWalker(doc, NodeFilter.SHOW_TEXT), nodes = [];
   while (w.nextNode()) if ((/\bPLN-\d+\b/.test(w.currentNode.data) || EMO_ANY.test(w.currentNode.data)) && !w.currentNode.parentElement.closest('a')) nodes.push(w.currentNode);
   for (const t of nodes){ const span = document.createElement('span'); span.innerHTML = chatText(t.data); t.replaceWith(...span.childNodes); }
+  doc.querySelectorAll('.kb-fold-h').forEach(h => { h.tabIndex = 0; h.setAttribute('role', 'button'); });
 }
 const KB_FONTS = ['Arial', 'Verdana', 'Tahoma', 'Georgia', 'Times New Roman', 'Courier New'];
 function kbStartEdit(id, link = {}){
@@ -6207,7 +6229,7 @@ function kbStartEdit(id, link = {}){
       <span class="kb-sep"></span>
       ${btn('insertUnorderedList', ic('ul'), 'Маркированный список')}${btn('insertOrderedList', ic('ol'), 'Нумерованный список')}${btn('justifyLeft', ic('alignL'), 'По левому краю')}${btn('justifyCenter', ic('alignC'), 'По центру')}${btn('justifyRight', ic('alignR'), 'По правому краю')}
       <span class="kb-sep"></span>
-      ${btn('kbLink', ic('link'), 'Ссылка')}${btn('kbImage', ic('image'), 'Вставить картинку')}${btn('kbFile', ic('clip'), 'Прикрепить файл')}${btn('insertHorizontalRule', ic('hr'), 'Разделитель')}${btn('kbTable', ic('table'), 'Вставить таблицу')}
+      ${btn('kbLink', ic('link'), 'Ссылка')}${btn('kbImage', ic('image'), 'Вставить картинку')}${btn('kbFile', ic('clip'), 'Прикрепить файл')}${btn('insertHorizontalRule', ic('hr'), 'Разделитель')}${btn('kbTable', ic('table'), 'Вставить таблицу')}${btn('kbCheck', ic('checklist'), 'Чек-лист')}${btn('kbFold', ic('chevR'), 'Сворачиваемый текст')}
       <select class="sel" data-kb-call aria-label="Блок: заметка, подсказка, предупреждение"><option value="">Блок</option><optgroup label="Вставить (можно внутрь другого)"><option value="ins:info">Заметка</option><option value="ins:tip">Подсказка</option><option value="ins:warn">Предупреждение</option><option value="ins:danger">Важно</option></optgroup><optgroup label="Блок, где курсор"><option value="set:info">Сделать заметкой</option><option value="set:tip">Сделать подсказкой</option><option value="set:warn">Сделать предупреждением</option><option value="set:danger">Сделать «Важно»</option><option value="none">Убрать блок</option></optgroup></select>
       <span class="kb-sep"></span>
       ${btn('removeFormat', ic('clear'), 'Убрать оформление')}${btn('undo', ic('undo'), 'Отменить (Ctrl+Z)')}${btn('redo', ic('redo'), 'Повторить (Ctrl+Y)')}
@@ -6488,6 +6510,10 @@ $('#kb-main').addEventListener('click', async e => {
     const f = await chatBlob(b.dataset.blob);
     return f ? download(b.dataset.name || 'файл', await (await fetch(f.data)).blob()) : toast('Файл сейчас недоступен');
   }
+  // the box in front of a checklist item ticks it: saved while editing, on this screen only while reading
+  const li = e.target.closest('.kb-check > li');
+  if (li && e.clientX - li.getBoundingClientRect().left < 24 && (kbEdit ? li.closest('#kb-ed') : li.closest('#kb-doc'))){ e.preventDefault(); if (li.hasAttribute('data-done')) li.removeAttribute('data-done'); else li.setAttribute('data-done', '1'); return; }
+  if (!kbEdit && (b = e.target.closest('#kb-doc .kb-fold-h'))) return b.parentElement.classList.toggle('open');
   if ((b = e.target.closest('#kb-doc img[src]'))) return openChatFile({id: b.dataset.blob, name: b.alt || 'Картинка', type: 'image/png', size: 0});
   if ((b = e.target.closest('[data-kb-w]'))) return kbSetWidth(+b.dataset.kbW);
   if ((b = e.target.closest('[data-kb-tbl]'))) return kbTable(b.dataset.kbTbl);
@@ -6496,6 +6522,8 @@ $('#kb-main').addEventListener('click', async e => {
     const c = b.dataset.cmd;
     if (c === 'kbImage') return $('#kb-img-in').click();
     if (c === 'kbTable') return kbExec('insertHTML', KB_TABLE);
+    if (c === 'kbCheck') return kbExec('insertHTML', `<ul class="kb-check">${(String(getSelection()).trim() ? String(getSelection()).trim().split(/\n+/) : ['']).map(l => `<li>${esc(l.trim()) || '<br>'}</li>`).join('')}</ul><p><br></p>`);
+    if (c === 'kbFold') return kbExec('insertHTML', `<div class="kb-fold"><div class="kb-fold-h">Заголовок</div><div class="kb-fold-b"><p>${esc(String(getSelection()).trim()) || '<br>'}</p></div></div><p><br></p>`);
     if (c === 'kbFile') return $('#kb-file-in').click();
     if (c === 'kbLink'){ const url = safeUrl(prompt('Адрес ссылки', 'https://')); if (url) kbExec(String(getSelection()) ? 'createLink' : 'insertHTML', String(getSelection()) ? url : `<a href="${esc(url)}">${esc(url)}</a>`); return; }
     kbExec(c);
@@ -6512,10 +6540,14 @@ $('#kb-main').addEventListener('change', e => {
 });
 $('#kb-main').addEventListener('input', e => { if (e.target.id === 'kb-imgw') kbSetWidth(+e.target.value); else if (e.target.id === 'kb-ed'){ if (!e.isComposing) emoNodes(e.target); kbHandle(); } });
 $('#kb-main').addEventListener('submit', e => { e.preventDefault(); kbSave(); });
+$('#kb-main').addEventListener('keyup', e => { if ((e.key === 'Enter' || e.key === ' ') && !kbEdit && e.target.matches('#kb-doc .kb-fold-h')) e.target.parentElement.classList.toggle('open'); });
 $('#kb-main').addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.code === 'KeyS' && kbEdit){ e.preventDefault(); kbSave(); }
   if (kbImg && e.target.id === 'kb-ed' && (e.key === 'Delete' || e.key === 'Backspace')){ e.preventDefault(); kbImg.remove(); kbPickImg(null); }
   if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.closest('#kb-form')){ e.preventDefault(); $('#kb-ed').focus(); }
+  // Enter in the heading of folding text goes on into its body rather than making a second heading
+  const an = getSelection().anchorNode, fh = e.key === 'Enter' && kbEdit && (an?.nodeType === 1 ? an : an?.parentElement)?.closest('#kb-ed .kb-fold-h');
+  if (fh){ e.preventDefault(); const body = fh.nextElementSibling?.classList.contains('kb-fold-b') ? fh.nextElementSibling : fh.insertAdjacentElement('afterend', Object.assign(document.createElement('div'), {className: 'kb-fold-b', innerHTML: '<p><br></p>'})); const r = document.createRange(); r.selectNodeContents(body.firstElementChild || body); r.collapse(true); getSelection().removeAllRanges(); getSelection().addRange(r); }
 });
 $('#kb-main').addEventListener('paste', e => {
   if (e.target.closest('#kb-ed') == null) return;
@@ -6590,7 +6622,10 @@ addEventListener('storage', e => {
   console.assert(normEv({id: 'z', start: 'bad'}).start === '' && normEv({id: 'z', start: '2026-11-02T10:00', end: '2026-11-01T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).end === '2026-11-02T10:00' && normEv({id: 'z', start: '2026-11-02T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).guests.join() === 'a', 'calendar: events are cleaned');
   const kq = migrate({version: 15, people: [], tasks: [], docs: [{id: 'a', title: 'A', section: 'Отчёты'}, {id: 'b', title: 'B', section: 'Отчёты'}, {id: 'f', folder: true, title: 'F', parent: 'g'}, {id: 'g', folder: true, title: 'G', parent: 'f'}, {id: 'c', title: 'C', parent: 'a'}]});
   const kf = kq.docs.find(d => d.folder && d.title === 'Отчёты');
-  const k17 = migrate({version: 16, people: [], tasks: [], docs: []}), k17b = migrate({version: 17, people: [], tasks: [], docs: []});
+  const k17 = migrate({version: 16, people: [], tasks: [], docs: []}), k17b = migrate({version: 18, people: [], tasks: [], docs: []});
+  const k18 = migrate({version: 17, people: [], tasks: [], docs: [{id: 'kb-howto', title: 'x', html: '<p>old</p>', updatedAt: KB_START_AT}, {id: 'kb-other', title: 'y', html: '<p>mine</p>', updatedAt: KB_START_AT}]}),
+    k18b = migrate({version: 17, people: [], tasks: [], docs: [{id: 'kb-howto', title: 'x', html: '<p>edited</p>', updatedAt: '2026-11-06T10:00:00.000Z'}]});
+  console.assert(k18.docs[0].html === KB_HOWTO && k18.docs[1].html === '<p>mine</p>' && k18b.docs[0].html === '<p>edited</p>' && KB_HOWTO.includes('kb-check') && kbClean('<ul class="kb-check x"><li data-done="1">a</li></ul><ul class="kb-check"><li data-done="yes">b</li></ul>') === '<ul><li data-done="1">a</li></ul><ul class="kb-check"><li>b</li></ul>', 'knowledge base: the starter article is refreshed unless edited; checklists are cleaned');
   console.assert(k17.docs.find(d => d.id === 'kb-howto')?.parent === 'kb-planerka' && kbClean(KB_HOWTO) === KB_HOWTO && k17b.docs.length === 0, 'knowledge base: the starter article comes once, on the upgrade, and survives cleaning');
   console.assert(kf && kq.docs.find(d => d.id === 'a').parent === kf.id && kq.docs.find(d => d.id === 'b').parent === kf.id && kq.docs.find(d => d.id === 'c').parent === '' && ['f', 'g'].some(id => kq.docs.find(d => d.id === id).parent === '')
     && migrate({version: 15, people: [], tasks: [], docs: [{id: 'a', title: 'A', section: 'Отчёты'}]}).docs.find(d => d.folder).id === kf.id, 'knowledge base: sections become folders, loops and article parents are cut');
