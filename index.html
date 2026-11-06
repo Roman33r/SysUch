@@ -941,12 +941,38 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
   #ch-send{margin-left:auto}
 }
 .kb-wrap{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
-.kb-left{display:grid;gap:10px;position:sticky;top:12px;max-height:calc(100vh - 140px);grid-template-rows:auto minmax(0,1fr);padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.kb-left{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;position:sticky;top:12px;max-height:calc(100vh - 140px);grid-template-rows:auto minmax(0,1fr);padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
 .kb-tools{display:flex;flex-wrap:wrap;gap:6px}
 .kb-tools input{flex:1 1 100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--sunken);color:var(--fg)}
 .kb-tools .sel{flex:1;min-width:0}
 .kb-list{overflow-y:auto;display:grid;gap:2px;align-content:start}
 .kb-group{margin:10px 8px 4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.kb-frow{display:flex;align-items:center;gap:6px;padding:6px 6px 6px calc(6px + var(--d,0) * 16px);border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--fg)}
+.kb-frow:hover,.kb-frow:focus-visible{background:var(--sunken)}
+.kb-frow > svg{flex:none;color:var(--muted)}
+.kb-fname{flex:1;min-width:0;overflow-wrap:anywhere}
+.kb-frow .n{font:500 11px var(--f-mono);color:var(--muted)}
+.kb-tog{display:grid;place-items:center;color:var(--muted);flex:none}
+.kb-tog svg{transition:transform .15s}
+.kb-frow[aria-expanded="true"] .kb-tog svg{transform:rotate(90deg)}
+.kb-fmenu{border:0;background:none;padding:2px 4px;color:var(--muted);cursor:pointer;opacity:0;border-radius:6px;display:grid;place-items:center}
+.kb-frow:hover .kb-fmenu,.kb-fmenu:focus-visible{opacity:1}
+.kb-fmenu:hover{background:var(--surface)}
+@media (pointer:coarse){.kb-fmenu{opacity:1}}
+.kb-row[style*="--d"]{padding-left:calc(32px + var(--d) * 16px)}
+.kb-row span svg{vertical-align:-2px}
+.kb-list .drop{outline:2px dashed var(--accent);outline-offset:-2px;background:var(--accent-soft)}
+.kb-list.drop-root{outline:2px dashed var(--accent);outline-offset:-2px;border-radius:10px}
+.kb-list [draggable="true"]{-webkit-user-drag:element}
+.kb-tools #kb-newf{padding:0 10px;display:inline-grid;place-items:center}
+.ask-in{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sunken);color:var(--fg);font:inherit}
+.kb-call{margin:12px 0;padding:10px 14px;border-left:4px solid var(--cc);border-radius:0 10px 10px 0;background:color-mix(in srgb,var(--cc) 10%,transparent)}
+.kb-call::before{display:block;margin-bottom:4px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--cc)}
+.kb-call > :last-child{margin-bottom:0}
+.kb-c-info{--cc:var(--accent)} .kb-c-info::before{content:"Заметка"}
+.kb-c-tip{--cc:var(--low)} .kb-c-tip::before{content:"Подсказка"}
+.kb-c-warn{--cc:var(--med)} .kb-c-warn::before{content:"Предупреждение"}
+.kb-c-danger{--cc:var(--high)} .kb-c-danger::before{content:"Важно"}
 .kb-row{display:grid;gap:2px;width:100%;padding:8px 10px;border:0;border-radius:10px;background:none;color:var(--fg);text-align:left;cursor:pointer}
 .kb-row:hover{background:var(--sunken)}
 .kb-row[aria-current="true"]{background:var(--accent-soft)}
@@ -998,8 +1024,10 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .kb-doc img,.kb-ed img{max-width:100%;height:auto;border-radius:6px;vertical-align:middle}
 .kb-doc blockquote,.kb-ed blockquote{margin:10px 0;padding:6px 14px;border-left:3px solid var(--accent);background:var(--sunken);border-radius:0 8px 8px 0}
 .kb-doc pre,.kb-ed pre{padding:10px 12px;border-radius:8px;background:var(--sunken);font:13px/1.5 var(--f-mono);white-space:pre-wrap}
-.kb-doc table,.kb-ed table{border-collapse:collapse}
-.kb-doc td,.kb-doc th,.kb-ed td,.kb-ed th{border:1px solid var(--line);padding:4px 8px}
+.kb-doc table,.kb-ed table{border-collapse:collapse;width:100%;margin:10px 0}
+.kb-doc td,.kb-doc th,.kb-ed td,.kb-ed th{border:1px solid color-mix(in srgb,var(--fg) 18%,transparent);padding:6px 10px;vertical-align:top;min-width:60px;text-align:left}
+.kb-doc th,.kb-ed th{background:var(--sunken);font-weight:600}
+.kb-doc tbody tr:nth-child(even){background:color-mix(in srgb,var(--fg) 3%,transparent)}
 .kb-doc a,.kb-ed a{color:var(--accent)}
 .kb-doc a[data-blob],.kb-ed a[data-blob]{display:inline-flex;gap:6px;align-items:center;padding:3px 10px;border:1px solid var(--line);border-radius:8px;text-decoration:none;color:var(--fg);background:var(--sunken)}
 .kb-doc a[data-blob]::before,.kb-ed a[data-blob]::before{content:"";flex:none;width:16px;height:16px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z%22/%3E%3Cpath d=%22M14 3v5h5M9 13h6M9 17h6%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z%22/%3E%3Cpath d=%22M14 3v5h5M9 13h6M9 17h6%22/%3E%3C/svg%3E") center/contain no-repeat}
@@ -1251,8 +1279,9 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
       <div class="kb-left">
         <div class="kb-tools">
           <input type="search" id="kb-q" maxlength="80" placeholder="Поиск по статьям" aria-label="Поиск по базе знаний" autocomplete="off">
-          <select class="sel" id="kb-sec" aria-label="Раздел"></select>
+          <select class="sel" id="kb-task" aria-label="Задача"></select>
           <select class="sel" id="kb-proj" aria-label="Проект"></select>
+          <button type="button" class="btn small" id="kb-newf" title="Новая папка" aria-label="Новая папка"></button>
           <button type="button" class="btn small primary" id="kb-new">+ Статья</button>
         </div>
         <nav class="kb-list" id="kb-list" aria-label="Статьи"></nav>
@@ -1514,9 +1543,12 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
         <p>Доступ к календарю проверяет интерфейс: технически данные доступны всем, кто вошёл в Планёрку.</p>
       </section>
       <section id="h-kb"><h3>База знаний</h3>
-        <p>Вкладка «База знаний»: инструкции по задачам, описания, шпаргалки. Слева список статей по разделам, поиск по названию и тексту и фильтр по разделу.</p>
+        <p>Вкладка «База знаний»: инструкции по задачам, описания, шпаргалки. Слева дерево папок со статьями, поиск по названию и тексту, фильтры по задаче и проекту.</p>
         <ul>
-          <li><b>Написать.</b> «+ Статья»: название, раздел (можно выбрать существующий или ввести новый) и текст. Ctrl+S или «Сохранить».</li>
+          <li><b>Папки.</b> Кнопка с папкой создаёт папку, «⋯» у папки (или правая кнопка) — статья или папка внутри, переименовать, вынести, удалить. Вложенность любая. Статьи и папки перетаскиваются мышью на другую папку или на пустое место списка (верхний уровень). При удалении папки её содержимое переезжает на уровень выше. Разделы из прежних версий стали папками.</li>
+          <li><b>Написать.</b> «+ Статья»: название, папка и текст. Ctrl+S или «Сохранить».</li>
+          <li><b>Таблица.</b> Кнопка с таблицей вставляет таблицу 3×3 с заголовком. Когда курсор в ячейке, в панели появляются «+ строка», «+ столбец», «− строка», «− столбец» и «Удалить таблицу». Таблицы из Excel и Word можно вставить через Ctrl+V.</li>
+          <li><b>Блоки.</b> Список «Блок»: заметка, подсказка, предупреждение или важно — цветная рамка с заголовком. Выделенный текст попадёт в блок; если курсор уже в блоке, меняется его вид, «Убрать блок» возвращает обычный текст.</li>
           <li><b>Оформление.</b> Стиль абзаца (заголовок, цитата, код), шрифт, размер, цвет текста и фона, жирный (Ctrl+B), наклонный (Ctrl+I), подчёркнутый (Ctrl+U), зачёркнутый, списки, выравнивание, ссылки, разделитель, «Убрать оформление».</li>
           <li><b>Картинки и файлы.</b> Кнопка с картинкой, перетаскивание в текст или вставка из буфера (Ctrl+V). Кнопка со скрепкой прикрепляет любой файл, в статье он скачивается по нажатию. До 5 МБ каждый, большие фото уменьшаются. Нужна база данных или общий JSON-файл.</li>
           <li><b>Размер картинки.</b> Нажмите на картинку в редакторе: она выделится, в панели появятся кнопки 25%, 50%, 75%, 100% и ползунок, а в правом нижнем углу картинки — маркер, который можно тянуть мышью или пальцем. Ширина задаётся в процентах от ширины текста, поэтому на телефоне картинка тоже помещается. Delete удаляет выделенную картинку.</li>
@@ -1524,7 +1556,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
           <li><b>Кто может менять.</b> Читают все. Изменить и удалить статью могут её автор, руководители и администраторы. Если двое правили одну статью одновременно, второй увидит предупреждение перед сохранением.</li>
           <li><b>Ссылки на задачи.</b> Номер вроде PLN-101 в тексте статьи становится ссылкой на задачу.</li>
           <li><b>Статья к задаче или проекту.</b> В редакторе выберите проект и задачу (номер или название). В «Дереве» правая кнопка на задаче: «Написать инструкцию к задаче», на пустом месте: «Написать инструкцию к проекту»; то же в меню ⋯ окна задачи. Откроется база знаний с новой статьёй, где задача и проект уже выбраны.</li>
-          <li><b>Поиск по задаче и проекту.</b> Поиск находит статьи по номеру и названию задачи и по названию проекта; фильтр «Все проекты» оставляет статьи одного проекта, включая статьи к его задачам. Под заголовком статьи — ссылка на задачу и проект.</li>
+          <li><b>Поиск по задаче и проекту.</b> Поиск находит статьи по номеру и названию задачи, проекта и папки. Фильтр «Все задачи» оставляет статьи одной задачи, «Все проекты» — статьи проекта, включая статьи к его задачам. При поиске и фильтрах список показывается без папок, с путём к каждой статье. Под заголовком статьи — ссылка на задачу и проект.</li>
         </ul>
       </section>
       <section id="h-people"><h3>Сотрудники и режим «Я»</h3>
@@ -1731,7 +1763,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 15;
+const SCHEMA = 16;
 const CHAT_MAX = 2000, CHAT_TEXT_MAX = 2000; // localStorage holds about 5 MB per site, so old messages drop off
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
@@ -1795,6 +1827,11 @@ const ICONS = {
   smilePlus: '<path d="M19 12.5A8 8 0 1 1 11.5 4.5"/><path d="M8 15a4 4 0 0 0 6 0"/><path d="M8.5 10.5h.01M13.5 10.5h.01" stroke-width="2.6"/><path d="M19 2v6M16 5h6"/>',
   camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
   layout: '<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>',
+  folder: '<path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"/>',
+  folderPlus: '<path d="M12 19h-7a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v3.5M16 19h6M19 16v6"/>',
+  chevR: '<path d="M9 6l6 6l-6 6"/>',
+  table: '<path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2zM3 10h18M10 3v18"/>',
+  info: '<path d="M12 9h.01M11 12h1v4h1M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/>',
   grip: '<path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="3"/>',
   corner: '<path d="M19 11v8h-8M19 19l-6-6"/>',
   expand: '<path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/>',
@@ -1920,7 +1957,7 @@ const ABSENT = {vac: ['Отпуск', 'в отпуске', '#0F8A6A'], away: ['�
 // who may see a person's calendar: one record per owner
 const normShare = x => ({id: String(x.id ?? '').slice(0, 40), list: (Array.isArray(x.list) ? x.list : []).filter(y => y && Object.hasOwn(CAL_LEVEL, y.level) && y.to).map(y => ({to: String(y.to).slice(0, 40), level: y.level}))});
 const normDoc = d => { const s = (v, max) => String(v ?? '').slice(0, max);
-  return {id: s(d.id, 40), title: s(d.title, 200).trim() || 'Без названия', section: s(d.section, 60).trim(), html: s(d.html, KB_HTML_MAX), task: s(d.task, 40), project: s(d.project, 40), author: s(d.author, 40), createdAt: s(d.createdAt, 40), updatedAt: s(d.updatedAt, 40), updatedBy: s(d.updatedBy, 40)}; };
+  return {id: s(d.id, 40), title: s(d.title, 200).trim() || 'Без названия', section: s(d.section, 60).trim(), folder: !!d.folder, parent: s(d.parent, 40), html: d.folder ? '' : s(d.html, KB_HTML_MAX), task: s(d.task, 40), project: s(d.project, 40), author: s(d.author, 40), createdAt: s(d.createdAt, 40), updatedAt: s(d.updatedAt, 40), updatedBy: s(d.updatedBy, 40)}; };
 const kbBlobIds = html => [...html.matchAll(/data-blob="([\w-]{1,40})"/g)].map(m => m[1]);
 // key -> {at, v}: each person writes only their own keys, the later write wins, so two copies merge without conflicts
 const normMarks = o => Object.fromEntries(Object.entries(o && typeof o === 'object' ? o : {}).filter(([, x]) => typeof x?.at === 'string').map(([k, x]) => [k.slice(0, 120), {at: x.at.slice(0, 40), v: typeof x.v === 'boolean' ? x.v : String(x.v ?? '').slice(0, 40)}]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
@@ -2070,6 +2107,18 @@ function migrate(raw){
   depts.forEach(d => { if (!pids.has(d.head)) d.head = ''; if (!pids.has(d.deputy)) d.deputy = ''; });
   people.forEach(p => { if (!dids.has(p.dept)) p.dept = ''; });
   const docIds = new Set(), docs = (Array.isArray(raw.docs) ? raw.docs : []).filter(d => d && typeof d === 'object').map(normDoc).filter(d => d.id && !docIds.has(d.id) && docIds.add(d.id));
+  // v15 -> v16: sections become folders; the id comes from the name, so two computers upgrading apart make the same folder
+  if (v < 16) for (const name of new Set(docs.filter(d => !d.folder && d.section).map(d => d.section))){
+    const id = 'ks' + [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7).toString(36);
+    if (!docIds.has(id)){ docIds.add(id); docs.push(normDoc({id, folder: true, title: name, createdAt: '', updatedAt: ''})); }
+    docs.forEach(d => { if (!d.folder && d.section === name){ d.parent = id; d.section = ''; } });
+  }
+  // a parent must be an existing folder and never the doc itself or one inside it
+  const folderIds = new Set(docs.filter(d => d.folder).map(d => d.id)), byDocId = new Map(docs.map(d => [d.id, d]));
+  for (const d of docs){
+    if (!folderIds.has(d.parent)){ d.parent = ''; continue; }
+    for (let p = d.parent, n = 0; p; p = byDocId.get(p)?.parent, n++) if (p === d.id || n > 200){ d.parent = ''; break; }
+  }
   const used = new Set([...tasks.flatMap(t => t.files.map(f => f.id)), ...chat.flatMap(m => m.files.map(f => f.id)), ...docs.flatMap(d => kbBlobIds(d.html)),
     ...[...people, ...(Array.isArray(raw.rooms) ? raw.rooms : []).map(r => ({photo: normPhoto(r?.photo)}))].flatMap(x => x.photo ? [x.photo.full, x.photo.thumb] : [])]);
   const blobs = {};
@@ -2598,6 +2647,22 @@ function askConfirm(title, html, ok){
     d.addEventListener('close', () => fin(false), {once: true});
     d.showModal();
     d.querySelector('[data-ask="0"]').focus(); // Enter by habit shouldn't assign
+  });
+}
+function askText(title, value, ok){
+  return new Promise(res => {
+    const d = $('#d-ask');
+    let done = false;
+    const fin = v => { if (done) return; done = true; if (d.open) d.close(); res(v); };
+    d.innerHTML = `<form><div class="d-head"><h2>${esc(title)}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
+      <div class="d-body"><input class="ask-in" maxlength="200" value="${esc(value)}" aria-label="${esc(title)}"></div>
+      <div class="d-foot"><span class="spacer"></span><button type="button" class="btn" data-ask="0">Отмена</button><button class="btn primary">${esc(ok)}</button></div></form>`;
+    d.querySelector('form').onsubmit = e => { e.preventDefault(); const v = d.querySelector('.ask-in').value.trim(); if (v) fin(v); };
+    d.querySelector('[data-ask="0"]').onclick = () => fin(null);
+    d.querySelector('.close').onclick = () => fin(null);
+    d.addEventListener('close', () => fin(null), {once: true});
+    d.showModal();
+    d.querySelector('.ask-in').select();
   });
 }
 const absentItem = (e, sub) => `<li><span class="dot" style="background:${ABSENT[e.kind][2]}"></span><div><b>${esc(person(e.who)?.name || 'Сотрудник')}</b> — ${ABSENT[e.kind][0].toLowerCase()}, ${absentWhen(e)}<span class="note">${sub}</span></div></li>`;
@@ -4617,7 +4682,7 @@ function archivePerson(id){
 
 /* ---------- filters (per browser, not part of the data) ---------- */
 const UI_DEFAULT = {q: '', who: '', proj: '', prio: '', tag: '', overdue: false, top: false, sort: 'manual', repPeriod: '30',
-  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}, twClosed: [], twFeed: 'all', nwMore: false, plQ: '', plAccess: '', plJob: '', plStatus: 'active', kbQ: '', kbSec: '', kbProj: '', kbOpen: '', calView: 'month', calDate: '', calDay: '', calOff: [], calNoTasks: false, cabPer: 'week'};
+  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}, twClosed: [], twFeed: 'all', nwMore: false, plQ: '', plAccess: '', plJob: '', plStatus: 'active', kbQ: '', kbSec: '', kbProj: '', kbOpen: '', calView: 'month', calDate: '', calDay: '', calOff: [], calNoTasks: false, cabPer: 'week', kbTask: '', kbClosed: []};
 const ui = (() => { try { return {...UI_DEFAULT, ...JSON.parse(localStorage.getItem(LS_UI) || '{}')}; } catch { return {...UI_DEFAULT}; } })();
 if (!Array.isArray(ui.treeClosed)) ui.treeClosed = [];
 if (!Array.isArray(ui.twClosed)) ui.twClosed = [];
@@ -6002,6 +6067,7 @@ function kbClean(html){
         if (/^[\w\s,'"-]{1,80}$/.test(attr('face'))) keep.face = attr('face');
         if (/^[1-7]$/.test(attr('size'))) keep.size = attr('size');
       }
+      if (tag === 'DIV' && /^kb-call kb-c-(info|tip|warn|danger)$/.test(attr('class').trim())) keep.class = attr('class').trim();
       if (tag === 'TD' || tag === 'TH') for (const k of ['colspan', 'rowspan']) if (/^\d{1,2}$/.test(attr(k))) keep[k] = attr(k);
       const w = /* read before the attributes go */ tag === 'IMG' && /^\d{1,3}(\.\d+)?%$/.test(n.style.width) ? `width: ${Math.min(100, parseFloat(n.style.width))}%` : '';
       for (const a of [...n.attributes]) n.removeAttribute(a.name);
@@ -6023,37 +6089,52 @@ const kbWho = id => id ? chatName(id) : 'неизвестно';
 const kbHydrate = box => box.querySelectorAll('img[data-blob]').forEach(img => { if (!img.src) chatBlob(img.dataset.blob).then(b => { if (b) img.src = b.data; }); });
 let kbEdit = null, kbRange = null;
 const kbPend = {}; // files inserted into the article being edited, sent with «Сохранить»
+const kbByName = (a, b) => a.title.localeCompare(b.title, 'ru');
+// the folders above a doc, outermost first
+function kbPath(d){ const out = []; for (let p = kbDoc(d.parent), n = 0; p && n < 200; p = kbDoc(p.parent), n++) out.unshift(p); return out; }
+const kbCount = id => db.docs.filter(d => d.parent === id).reduce((n, x) => n + (x.folder ? kbCount(x.id) : 1), 0);
+const kbInside = (id, folder) => { for (let p = kbDoc(id), n = 0; p && n < 200; p = kbDoc(p.parent), n++) if (p.id === folder) return true; return false; };
+function kbTree(pid, depth, row){
+  const kids = db.docs.filter(d => d.parent === pid);
+  return kids.filter(d => d.folder).sort(kbByName).map(fd => {
+    const open = !ui.kbClosed.includes(fd.id), n = kbCount(fd.id);
+    return `<div class="kb-frow" data-kb-folder="${esc(fd.id)}" draggable="${kbCanEdit(fd)}" style="--d:${depth}" role="button" tabindex="0" aria-expanded="${open}" aria-label="Папка «${esc(fd.title)}»${n ? `, статей: ${n}` : ''}">
+      <span class="kb-tog" aria-hidden="true">${ic('chevR', 14)}</span>${ic('folder', 16)}<span class="kb-fname">${esc(fd.title)}</span><span class="n">${n || ''}</span>
+      <button type="button" class="kb-fmenu" data-kb-fmenu aria-label="Действия с папкой «${esc(fd.title)}»">${ic('dots', 16)}</button></div>${open ? kbTree(fd.id, depth + 1, row) : ''}`;
+  }).join('') + kids.filter(d => !d.folder).sort(kbByName).map(d => row({d}, depth)).join('');
+}
+const kbFolderOpts = sel => { const out = []; (function walk(pid, depth){ db.docs.filter(x => x.folder && x.parent === pid).sort(kbByName).forEach(x => { out.push(`<option value="${esc(x.id)}" ${x.id === sel ? 'selected' : ''}>${'\u00a0\u00a0\u00a0'.repeat(depth)}${esc(x.title)}</option>`); walk(x.id, depth + 1); }); })('', 0); return '<option value="">Без папки</option>' + out.join(''); };
 function renderKb(){
-  const f = ui, q = chatNorm(f.kbQ.trim()), secs = [...new Set(db.docs.map(d => d.section).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ru'));
-  if (f.kbSec && !secs.includes(f.kbSec)) f.kbSec = '';
-  const sel = $('#kb-sec');
-  if (document.activeElement !== sel){ sel.innerHTML = '<option value="">Все разделы</option>' + secs.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join(''); sel.value = f.kbSec; }
+  const f = ui, q = chatNorm(f.kbQ.trim()), arts = db.docs.filter(d => !d.folder);
   if (document.activeElement !== $('#kb-q')) $('#kb-q').value = f.kbQ;
+  // tasks that have articles
+  const tids = [...new Set(arts.map(d => d.task).filter(Boolean))].sort((a, b) => +a.slice(4) - +b.slice(4) || a.localeCompare(b));
+  if (f.kbTask && !tids.includes(f.kbTask)) f.kbTask = '';
+  const ts = $('#kb-task');
+  ts.hidden = !tids.length;
+  if (document.activeElement !== ts){ ts.innerHTML = '<option value="">Все задачи</option>' + tids.map(id => `<option value="${esc(id)}">${esc(id)}${byId(id) ? ' · ' + esc(byId(id).title) : ''}</option>`).join(''); ts.value = f.kbTask; }
   // a project filter also finds articles written for that project's tasks
-  const projOf = d => d.project || byId(d.task)?.project || '', used = new Set(db.docs.map(projOf).filter(Boolean));
+  const projOf = d => d.project || byId(d.task)?.project || '', used = new Set(arts.map(projOf).filter(Boolean));
   if (f.kbProj && !used.has(f.kbProj)) f.kbProj = '';
   const ps = $('#kb-proj');
   ps.hidden = !used.size;
   if (document.activeElement !== ps){ ps.innerHTML = '<option value="">Все проекты</option>' + db.projects.filter(p => used.has(p.id)).map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join(''); ps.value = f.kbProj; }
   const mark = (t, i, n) => `${esc(t.slice(0, i))}<mark>${esc(t.slice(i, i + n))}</mark>${esc(t.slice(i + n))}`;
   const linkText = d => [d.task, byId(d.task)?.title, project(projOf(d))?.name].filter(Boolean).join(' · ');
-  const hits = db.docs.filter(d => (!f.kbSec || d.section === f.kbSec) && (!f.kbProj || projOf(d) === f.kbProj)).map(d => {
+  const pathText = d => kbPath(d).map(x => x.title).join(' / ');
+  const hits = arts.filter(d => (!f.kbTask || d.task === f.kbTask) && (!f.kbProj || projOf(d) === f.kbProj)).map(d => {
     if (!q) return {d};
     const ti = chatNorm(d.title).indexOf(q), text = kbText(d.html), xi = chatNorm(text).indexOf(q);
-    return ti < 0 && xi < 0 && !chatNorm(d.section).includes(q) && !chatNorm(linkText(d)).includes(q) ? null : {d, ti, text, xi};
+    return ti < 0 && xi < 0 && !chatNorm(pathText(d)).includes(q) && !chatNorm(linkText(d)).includes(q) ? null : {d, ti, text, xi};
   }).filter(Boolean);
-  const row = ({d, ti, text, xi}) => `<button type="button" class="kb-row" data-kb="${esc(d.id)}" aria-current="${d.id === (kbEdit ? kbEdit.id : f.kbOpen)}">
-    <b>${ti >= 0 ? mark(d.title, ti, q.length) : esc(d.title)}</b><span>${q && d.section ? esc(d.section) + ' · ' : ''}${esc(kbWho(d.author))} · ${fmtDay(isoDay(new Date(d.updatedAt || d.createdAt)))}</span>${linkText(d) ? `<span class="kb-link">${esc(linkText(d))}</span>` : ''}
+  // depth >= 0: a row of the tree; otherwise a search result, which shows its folders
+  const row = ({d, ti, text, xi}, depth = -1) => `<button type="button" class="kb-row" data-kb="${esc(d.id)}" draggable="${kbCanEdit(d)}"${depth >= 0 ? ` style="--d:${depth}"` : ''} aria-current="${d.id === (kbEdit ? kbEdit.id : f.kbOpen)}">
+    <b>${ti >= 0 ? mark(d.title, ti, q.length) : esc(d.title)}</b><span>${depth < 0 && pathText(d) ? `${ic('folder', 12)} ${esc(pathText(d))} · ` : ''}${esc(kbWho(d.author))} · ${fmtDay(isoDay(new Date(d.updatedAt || d.createdAt)))}</span>${linkText(d) ? `<span class="kb-link">${esc(linkText(d))}</span>` : ''}
     ${xi >= 0 && !(ti >= 0) ? `<span class="kb-hit">${xi > 30 ? '…' : ''}${mark(text.slice(Math.max(0, xi - 30), xi + q.length + 60), Math.min(xi, 30), q.length)}</span>` : ''}</button>`;
-  let html;
-  if (q) html = hits.sort((a, b) => (b.ti >= 0) - (a.ti >= 0) || b.d.updatedAt.localeCompare(a.d.updatedAt)).map(row).join('');
-  else {
-    // grouped by section, the newest first inside each; articles without a section go last
-    const groups = new Map();
-    for (const h of hits.sort((a, b) => b.d.updatedAt.localeCompare(a.d.updatedAt))) (groups.get(h.d.section) || groups.set(h.d.section, []).get(h.d.section)).push(h);
-    html = [...groups].sort(([a], [b]) => !a - !b || a.localeCompare(b, 'ru')).map(([sec, l]) => `<p class="kb-group">${esc(sec || 'Без раздела')}</p>${l.map(row).join('')}`).join('');
-  }
-  $('#kb-list').innerHTML = html || `<p class="note" style="padding:12px 8px">${db.docs.length ? 'Ничего не нашлось.' : 'Статей пока нет.'}</p>`;
+  const flat = q || f.kbTask || f.kbProj;
+  const html = flat ? hits.sort((a, b) => (b.ti >= 0) - (a.ti >= 0) || b.d.updatedAt.localeCompare(a.d.updatedAt)).map(h => row(h)).join('') : kbTree('', 0, row);
+  $('#kb-list').innerHTML = html || `<p class="note" style="padding:12px 8px">${db.docs.length ? 'Ничего не нашлось.' : 'Статей пока нет. Создайте папку кнопкой с папкой и напишите статью.'}</p>`;
+  $('#kb-list').dataset.flat = flat ? 1 : '';
   $('#kb-wrap').classList.toggle('open', !!(kbEdit || kbDoc(f.kbOpen)));
   if (!kbEdit){ kbImg = null; kbHandle(); kbShow(); } // the editor is never redrawn: that would lose what is being typed
 }
@@ -6068,7 +6149,7 @@ function kbNewFor(link){
   kbStartEdit(null, link);
 }
 // articles of a task: the knowledge base with the task number in the search
-function kbShowFor(id){ ui.kbQ = id; ui.kbSec = ui.kbProj = ''; saveUi(); setView('kb'); }
+function kbShowFor(id){ ui.kbTask = id; ui.kbQ = ui.kbProj = ''; saveUi(); setView('kb'); }
 const kbCountFor = id => db.docs.filter(d => d.task === id).length;
 function kbShow(){
   const d = kbDoc(ui.kbOpen), box = $('#kb-main');
@@ -6077,7 +6158,7 @@ function kbShow(){
     return;
   }
   box.innerHTML = `<div class="kb-head"><button type="button" class="btn small kb-back" data-kb-back aria-label="К списку статей">‹</button>
-    <div>${d.section ? `<span class="kb-sec-chip">${esc(d.section)}</span>` : ''}<h2>${esc(d.title)}</h2>
+    <div>${kbPath(d).length ? `<span class="kb-sec-chip">${ic('folder', 13)} ${kbPath(d).map(x => esc(x.title)).join(' / ')}</span>` : ''}<h2>${esc(d.title)}</h2>
     ${kbLinks(d)}
     <p class="note">Автор: ${esc(kbWho(d.author))} · ${d.updatedAt && d.updatedAt !== d.createdAt ? `изменено ${esc(fmtStamp(d.updatedAt))}${d.updatedBy && d.updatedBy !== d.author ? `, ${esc(kbWho(d.updatedBy))}` : ''}` : `создано ${esc(fmtStamp(d.createdAt))}`}</p></div>
     ${kbCanEdit(d) ? `<div class="kb-acts"><button type="button" class="btn small" data-kb-edit>Изменить</button><button type="button" class="btn small" data-kb-del>Удалить</button></div>` : ''}</div>
@@ -6097,12 +6178,11 @@ function kbStartEdit(id, link = {}){
   const title0 = d ? d.title : lt ? `Инструкция: ${lt.title}` : project(lp) && link.project ? `Инструкция по проекту «${project(lp).name}»` : '';
   kbEdit = {id: d?.id || null, base: d?.updatedAt || null, force: false};
   for (const k in kbPend) delete kbPend[k];
-  const secs = [...new Set(db.docs.map(x => x.section).filter(Boolean))];
   const btn = (cmd, label, title, val = '') => `<button type="button" data-cmd="${cmd}" data-val="${val}" title="${title}" aria-label="${title}">${label}</button>`;
   $('#kb-main').innerHTML = `<form id="kb-form" novalidate>
     <div class="kb-head"><button type="button" class="btn small kb-back" data-kb-cancel aria-label="Отменить и вернуться">‹</button>
       <div class="kb-fields"><input id="kb-title" maxlength="200" placeholder="Название статьи" aria-label="Название" value="${esc(title0)}">
-      <input id="kb-section" maxlength="60" list="kb-sections" placeholder="Раздел, например «Отчёты 1С»" aria-label="Раздел" value="${esc(d?.section || '')}"><datalist id="kb-sections">${secs.map(x => `<option value="${esc(x)}">`).join('')}</datalist>
+      <select class="sel" id="kb-section" aria-label="Папка">${kbFolderOpts(d ? d.parent : link.parent || '')}</select>
       <input id="kb-ltask" list="kb-tasks" placeholder="Задача: номер или название" aria-label="Задача статьи" value="${lt ? esc(taskOpt(lt)) : esc(d?.task || '')}"><datalist id="kb-tasks">${db.tasks.filter(t => t.status !== 'done' || t.id === lt?.id).map(t => `<option value="${esc(taskOpt(t))}">`).join('')}</datalist>
       <select class="sel" id="kb-lproj" aria-label="Проект статьи"><option value="">Без проекта</option>${db.projects.filter(p => !p.archived || p.id === lp).map(p => `<option value="${esc(p.id)}" ${p.id === lp ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></div></div>
     <div class="kb-bar" role="toolbar" aria-label="Оформление текста">
@@ -6116,9 +6196,11 @@ function kbStartEdit(id, link = {}){
       <span class="kb-sep"></span>
       ${btn('insertUnorderedList', ic('ul'), 'Маркированный список')}${btn('insertOrderedList', ic('ol'), 'Нумерованный список')}${btn('justifyLeft', ic('alignL'), 'По левому краю')}${btn('justifyCenter', ic('alignC'), 'По центру')}${btn('justifyRight', ic('alignR'), 'По правому краю')}
       <span class="kb-sep"></span>
-      ${btn('kbLink', ic('link'), 'Ссылка')}${btn('kbImage', ic('image'), 'Вставить картинку')}${btn('kbFile', ic('clip'), 'Прикрепить файл')}${btn('insertHorizontalRule', ic('hr'), 'Разделитель')}
+      ${btn('kbLink', ic('link'), 'Ссылка')}${btn('kbImage', ic('image'), 'Вставить картинку')}${btn('kbFile', ic('clip'), 'Прикрепить файл')}${btn('insertHorizontalRule', ic('hr'), 'Разделитель')}${btn('kbTable', ic('table'), 'Вставить таблицу')}
+      <select class="sel" data-kb-call aria-label="Блок: заметка, подсказка, предупреждение"><option value="">${'Блок'}</option><option value="info">Заметка</option><option value="tip">Подсказка</option><option value="warn">Предупреждение</option><option value="danger">Важно</option><option value="none">Убрать блок</option></select>
       <span class="kb-sep"></span>
       ${btn('removeFormat', ic('clear'), 'Убрать оформление')}${btn('undo', ic('undo'), 'Отменить (Ctrl+Z)')}${btn('redo', ic('redo'), 'Повторить (Ctrl+Y)')}
+      <span class="kb-imgbar" id="kb-tblbar" hidden><span class="kb-sep"></span><span class="note">Таблица:</span><button type="button" data-kb-tbl="row+">+ строка</button><button type="button" data-kb-tbl="col+">+ столбец</button><button type="button" data-kb-tbl="row-">− строка</button><button type="button" data-kb-tbl="col-">− столбец</button><button type="button" data-kb-tbl="del">Удалить таблицу</button></span>
       <span class="kb-imgbar" id="kb-imgbar" hidden><span class="kb-sep"></span><span class="note">Картинка:</span>${[25, 50, 75, 100].map(w => `<button type="button" data-kb-w="${w}" aria-label="Ширина ${w}%">${w}%</button>`).join('')}<input type="range" id="kb-imgw" min="10" max="100" step="5" aria-label="Ширина картинки, %"><span class="note" id="kb-imgw-n"></span></span>
     </div>
     <div class="kb-ed" id="kb-ed" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Текст статьи" data-placeholder="Текст статьи. Картинки можно вставить кнопкой с картинкой, перетащить сюда или вставить из буфера (Ctrl+V)."></div>
@@ -6183,8 +6265,33 @@ function kbState(){
 }
 document.addEventListener('selectionchange', () => {
   const ed = $('#kb-ed'), s = getSelection();
-  if (ed && s.rangeCount && ed.contains(s.anchorNode)){ kbRange = s.getRangeAt(0).cloneRange(); kbState(); }
+  if (ed && s.rangeCount && ed.contains(s.anchorNode)){ kbRange = s.getRangeAt(0).cloneRange(); kbState(); $('#kb-tblbar').hidden = !kbCell(); }
 });
+// the table cell the cursor is in
+const kbCell = () => { const n = kbRange?.startContainer; return (n?.nodeType === 1 ? n : n?.parentElement)?.closest('#kb-ed td, #kb-ed th') || null; };
+const KB_TABLE = `<table><thead><tr><th>Столбец 1</th><th>Столбец 2</th><th>Столбец 3</th></tr></thead><tbody>${'<tr><td><br></td><td><br></td><td><br></td></tr>'.repeat(2)}</tbody></table><p><br></p>`;
+function kbTable(op){
+  const cell = kbCell(); if (!cell) return;
+  const tr = cell.parentElement, table = cell.closest('table'), i = cell.cellIndex, blank = tag => { const c = document.createElement(tag); c.innerHTML = '<br>'; return c; };
+  if (op === 'row+'){
+    const n = document.createElement('tr'); for (let k = 0; k < tr.cells.length; k++) n.append(blank('td'));
+    if (tr.parentElement.tagName === 'THEAD'){ const body = table.tBodies[0] || table.createTBody(); body.prepend(n); } else tr.after(n);
+  }
+  if (op === 'col+') for (const r of table.rows) (r.cells[Math.min(i, r.cells.length - 1)] || r).after(blank(r.parentElement.tagName === 'THEAD' ? 'th' : 'td'));
+  if (op === 'row-'){ if (table.rows.length > 1) tr.remove(); else op = 'del'; }
+  if (op === 'col-'){ if (tr.cells.length > 1) for (const r of table.rows) r.cells[i]?.remove(); else op = 'del'; }
+  if (op === 'del') table.remove();
+  $('#kb-tblbar').hidden = !table.isConnected;
+  $('#kb-ed').focus();
+}
+// a coloured box with a heading: note, tip, warning, important; «none» takes the box away
+function kbCallout(kind){
+  const n = kbRange?.startContainer, box = (n?.nodeType === 1 ? n : n?.parentElement)?.closest('#kb-ed .kb-call');
+  if (box){ if (kind === 'none') box.replaceWith(...box.childNodes); else box.className = `kb-call kb-c-${kind}`; return $('#kb-ed').focus(); }
+  if (kind === 'none') return;
+  const text = String(getSelection()).trim();
+  kbExec('insertHTML', `<div class="kb-call kb-c-${kind}"><p>${text ? esc(text) : '<br>'}</p></div><p><br></p>`);
+}
 async function kbInsertFiles(files, asImages){
   if (!canAttach()) return toast('Картинки и файлы можно добавлять при работе с базой данных или общим JSON-файлом: в браузере для них нет места.');
   const big = [];
@@ -6202,7 +6309,7 @@ async function kbInsertFiles(files, asImages){
   if (big.length) toast(`Не добавлены, больше ${fmtSize(FILE_MAX)}: ${big.join(', ')}`);
 }
 async function kbSave(){
-  const ed = $('#kb-ed'), title = $('#kb-title').value.trim(), section = $('#kb-section').value.trim(), save = $('#kb-save');
+  const ed = $('#kb-ed'), title = $('#kb-title').value.trim(), parent = kbDoc($('#kb-section').value)?.folder ? $('#kb-section').value : '', save = $('#kb-save');
   const task = kbTaskOf($('#kb-ltask').value), projectId = $('#kb-lproj').value || byId(task)?.project || '';
   if ($('#kb-ltask').value.trim() && !task){ $('#kb-ltask').focus(); return toast('Такой задачи нет: выберите её из списка или очистите поле'); }
   if (!title){ $('#kb-title').focus(); return toast('Введите название статьи'); }
@@ -6236,8 +6343,8 @@ async function kbSave(){
   const id = kbEdit.id || 'kb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), at = stamp();
   change(() => {
     const d = kbDoc(id);
-    if (d) Object.assign(d, {title, section, html, task, project: projectId, updatedAt: at, updatedBy: chatMe()});
-    else db.docs.push(normDoc({id, title, section, html, task, project: projectId, author: chatMe(), createdAt: at, updatedAt: at, updatedBy: chatMe()}));
+    if (d) Object.assign(d, {title, section: '', parent, html, task, project: projectId, updatedAt: at, updatedBy: chatMe()});
+    else db.docs.push(normDoc({id, title, parent, html, task, project: projectId, author: chatMe(), createdAt: at, updatedAt: at, updatedBy: chatMe()}));
     addEvent(`${actor()} ${d ? 'изменил' : 'написал'} статью «${title}» в базе знаний`);
   });
   kbEdit = null; ui.kbOpen = id; saveUi();
@@ -6255,7 +6362,66 @@ function kbDelete(id){
 }
 const kbSet = (k, v) => { ui[k] = v; saveUi(); renderKb(); };
 $('#kb-q').oninput = e => kbSet('kbQ', e.target.value);
-$('#kb-sec').onchange = e => kbSet('kbSec', e.target.value);
+$('#kb-task').onchange = e => kbSet('kbTask', e.target.value);
+$('#kb-newf').innerHTML = ic('folderPlus', 16);
+$('#kb-newf').onclick = () => kbNewFolder('');
+async function kbNewFolder(pid){
+  const name = await askText(pid ? `Новая папка в «${kbDoc(pid)?.title}»` : 'Новая папка', '', 'Создать'); if (!name) return;
+  const at = stamp();
+  ui.kbClosed = ui.kbClosed.filter(x => x !== pid); ui.kbQ = ui.kbTask = ui.kbProj = ''; saveUi();
+  change(() => { db.docs.push(normDoc({id: 'kf' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), folder: true, title: name, parent: pid, author: chatMe(), createdAt: at, updatedAt: at, updatedBy: chatMe()})); }, `Папка «${name}» создана`);
+}
+function kbMove(id, to){
+  const d = kbDoc(id); if (!d || d.parent === to || id === to) return;
+  if (d.folder && kbInside(to, id)) return toast('Папку нельзя положить в неё саму');
+  if (!kbCanEdit(d)) return toast('Переместить может автор или руководитель');
+  ui.kbClosed = ui.kbClosed.filter(x => x !== to); saveUi();
+  change(() => { d.parent = to; }, `«${d.title}» → ${to ? `«${kbDoc(to).title}»` : 'без папки'}`);
+}
+function kbFolderMenu(fd, x, y){
+  const can = kbCanEdit(fd), up = kbDoc(fd.parent);
+  openCtx(x, y, [{head: fd.title},
+    {label: 'Новая статья в папке', icon: ic('file', 15), run: () => { if (kbEdit) return toast('Сначала сохраните или отмените статью, которую вы правите'); kbStartEdit(null, {parent: fd.id}); }},
+    {label: 'Новая папка внутри', icon: ic('folderPlus', 15), run: () => kbNewFolder(fd.id)},
+    ...(can ? [{label: 'Переименовать…', run: async () => { const name = await askText('Название папки', fd.title, 'Сохранить'); if (name && name !== fd.title) change(() => { const x = kbDoc(fd.id); if (x){ x.title = name; x.updatedAt = stamp(); x.updatedBy = chatMe(); } }, `Папка переименована: «${name}»`); }},
+      {label: 'Вынести из папки', run: () => kbMove(fd.id, up?.parent || ''), hidden: !up},
+      '-', {label: 'Удалить папку…', danger: true, run: async () => {
+        const n = kbCount(fd.id), kids = db.docs.filter(x => x.parent === fd.id).length;
+        if (!await askConfirm(`Удалить папку «${fd.title}»?`, `<p>${kids ? `Статьи и папки из неё${n ? ` (статей: ${n})` : ''} не удалятся, а переедут ${up ? `в «${esc(up.title)}»` : 'на верхний уровень'}.` : 'Папка пустая.'}</p>`, 'Удалить папку')) return;
+        change(() => { db.docs.forEach(x => { if (x.parent === fd.id) x.parent = fd.parent; }); db.docs = db.docs.filter(x => x.id !== fd.id); }, `Папка «${fd.title}» удалена`);
+      }}] : [])].filter(x => !x.hidden));
+}
+const kbToggle = id => { ui.kbClosed = ui.kbClosed.includes(id) ? ui.kbClosed.filter(x => x !== id) : [...ui.kbClosed, id]; saveUi(); renderKb(); };
+$('#kb-list').addEventListener('click', e => {
+  const fr = e.target.closest('[data-kb-folder]'); if (!fr) return;
+  e.stopImmediatePropagation();
+  if (e.target.closest('[data-kb-fmenu]')) return kbFolderMenu(kbDoc(fr.dataset.kbFolder), ...anchor(e.target.closest('[data-kb-fmenu]')));
+  kbToggle(fr.dataset.kbFolder);
+}, true);
+$('#kb-list').addEventListener('keydown', e => { const fr = e.target.closest('[data-kb-folder]'); if (fr && e.target === fr && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); kbToggle(fr.dataset.kbFolder); } });
+$('#kb-list').addEventListener('contextmenu', e => {
+  const fr = e.target.closest('[data-kb-folder]');
+  e.preventDefault();
+  if (fr) return kbFolderMenu(kbDoc(fr.dataset.kbFolder), ...ctxAt(e, fr));
+  openCtx(...ctxAt(e, $('#kb-list')), [{label: 'Новая статья', icon: ic('file', 15), run: () => kbStartEdit(null)}, {label: 'Новая папка', icon: ic('folderPlus', 15), run: () => kbNewFolder('')}]);
+});
+// drag an article or a folder onto a folder, or onto the empty part of the list for the top level
+let kbDrag = null;
+$('#kb-list').addEventListener('dragstart', e => {
+  const el = e.target.closest?.('[data-kb],[data-kb-folder]'); if (!el || $('#kb-list').dataset.flat) return e.preventDefault();
+  kbDrag = el.dataset.kb || el.dataset.kbFolder; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', kbDrag);
+});
+const kbDropOn = e => { const fr = e.target.closest('[data-kb-folder]'); return fr ? fr.dataset.kbFolder : e.target.closest('[data-kb]') ? kbDoc(e.target.closest('[data-kb]').dataset.kb)?.parent ?? '' : ''; };
+const kbDropMark = el => { document.querySelectorAll('#kb-list .drop').forEach(x => x !== el && x.classList.remove('drop')); $('#kb-list').classList.toggle('drop-root', !el); el?.classList.add('drop'); };
+$('#kb-list').addEventListener('dragover', e => {
+  if (!kbDrag) return;
+  e.preventDefault();
+  const to = kbDropOn(e);
+  kbDropMark(to ? $('#kb-list').querySelector(`[data-kb-folder="${CSS.escape(to)}"]`) : null);
+});
+$('#kb-list').addEventListener('dragleave', e => { if (!$('#kb-list').contains(e.relatedTarget)) kbDropMark(undefined), $('#kb-list').classList.remove('drop-root'); });
+$('#kb-list').addEventListener('drop', e => { if (!kbDrag) return; e.preventDefault(); const id = kbDrag, to = kbDropOn(e); kbDrag = null; kbDropMark(undefined); $('#kb-list').classList.remove('drop-root'); kbMove(id, to); });
+$('#kb-list').addEventListener('dragend', () => { kbDrag = null; kbDropMark(undefined); $('#kb-list').classList.remove('drop-root'); });
 $('#kb-proj').onchange = e => kbSet('kbProj', e.target.value);
 $('#kb-new').onclick = () => kbStartEdit(null);
 $('#kb-list').onclick = e => {
@@ -6266,7 +6432,7 @@ $('#kb-list').onclick = e => {
 $('#kb-main').addEventListener('click', async e => {
   let b;
   if (e.target.closest('[data-kb-new]')) return kbStartEdit(null);
-  const pf = e.target.closest('[data-kb-projf]'); if (pf){ ui.kbProj = pf.dataset.kbProjf; ui.kbQ = ''; saveUi(); return renderKb(); }
+  const pf = e.target.closest('[data-kb-projf]'); if (pf){ ui.kbProj = pf.dataset.kbProjf; ui.kbQ = ui.kbTask = ''; saveUi(); return renderKb(); }
   if (e.target.closest('[data-kb-back]')){ ui.kbOpen = ''; saveUi(); return renderKb(); }
   if (e.target.closest('[data-kb-edit]')) return kbStartEdit(ui.kbOpen);
   if (e.target.closest('[data-kb-cancel]')) return kbCancel();
@@ -6281,10 +6447,12 @@ $('#kb-main').addEventListener('click', async e => {
   }
   if ((b = e.target.closest('#kb-doc img[src]'))) return openChatFile({id: b.dataset.blob, name: b.alt || 'Картинка', type: 'image/png', size: 0});
   if ((b = e.target.closest('[data-kb-w]'))) return kbSetWidth(+b.dataset.kbW);
+  if ((b = e.target.closest('[data-kb-tbl]'))) return kbTable(b.dataset.kbTbl);
   if (kbEdit && e.target.closest('#kb-ed')) return kbPickImg(e.target.tagName === 'IMG' ? e.target : null);
   if ((b = e.target.closest('.kb-bar button[data-cmd]'))){
     const c = b.dataset.cmd;
     if (c === 'kbImage') return $('#kb-img-in').click();
+    if (c === 'kbTable') return kbExec('insertHTML', KB_TABLE);
     if (c === 'kbFile') return $('#kb-file-in').click();
     if (c === 'kbLink'){ const url = safeUrl(prompt('Адрес ссылки', 'https://')); if (url) kbExec(String(getSelection()) ? 'createLink' : 'insertHTML', String(getSelection()) ? url : `<a href="${esc(url)}">${esc(url)}</a>`); return; }
     kbExec(c);
@@ -6292,8 +6460,10 @@ $('#kb-main').addEventListener('click', async e => {
 });
 // toolbar buttons keep the selection in the text
 $('#kb-main').addEventListener('mousedown', e => { if (e.target.closest('.kb-bar button')) e.preventDefault(); });
+$('#kb-main').addEventListener('focusin', e => { if (e.target.matches('.kb-bar select')){ const s = getSelection(); if (s.rangeCount && $('#kb-ed')?.contains(s.anchorNode)) kbRange = s.getRangeAt(0).cloneRange(); } });
 $('#kb-main').addEventListener('change', e => {
   const c = e.target.dataset?.cmd;
+  if ('kbCall' in (e.target.dataset || {}) && e.target.value){ kbCallout(e.target.value); e.target.value = ''; return; }
   if (e.target.tagName === 'SELECT' && c && e.target.value){ kbExec(c, c === 'formatBlock' ? `<${e.target.value}>` : e.target.value); e.target.value = ''; }
   else if (e.target.type === 'color' && c) kbExec(c, e.target.value);
 });
@@ -6372,6 +6542,11 @@ addEventListener('storage', e => {
   const bw = normEv({...wk, repeat: 'weekdays'}), mo = normEv({...wk, repeat: 'month'}), one = normEv({...wk, repeat: '', end: '2026-11-04T09:00'});
   console.assert(evOccur(bw, '2026-11-06', '2026-11-09').length === 2 && evOccur(mo, '2026-11-01', '2027-01-31').length === 3 && evOccur(one, '2026-11-03', '2026-11-03').length === 1 && evOccur(one, '2026-11-05', '2026-11-30').length === 0, 'calendar: weekdays, months, a span of days');
   console.assert(normEv({id: 'z', start: 'bad'}).start === '' && normEv({id: 'z', start: '2026-11-02T10:00', end: '2026-11-01T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).end === '2026-11-02T10:00' && normEv({id: 'z', start: '2026-11-02T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).guests.join() === 'a', 'calendar: events are cleaned');
+  const kq = migrate({version: 15, people: [], tasks: [], docs: [{id: 'a', title: 'A', section: 'Отчёты'}, {id: 'b', title: 'B', section: 'Отчёты'}, {id: 'f', folder: true, title: 'F', parent: 'g'}, {id: 'g', folder: true, title: 'G', parent: 'f'}, {id: 'c', title: 'C', parent: 'a'}]});
+  const kf = kq.docs.find(d => d.folder && d.title === 'Отчёты');
+  console.assert(kf && kq.docs.find(d => d.id === 'a').parent === kf.id && kq.docs.find(d => d.id === 'b').parent === kf.id && kq.docs.find(d => d.id === 'c').parent === '' && ['f', 'g'].some(id => kq.docs.find(d => d.id === id).parent === '')
+    && migrate({version: 15, people: [], tasks: [], docs: [{id: 'a', title: 'A', section: 'Отчёты'}]}).docs.find(d => d.folder).id === kf.id, 'knowledge base: sections become folders, loops and article parents are cut');
+  console.assert(kbClean('<div class="kb-call kb-c-warn" onclick="x()"><p>a</p></div><div class="evil">b</div>') === '<div class="kb-call kb-c-warn"><p>a</p></div><div>b</div>', 'knowledge base: callouts kept, other classes dropped');
   const dq = migrate({version: 14, people: [{id: 'a', name: 'A', dept: 'd1'}, {id: 'b', name: 'B', dept: 'gone'}], tasks: [], depts: [{id: 'd1', name: 'Бухгалтерия', head: 'a', deputy: 'ghost'}],
     cal: [{id: 'v', owner: 'dept:d1', title: 'Отпуск', start: '2026-11-10T00:00', end: '2026-11-12T23:59', allDay: true, kind: 'vac', who: 'a'}, {id: 'x', owner: 'a', title: 'x', start: '2026-11-10T10:00', kind: 'vac', who: 'b'}]});
   console.assert(dq.depts[0].deputy === '' && dq.people[0].dept === 'd1' && dq.people[1].dept === '' && dq.cal[0].kind === 'vac' && dq.cal[0].end === '2026-11-12T23:59' && evOccur(dq.cal[0], '2026-11-11', '2026-11-11').length === 1 && evOccur(dq.cal[0], '2026-11-13', '2026-11-13').length === 0, 'departments and absences');
