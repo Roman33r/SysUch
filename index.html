@@ -490,6 +490,15 @@ header{position:relative;padding-right:98px}
 .ach-medal.t3{background:#FFE08A;color:#6B4A00;border:1px solid #E0A800}
 .ach-medal.tm{background:#E5DBFF;color:#4C2A99;border:1px solid #9775FA}
 .ach-acts{display:flex;gap:6px;flex-wrap:wrap}
+.ach-row .ach-medal[data-ach-tip]{cursor:help}
+.ach-row .ach-medal[data-ach-tip]:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.ach-tip{position:fixed;z-index:60;width:min(300px,calc(100vw - 16px));padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:13px;line-height:1.45;pointer-events:none;display:grid;gap:6px}
+.ach-tip[hidden]{display:none}
+.ach-tip p{margin:0}
+.ach-tip-h{display:flex;gap:8px;align-items:center}
+.ach-tip-h b{flex:1;font-size:14px}
+.ach-tier{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--sunken);color:var(--muted)}
+.ach-tier.t1{background:#F1C3A5;color:#7A3B12}.ach-tier.t2{background:#E3E6EA;color:#3B424A}.ach-tier.t3{background:#FFE08A;color:#6B4A00}.ach-tier.tm{background:#E5DBFF;color:#4C2A99}
 .ad-icons{display:flex;flex-wrap:wrap;gap:4px}
 .ad-ic input{position:absolute;opacity:0;pointer-events:none}
 .ad-ic span{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--fg)}
@@ -527,6 +536,42 @@ header{position:relative;padding-right:98px}
 .ava.fr-finish{box-shadow:0 0 0 calc(2px*var(--fw)) #fff,0 0 0 calc(4px*var(--fw)) #212529,0 0 0 calc(6px*var(--fw)) #fff,0 0 0 calc(8px*var(--fw)) #212529}
 .ava.fr-compass{animation:fr-compass 4s linear infinite}
 @keyframes fr-compass{0%,100%{box-shadow:0 0 0 calc(2px*var(--fw)) var(--surface),0 0 0 calc(5px*var(--fw)) #15AABF,0 0 0 calc(7px*var(--fw)) #4C6EF5}50%{box-shadow:0 0 0 calc(2px*var(--fw)) var(--surface),0 0 0 calc(5px*var(--fw)) #4C6EF5,0 0 0 calc(7px*var(--fw)) #15AABF}}
+/* animated frames: a ring on ::before (::after belongs to the online dot) and shadows */
+.ava[class*="fr-"]::before{content:"";position:absolute;border-radius:50%;pointer-events:none}
+.ava.fr-neon::before,.ava.fr-rainbow::before,.ava.fr-frost::before,.ava.fr-gold::before{inset:calc(-6px*var(--fw));padding:calc(3px*var(--fw));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+@keyframes fr-spin{to{transform:rotate(360deg)}}
+@keyframes fr-spinr{to{transform:rotate(-360deg)}}
+.ava.fr-neon::before{background:conic-gradient(#F06595,#22B8CF,#F06595);animation:fr-spin 2.5s linear infinite}
+.ava.fr-rainbow::before{background:conic-gradient(#FA5252,#FAB005,#40C057,#228BE6,#BE4BDB,#FA5252);animation:fr-spin 3s linear infinite}
+.ava.fr-frost::before{background:conic-gradient(#C3FAE8,#74C0FC,#E7F5FF,#74C0FC,#C3FAE8);animation:fr-spin 6s linear infinite,fr-twinkle 2s ease-in-out infinite alternate}
+@keyframes fr-twinkle{to{opacity:.55}}
+.ava.fr-gold::before{background:conic-gradient(#9C6B00,#FFE066 10%,#9C6B00 20%,#E0A800 60%,#9C6B00);animation:fr-spin 2.2s linear infinite}
+.ava.fr-orbit{box-shadow:0 0 0 calc(5px*var(--fw)) var(--surface),0 0 0 calc(7px*var(--fw)) #85B7EB}
+.ava.fr-orbit::before{inset:calc(-7px*var(--fw));border:calc(2px*var(--fw)) solid transparent;border-top-color:#FAB005;border-right-color:#FAB005;animation:fr-spin 1.6s linear infinite}
+.ava.fr-sonar{box-shadow:0 0 0 calc(3px*var(--fw)) #1D9E75}
+.ava.fr-sonar::before{inset:calc(-3px*var(--fw));border:calc(3px*var(--fw)) solid #1D9E75;animation:fr-ping 1.6s ease-out infinite}
+@keyframes fr-ping{from{transform:scale(1);opacity:.9}to{transform:scale(1.45);opacity:0}}
+.ava.fr-flame{animation:fr-flame .5s ease-in-out infinite alternate}
+@keyframes fr-flame{from{box-shadow:0 0 0 calc(3px*var(--fw)) #E8590C,0 calc(-3px*var(--fw)) 0 calc(6px*var(--fw)) #F08C00,0 calc(2px*var(--fw)) 0 calc(8px*var(--fw)) #C92A2A}to{box-shadow:0 0 0 calc(3px*var(--fw)) #F76707,0 calc(-5px*var(--fw)) 0 calc(6px*var(--fw)) #FAB005,0 calc(2px*var(--fw)) 0 calc(9px*var(--fw)) #E03131}}
+.ava.fr-gear{box-shadow:0 0 0 calc(3px*var(--fw)) var(--surface),0 0 0 calc(5px*var(--fw)) #4C6EF5}
+.ava.fr-gear::before{inset:calc(-9px*var(--fw));border:calc(3px*var(--fw)) dashed #FFD43B;animation:fr-spin 4s linear infinite}
+.ava.fr-heart{box-shadow:0 0 0 calc(2px*var(--fw)) var(--surface),0 0 0 calc(5px*var(--fw)) #E03131;animation:fr-beat 1.2s ease-in-out infinite}
+@keyframes fr-beat{0%,40%,100%{transform:scale(1)}20%{transform:scale(1.1)}}
+.ava.fr-garland::before{inset:calc(-7px*var(--fw));border:calc(4px*var(--fw)) dotted;border-color:#FA5252 #40C057 #FAB005 #228BE6;animation:fr-spin 1.6s steps(8) infinite}
+.ava.fr-twin{outline:calc(2px*var(--fw)) dashed #1D9E75;outline-offset:calc(7px*var(--fw))}
+.ava.fr-twin::before{inset:calc(-5px*var(--fw));border:calc(2px*var(--fw)) dashed #7F77DD;animation:fr-spinr 3s linear infinite}
+.ava.fr-radar{box-shadow:0 0 0 calc(4px*var(--fw)) var(--surface),0 0 0 calc(5px*var(--fw)) #40C05766}
+.ava.fr-radar::before{inset:calc(-8px*var(--fw));background:conic-gradient(transparent 0 290deg,#40C057);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px*var(--fw)),#000 calc(100% - 4px*var(--fw)));mask:radial-gradient(farthest-side,transparent calc(100% - 4px*var(--fw)),#000 calc(100% - 4px*var(--fw)));animation:fr-spin 1.8s linear infinite}
+.ava.fr-glitch{animation:fr-glitch 2s steps(1) infinite}
+@keyframes fr-glitch{0%,88%,100%{box-shadow:calc(-1px*var(--fw)) 0 0 calc(3px*var(--fw)) #22B8CF,calc(1px*var(--fw)) 0 0 calc(3px*var(--fw)) #F06595}90%{box-shadow:calc(-4px*var(--fw)) calc(1px*var(--fw)) 0 calc(3px*var(--fw)) #22B8CF,calc(3px*var(--fw)) calc(-1px*var(--fw)) 0 calc(3px*var(--fw)) #F06595}94%{box-shadow:calc(3px*var(--fw)) 0 0 calc(3px*var(--fw)) #22B8CF,calc(-3px*var(--fw)) calc(1px*var(--fw)) 0 calc(3px*var(--fw)) #F06595}}
+.ava.fr-liquid::before{inset:calc(-7px*var(--fw));border:calc(4px*var(--fw)) solid #7F77DD;animation:fr-morph 3s ease-in-out infinite,fr-spin 8s linear infinite}
+@keyframes fr-morph{0%,100%{border-radius:50%}25%{border-radius:58% 42% 55% 45%}50%{border-radius:45% 55% 42% 58%}75%{border-radius:52% 48% 60% 40%}}
+.ava.fr-stars{box-shadow:0 0 0 calc(2px*var(--fw)) var(--surface),0 0 0 calc(4px*var(--fw)) #FFD43B88}
+.ava.fr-stars::before{inset:calc(-10px*var(--fw));background:radial-gradient(circle at 50% 4%,#FFD43B 0 calc(3px*var(--fw)),transparent calc(3.5px*var(--fw))),radial-gradient(circle at 96% 50%,#FFD43B 0 calc(2.5px*var(--fw)),transparent calc(3px*var(--fw))),radial-gradient(circle at 50% 96%,#FFD43B 0 calc(3px*var(--fw)),transparent calc(3.5px*var(--fw))),radial-gradient(circle at 4% 50%,#FFD43B 0 calc(2.5px*var(--fw)),transparent calc(3px*var(--fw)));animation:fr-spin 5s linear infinite}
+.ava.fr-sakura{box-shadow:0 0 0 calc(2px*var(--fw)) var(--surface),0 0 0 calc(4px*var(--fw)) #F783AC}
+.ava.fr-sakura::before{inset:calc(-10px*var(--fw));background:radial-gradient(ellipse calc(4px*var(--fw)) calc(3px*var(--fw)) at 50% 4%,#F783AC 60%,transparent 62%),radial-gradient(ellipse calc(3px*var(--fw)) calc(4px*var(--fw)) at 92% 35%,#FCC2D7 60%,transparent 62%),radial-gradient(ellipse calc(4px*var(--fw)) calc(3px*var(--fw)) at 70% 93%,#F783AC 60%,transparent 62%),radial-gradient(ellipse calc(3px*var(--fw)) calc(4px*var(--fw)) at 8% 62%,#FCC2D7 60%,transparent 62%);animation:fr-spin 7s linear infinite}
+/* in lists and the chat the small avatars keep their frame but stand still */
+.ava.sm[class*="fr-"],.ava.sm[class*="fr-"]::before{animation:none}
 /* profile backgrounds */
 .lbg{position:relative;color:#fff;background-size:cover;overflow:hidden}
 .cab-who.lbg{padding:18px 20px;border-radius:16px}
@@ -1702,7 +1747,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
           <li><b>Достижения.</b> Считаются сами по истории работы: задачи в срок, серия рабочих дней, недели без просрочек, статьи в базе знаний и к задачам, этапы в срок, закрытые часы, первые шаги. У каждого три ступени: бронза — медаль в профиле, серебро — рамка аватара, золото — фон профиля. Блок «Достижения» в кабинете показывает, сколько осталось до следующей ступени.</li>
           <li><b>Свои достижения.</b> Руководитель в блоке «Достижения» нажимает «+ Достижение». Автоматическое: что считать (задачи в срок, закрытые задачи, часы, этапы, статьи, серия дней, недели без просрочек), фильтр по проекту, тегу и приоритету, три ступени и награды — рамка за серебро, фон за золото. Можно сделать его только для отдела. Ручное — награда, которую руководитель вручает кнопкой «Вручить» с подписью «за что»; её можно снять.</li>
           <li><b>Свои фоны.</b> В «Гардеробе» руководитель загружает фоны в каталог («В каталог»): картинку, GIF или короткое видео MP4/WebM до 5 МБ, выбирает видимую часть и делает фон доступным всем или наградой (её выбирают в достижении). Сотрудник с золотом в любом достижении загружает свой фон. Видео легче GIF и ставится на паузу, если в системе отключена анимация. Нужна база данных или общий JSON-файл.</li>
-          <li><b>Гардероб.</b> Кнопка «Гардероб» в своём кабинете: фон профиля (часть фонов анимированные), рамка аватара и до трёх медалей рядом с именем. Закрытое показано с замком и условием. Фон и медали видят коллеги в вашем кабинете, рамку — на аватаре везде: в команде, чате, списке сотрудников. Тем, у кого в системе отключена анимация, фоны и рамки показываются неподвижными.</li>
+          <li><b>Гардероб.</b> Кнопка «Гардероб» в своём кабинете: фон профиля (часть фонов анимированные), рамка аватара и до трёх медалей рядом с именем. Закрытое показано с замком и условием. Анимированные рамки (Неон, Радуга, Орбита, Сонар, Пламя+, Шестерня, Иней, Золотой блик, Сердцебиение, Гирлянда, Двойное вращение, Радар, Глитч, Жидкий, Звёздный хоровод, Сакура) открываются наградами: руководитель выбирает рамку в своём достижении. В маленьких аватарах в чате и списках рамки неподвижны. Фон и медали видят коллеги в вашем кабинете, рамку — на аватаре везде: в команде, чате, списке сотрудников. Тем, у кого в системе отключена анимация, фоны и рамки показываются неподвижными.</li>
           <li><b>Свои блоки.</b> «Настроить блоки» в своём кабинете: перетаскивайте блоки за значок с точками (мышью или пальцем, с клавиатуры — стрелками), убирайте ненужные крестиком, добавляйте обратно кнопками «+ …», меняйте размер за правый нижний угол — ширина и высота прилипают к сетке. «Готово» сохраняет порядок, он виден и коллегам, открывшим ваш кабинет.</li>
         </ul>
         <p>На телефоне блоки идут одной колонкой в том же порядке. Сравнения с коллегами в кабинете нет: только собственная динамика.</p>
@@ -1995,7 +2040,10 @@ const LOOK_BG = {'': {name: 'Без фона'}, sky: {name: 'Синий'}, mint:
   target: {name: 'Мишень', ach: 'sniper'}, sunset: {name: 'Закат', ach: 'streak'}, aurora: {name: 'Северное сияние', ach: 'clean'}, stars: {name: 'Звёздное небо', ach: 'writer'},
   confetti: {name: 'Конфетти', ach: 'mentor'}, waves: {name: 'Волны', ach: 'team'}, stripes: {name: 'Финишная прямая', ach: 'marathon'}, space: {name: 'Космос', ach: 'pioneer'}};
 const LOOK_FRAME = {'': {name: 'Без рамки'}, scope: {name: 'Прицел', ach: 'sniper'}, fire: {name: 'Пламя', ach: 'streak'}, fresh: {name: 'Свежесть', ach: 'clean'}, ink: {name: 'Чернила', ach: 'writer'},
-  laurel: {name: 'Лавры', ach: 'mentor'}, link: {name: 'Связка', ach: 'team'}, finish: {name: 'Финиш', ach: 'marathon'}, compass: {name: 'Компас', ach: 'pioneer'}};
+  laurel: {name: 'Лавры', ach: 'mentor'}, link: {name: 'Связка', ach: 'team'}, finish: {name: 'Финиш', ach: 'marathon'}, compass: {name: 'Компас', ach: 'pioneer'},
+  // animated ones: no built-in achievement gives them, a manager makes them a reward in the constructor
+  neon: {name: 'Неон'}, rainbow: {name: 'Радуга'}, orbit: {name: 'Орбита'}, sonar: {name: 'Сонар'}, flame: {name: 'Пламя+'}, gear: {name: 'Шестерня'}, frost: {name: 'Иней'}, gold: {name: 'Золотой блик'},
+  heart: {name: 'Сердцебиение'}, garland: {name: 'Гирлянда'}, twin: {name: 'Двойное вращение'}, radar: {name: 'Радар'}, glitch: {name: 'Глитч'}, liquid: {name: 'Жидкий'}, stars: {name: 'Звёздный хоровод'}, sakura: {name: 'Сакура'}};
 // own achievements: counted by a rule, or handed out by a manager
 const ACH_METRIC = {ontime: 'задач закрыто в срок', closed: 'задач закрыто', hours: 'часов закрытой работы', stages: 'этапов сделано в срок', docs: 'статей в базе знаний', docsTask: 'статей к задачам', streak: 'рабочих дней подряд с закрытой задачей', clean: 'недель без просрочек'};
 const ACH_ICONS = ['medal', 'target', 'flame', 'sparkles', 'book2', 'school', 'users', 'run', 'compass', 'checklist', 'calendar', 'clock', 'chartBar', 'bookmark', 'comment', 'palette', 'folder', 'camera'];
@@ -3722,9 +3770,9 @@ function achOf(pid){
   return list;
 }
 // a frame opens with silver of an achievement that gives it, a background with gold; free ones and one's own uploads are always open
-const frameOpen = (pid, k) => !k || achOf(pid).some(a => a.frame === k && a.tier >= 2);
+const frameOpen = (pid, k) => !k || !!person(pid)?.achAll || achOf(pid).some(a => a.frame === k && a.tier >= 2);
 function bgOpen(pid, k){
-  if (!k) return true;
+  if (!k || (person(pid)?.achAll && !db.bgs.find(b => 'u:' + b.id === k)?.owner)) return true;
   if (k.startsWith('u:')){ const u = db.bgs.find(b => 'u:' + b.id === k); if (!u) return false; if (u.owner) return u.owner === pid; if (u.free) return true; }
   else if (!LOOK_BG[k]?.ach) return !!LOOK_BG[k];
   return achOf(pid).some(a => a.bg === k && a.tier >= 3);
@@ -3739,6 +3787,30 @@ function lookOf(p){
 }
 // an uploaded background under the header, darkened so the name reads on any picture
 const bgHead = k => { const b = k?.startsWith('u:') && db.bgs.find(x => 'u:' + x.id === k); return b ? `<span class="lbg-media">${bgMedia(b)}<span class="lbg-shade"></span></span>` : ''; };
+// a medal with a card on hover or focus: what it is for, how far along, what comes next
+const medalTip = (a, pid) => `<span class="ach-medal t${a.tier}${a.manual ? ' tm' : ''}" tabindex="0" data-ach-tip="${esc(a.id)}" data-ach-pid="${esc(pid)}" aria-label="${esc(a.name)}${a.manual ? ', награда' : a.tier ? ', ' + TIER[a.tier] : ''}">${ic(a.icon, 15)}</span>`;
+const achTip = Object.assign(document.createElement('div'), {className: 'ach-tip', hidden: true});
+achTip.setAttribute('role', 'tooltip');
+document.body.append(achTip);
+function showAchTip(el){
+  const a = achOf(el.dataset.achPid).find(x => x.id === el.dataset.achTip); if (!a) return;
+  const prev = a.steps[a.tier - 1] || 0, pct = a.next ? Math.min(100, (a.value - prev) / (a.next - prev) * 100) : 100;
+  achTip.innerHTML = `<div class="ach-tip-h">${medal(a, 16)}<b>${esc(a.name)}</b><span class="ach-tier t${a.tier}${a.manual ? ' tm' : ''}">${a.manual ? 'награда' : TIER[a.tier] || 'ещё нет'}</span></div>`
+    + (a.manual ? (a.awards || []).map(w => `<p>${w.note ? `«${esc(w.note)}»<br>` : ''}<span class="note">Вручил(а) ${esc(chatName(w.by))}, ${esc(fmtStamp(w.at))}</span></p>`).join('') || '<p class="note">Открыто временно</p>'
+      : `<p>${f1(a.value)} — ${esc(a.what)}${a.custom && (a.proj || a.tag) ? `<br><span class="note">${[project(a.proj)?.name, a.tag && 'тег «' + a.tag + '»'].filter(Boolean).map(esc).join(', ')}</span>` : ''}</p>
+        <span class="cab-gauge"><i style="width:${pct}%"></i></span>
+        <p class="note">${a.next ? `До ступени «${TIER[a.tier + 1]}»: ещё ${f1(a.next - a.value)}. Откроет: ${esc(achReward(a)[a.tier])}` : 'Все ступени взяты'}</p>
+        <p class="note">Ступени: ${a.steps.map((n, i) => `${TIER[i + 1]} — ${n}`).join(', ')}</p>`);
+  achTip.hidden = false;
+  const r = el.getBoundingClientRect(), w = achTip.offsetWidth, h = achTip.offsetHeight;
+  achTip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
+  achTip.style.top = (r.bottom + 8 + h > innerHeight ? r.top - h - 8 : r.bottom + 8) + 'px';
+}
+document.addEventListener('mouseover', e => { const el = e.target.closest?.('[data-ach-tip]'); if (el) showAchTip(el); else achTip.hidden = true; });
+document.addEventListener('focusin', e => { const el = e.target.closest?.('[data-ach-tip]'); if (el) showAchTip(el); else achTip.hidden = true; });
+document.addEventListener('focusout', e => { if (e.target.closest?.('[data-ach-tip]')) achTip.hidden = true; });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') achTip.hidden = true; });
+addEventListener('scroll', () => { achTip.hidden = true; }, true);
 const medal = (a, size = 15) => `<span class="ach-medal t${a.tier}${a.manual ? ' tm' : ''}" title="${esc(a.name)}${a.manual ? ' — награда' : a.tier ? ' — ' + TIER[a.tier] : ''}">${ic(a.icon, size)}</span>`;
 const bgName = k => k.startsWith('u:') ? db.bgs.find(b => 'u:' + b.id === k)?.name || 'свой фон' : LOOK_BG[k]?.name || '';
 const achReward = a => ['медаль в профиле', a.frame ? `рамка «${LOOK_FRAME[a.frame].name}»` : 'медаль серебра', a.bg ? `фон «${bgName(a.bg)}»` : 'золотая медаль'];
@@ -3762,7 +3834,7 @@ function renderCab(){
   const look = lookOf(p), big = `<span class="ava cab-ava${look.frame ? ' fr-' + look.frame : ''}" style="background:${p.hue}">${avaImg(p.photo) || esc(initials(p.name))}</span>`;
   $('#cab-who').className = 'cab-who' + (look.bg ? ' lbg lbg-' + look.bg.replace(':', '-') : '');
   $('#cab-who').innerHTML = `${bgHead(look.bg)}${p.photo ? `<button type="button" class="cab-ava-btn" data-photo-view title="Открыть фото" aria-label="Открыть фото: ${esc(p.name)}">${big}</button>` : big}
-    <div class="cab-id"><div class="cab-name">${esc(p.name)}${me ? ' <span class="chip">это вы</span>' : ''}${look.badges.length ? `<span class="ach-row">${look.badges.map(a => medal(a)).join('')}</span>` : ''}</div><div class="muted">${esc(p.role || 'Без роли')} · ${p.cap} ч в неделю${seenText(p.id) ? ' · ' + seenHtml(p.id) : ''}</div></div>
+    <div class="cab-id"><div class="cab-name">${esc(p.name)}${me ? ' <span class="chip">это вы</span>' : ''}${look.badges.length ? `<span class="ach-row">${look.badges.map(a => medalTip(a, p.id)).join('')}</span>` : ''}</div><div class="muted">${esc(p.role || 'Без роли')} · ${p.cap} ч в неделю${seenText(p.id) ? ' · ' + seenHtml(p.id) : ''}</div></div>
     <span class="spacer"></span>
     <div class="cab-per"><span class="seg" role="group" aria-label="Период статистики">${Object.entries(CAB_PER).map(([k, x]) => `<button type="button" data-cper="${k}" aria-pressed="${k === v}">${x[0]}</button>`).join('')}</span>
       <span class="cab-week"><button type="button" class="ibtn" data-cweek="-1" aria-label="Назад">‹</button><b class="num">${perLabel(v, from)}</b><button type="button" class="ibtn" data-cweek="1" aria-label="Вперёд">›</button>${cabOff ? '<button type="button" class="btn small" data-cweek="0">Сейчас</button>' : ''}</span></div>
@@ -3875,7 +3947,7 @@ function openLook(pid){
   const p = person(pid); if (!p) return;
   const d = $('#d-look'), al = achOf(pid), sel = {...normLook(p.look)};
   // what opens a locked item: every achievement that gives it
-  const by = (field, k, need) => al.filter(a => a[field] === k).map(a => a.manual ? `награда «${a.name}»` : `${a.name}: ${TIER[need]} — ${a.steps[need - 1]} ${a.what}`).join(' или ') || 'пока ничем не открывается';
+  const by = (field, k, need) => al.filter(a => a[field] === k).map(a => a.manual ? `награда «${a.name}»` : `${a.name}: ${TIER[need]} — ${a.steps[need - 1]} ${a.what}`).join(' или ') || 'руководитель может сделать её наградой: «+ Достижение» → рамка';
   const bgCond = k => by('bg', k, 3), frCond = k => by('frame', k, 2);
   const draw = () => {
     const prev = {...lookOf({...p, look: sel})};
