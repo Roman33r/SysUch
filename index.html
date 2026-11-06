@@ -1129,8 +1129,10 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 .ev-cols{display:flex;gap:8px}
 .ev-cols button{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
 .ev-cols button[aria-pressed="true"]{border-color:var(--fg)}
+.dp-row{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px;margin:0 0 12px}
+.dp-row .btn.danger{justify-self:start}
 .ev-guests{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px;max-height:160px;overflow:auto;padding:2px}
-.ev-guests label{display:flex;gap:6px;align-items:center;font-size:14px}
+.ev-guests label{display:flex;gap:6px;align-items:center;font-size:14px;text-transform:none;letter-spacing:0;color:var(--fg)}
 #d-ev .err,#d-ev .note{margin:0}
 .cs-row{display:flex;gap:10px;align-items:center;padding:6px 0}
 .cs-row > span:not(.ava){flex:1;min-width:0}
@@ -1257,7 +1259,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
   </main>
 
   <main id="v-people" class="stack" hidden>
-    <div class="panel-h"><h2>Сотрудники</h2><span class="count" id="pl-count"></span><button class="btn small" id="pl-new">+ Сотрудник</button><button class="btn small" id="pl-users" style="margin-left:0">Логины и пароли…</button></div>
+    <div class="panel-h"><h2>Сотрудники</h2><span class="count" id="pl-count"></span><button class="btn small" id="pl-new">+ Сотрудник</button><button class="btn small" id="pl-depts" style="margin-left:0">Отделы…</button><button class="btn small" id="pl-users" style="margin-left:0">Логины и пароли…</button></div>
     <div class="pl-tools">
       <input id="pl-q" type="search" maxlength="80" placeholder="Поиск по имени и должности" aria-label="Поиск сотрудника">
       <select class="sel" id="pl-access" aria-label="Фильтр по роли"></select>
@@ -1350,6 +1352,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 <dialog id="d-new" aria-label="Новая задача"></dialog>
 <dialog id="d-inbox"></dialog>
 <dialog id="d-person"></dialog>
+<dialog id="d-depts"></dialog>
 <dialog id="d-store"></dialog>
 <dialog id="d-conflict"></dialog>
 <dialog id="d-login"></dialog>
@@ -1498,6 +1501,8 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
           <li><b>Доступ.</b> «Доступ к моему календарю»: каждому коллеге — нет доступа, только «занят» (время без названий), видит всё или может добавлять и менять события. Слева галочками выбирается, чьи календари показывать.</li>
           <li><b>Сроки задач.</b> Открытые задачи с датой срока; просроченные красные. Галочка «Сроки задач» их прячет.</li>
           <li><b>Контекстное меню.</b> Правая кнопка на дне или часе: новое событие, новая задача со сроком на этот день, открыть день. На событии: изменить или удалить, на задаче: открыть.</li>
+          <li><b>Рабочий календарь отдела.</b> Отделы заводит руководитель в «Сотрудники → Отделы…» и назначает руководителя отдела и того, кто его замещает. Только они (и администратор) добавляют события в рабочий календарь, выбрав его в поле «Календарь» нового события. Там же тип: событие, отпуск, отсутствие или больничный сотрудника, с какого по какое число. Сотрудники отдела видят рабочий календарь в списке «Рабочие».</li>
+          <li><b>Предупреждения.</b> Если задачу назначают сотруднику (или переносят её срок) на день, когда у него отпуск, отсутствие или больничный, Планёрка спросит «Всё равно назначить?». День — срок задачи, а без срока — сегодня. Если сотрудник ставит в своём календаре событие на время события отдела или своего отсутствия, Планёрка тоже предупредит.</li>
           <li><b>Выходные и праздники</b> выделены красным. Праздники — нерабочие дни по Трудовому кодексу (1–8 января, 23 февраля, 8 марта, 1 и 9 мая, 12 июня, 4 ноября); переносы выходных, которые правительство объявляет каждый год, не учитываются.</li>
         </ul>
         <p>Доступ к календарю проверяет интерфейс: технически данные доступны всем, кто вошёл в Планёрку.</p>
@@ -1720,7 +1725,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 14;
+const SCHEMA = 15;
 const CHAT_MAX = 2000, CHAT_TEXT_MAX = 2000; // localStorage holds about 5 MB per site, so old messages drop off
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
@@ -1832,7 +1837,7 @@ function normPerson(p){
     hue: /^#[0-9a-f]{6}$/i.test(p.hue) ? p.hue : HUES[0],
     archived: !!p.archived,
     access: ACCESS[p.access] && Object.hasOwn(ACCESS, p.access) ? p.access : 'employee',
-    photo: normPhoto(p.photo), cab: normCab(p.cab),
+    photo: normPhoto(p.photo), cab: normCab(p.cab), dept: s(p.dept, 40),
   };
 }
 function normTask(t){
@@ -1899,8 +1904,13 @@ function normEv(e){
   return {id: s(e.id, 40), title: s(e.title, 200).trim() || 'Без названия', note: s(e.note, 2000), owner: s(e.owner, 40), start, end: end && end >= start ? end : start,
     allDay: !!e.allDay, remind: Object.hasOwn(CAL_REMIND, String(e.remind)) ? +e.remind : -1, repeat: Object.hasOwn(CAL_REPEAT, e.repeat ?? '') ? e.repeat ?? '' : '',
     guests: [...new Set((Array.isArray(e.guests) ? e.guests : []).map(String))].filter(g => g && g !== s(e.owner, 40)).slice(0, 50),
-    color: /^#[0-9a-f]{6}$/i.test(e.color) ? e.color : CAL_COLORS[0], createdAt: s(e.createdAt, 40), updatedAt: s(e.updatedAt, 40)};
+    color: /^#[0-9a-f]{6}$/i.test(e.color) ? e.color : CAL_COLORS[0], createdAt: s(e.createdAt, 40), updatedAt: s(e.updatedAt, 40),
+    kind: Object.hasOwn(ABSENT, e.kind) ? e.kind : '', who: Object.hasOwn(ABSENT, e.kind) ? s(e.who, 40) : ''};
 }
+/* departments: a head and a deputy keep the department's work calendar, where they also mark absences */
+const normDept = d => ({id: String(d.id ?? '').slice(0, 40), name: String(d.name ?? '').trim().slice(0, 80) || 'Без названия', head: String(d.head ?? '').slice(0, 40), deputy: String(d.deputy ?? '').slice(0, 40), at: String(d.at ?? '').slice(0, 40)});
+// kinds of absence in a work calendar: name, what the warning says, colour
+const ABSENT = {vac: ['Отпуск', 'в отпуске', '#0F8A6A'], away: ['Отсутствие', 'отсутствует на рабочем месте', '#B0731A'], sick: ['Больничный', 'на больничном', '#B5476E']};
 // who may see a person's calendar: one record per owner
 const normShare = x => ({id: String(x.id ?? '').slice(0, 40), list: (Array.isArray(x.list) ? x.list : []).filter(y => y && Object.hasOwn(CAL_LEVEL, y.level) && y.to).map(y => ({to: String(y.to).slice(0, 40), level: y.level}))});
 const normDoc = d => { const s = (v, max) => String(v ?? '').slice(0, max);
@@ -1983,7 +1993,7 @@ function merge3(base, mine, theirs){
     notes.push(`Номер ${old} одновременно заняли двое, ваша задача теперь ${id}.`);
   }
   const data = {...t, nextId: next, ...chatOf(mine, theirs), blobs: {...theirs.blobs, ...mine.blobs}, savedAt: mine.savedAt};
-  for (const coll of ['people', 'tasks', 'projects', 'templates', 'docs', 'cal', 'calShare']){
+  for (const coll of ['people', 'tasks', 'projects', 'templates', 'docs', 'cal', 'calShare', 'depts']){
     const B = new Map(base[coll].map(x => [x.id, x])), M = new Map(m[coll].map(x => [x.id, x])), T = new Map(t[coll].map(x => [x.id, x]));
     data[coll] = [];
     const kept = x => { if (coll === 'tasks') notes.push(`${x.id} удалили с одной стороны и изменили с другой: задача оставлена.`); data[coll].push(x); };
@@ -2049,6 +2059,10 @@ function migrate(raw){
   // v12 -> v13: calendar
   const uniq = (l, norm, ok) => { const ids = new Set(); return (Array.isArray(l) ? l : []).filter(x => x && typeof x === 'object').map(norm).filter(x => x.id && ok(x) && !ids.has(x.id) && ids.add(x.id)); };
   const cal = uniq(raw.cal, normEv, e => e.start), calShare = uniq(raw.calShare, normShare, () => true);
+  // v14 -> v15: departments; people of a department that is gone are left without one
+  const depts = uniq(raw.depts, normDept, () => true), dids = new Set(depts.map(d => d.id));
+  depts.forEach(d => { if (!pids.has(d.head)) d.head = ''; if (!pids.has(d.deputy)) d.deputy = ''; });
+  people.forEach(p => { if (!dids.has(p.dept)) p.dept = ''; });
   const docIds = new Set(), docs = (Array.isArray(raw.docs) ? raw.docs : []).filter(d => d && typeof d === 'object').map(normDoc).filter(d => d.id && !docIds.has(d.id) && docIds.add(d.id));
   const used = new Set([...tasks.flatMap(t => t.files.map(f => f.id)), ...chat.flatMap(m => m.files.map(f => f.id)), ...docs.flatMap(d => kbBlobIds(d.html)),
     ...[...people, ...(Array.isArray(raw.rooms) ? raw.rooms : []).map(r => ({photo: normPhoto(r?.photo)}))].flatMap(x => x.photo ? [x.photo.full, x.photo.thumb] : [])]);
@@ -2057,7 +2071,7 @@ function migrate(raw){
     if (used.has(id) && typeof b?.data === 'string' && b.data.startsWith('data:')) blobs[id] = {data: b.data};
   // v8 -> v9: group chats; people who no longer exist leave them
   const rooms = mergeRooms((Array.isArray(raw.rooms) ? raw.rooms : []).map(normRoom).filter(r => r.id && r.name).map(r => ({...r, members: r.members.filter(m => m === 'boss' || pids.has(m))})), []);
-  return {version: SCHEMA, nextId, people, tasks, projects, templates, docs, cal, calShare, events, chat, rooms, marks: normMarks(raw.marks), blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null, revs: (Array.isArray(raw.revs) ? raw.revs : []).map(String).slice(-REVS_MAX)};
+  return {version: SCHEMA, nextId, people, tasks, projects, templates, docs, cal, calShare, depts, events, chat, rooms, marks: normMarks(raw.marks), blobs, savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : null, revs: (Array.isArray(raw.revs) ? raw.revs : []).map(String).slice(-REVS_MAX)};
 }
 
 function demo(){
@@ -2547,13 +2561,25 @@ const addLog = (t, text) => t.log.push({at: stamp(), text});
 // snapshot before a change so the toast can undo it
 // msg may be a function, evaluated after the change (for texts that depend on the result)
 function change(fn, msg, action){
-  const before = JSON.stringify(db);
+  const before = JSON.stringify(db), was = new Map(db.tasks.map(t => [t.id, t.assignee + '|' + t.due]));
   if (fn() === false) return;
+  const warn = absentWarn(was);
+  if (warn && !confirm(warn)){ db = {...JSON.parse(before), chat: db.chat, rooms: db.rooms, marks: db.marks}; render(); return; }
   commit();
   if (typeof msg === 'function') msg = msg();
   if (typeof action === 'function') action = action();
   if (msg) toast(msg, () => { db = {...JSON.parse(before), chat: db.chat, rooms: db.rooms, marks: db.marks}; commit(); }, action || undefined);
 }
+// tasks given to someone, or moved to a date, while the work calendar has them away; the date is the due date, or today without one
+function absentWarn(was){
+  const out = db.tasks.filter(t => t.assignee && t.status !== 'done' && was.get(t.id) !== t.assignee + '|' + t.due).flatMap(t => {
+    const e = absentOn(t.assignee, t.due || addDays(0));
+    return e ? [`${person(t.assignee)?.name || 'Сотрудник'} ${ABSENT[e.kind][1]} (${absentWhen(e)}) — ${t.id}${t.due ? `, срок ${fmtDay(t.due)}` : ''}`] : [];
+  });
+  return out.length ? `${out.slice(0, 5).join('\n')}${out.length > 5 ? `\n…и ещё ${out.length - 5}` : ''}\n\nВсё равно назначить?` : '';
+}
+const absentOn = (pid, day) => db.cal.find(e => e.kind && e.who === pid && e.owner.startsWith('dept:') && evOccur(e, day, day).length);
+const absentWhen = e => e.start.slice(0, 10) === e.end.slice(0, 10) ? fmtDay(e.start.slice(0, 10)) + (e.allDay ? '' : `, ${hm(e.start)}–${hm(e.end)}`) : `${fmtDay(e.start.slice(0, 10))} – ${fmtDay(e.end.slice(0, 10))}`;
 const addEvent = text => { db.events.push({at: stamp(), text}); if (db.events.length > 500) db.events.splice(0, db.events.length - 500); };
 
 /* weeks start on Monday; dates are local YYYY-MM-DD strings */
@@ -4452,6 +4478,7 @@ function openPerson(id){
       <div class="field"><label for="pf-role">Должность</label><input id="pf-role" maxlength="80" value="${esc(p.role)}" placeholder="Фронтенд, QA…"></div>
       <div class="field"><label for="pf-cap">Часов в неделю</label><input id="pf-cap" type="number" min="1" step="1" value="${p.cap}"></div>
     </div>
+    ${db.depts.length ? `<div class="field"><label for="pf-dept">Отдел</label><select class="sel" id="pf-dept"><option value="">Без отдела</option>${db.depts.map(x => `<option value="${esc(x.id)}" ${p.dept === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : ''}
     ${canAssignRoles() ? `<div class="field"><label for="pf-access">Роль</label><select class="sel" id="pf-access">${Object.entries(ACCESS).map(([k, l]) => `<option value="${k}" ${p.access === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>` : ''}
     <div class="field"><span class="k">Цвет</span><div class="swatches">${HUES.map((h, i) => `<input type="radio" name="hue" id="hue-${i}" value="${h}" ${p.hue === h ? 'checked' : ''}><label for="hue-${i}" style="background:${h}" aria-label="Цвет ${i + 1}"></label>`).join('')}</div></div>
     ${existing ? '<p class="note">В архиве сотрудник не виден в команде, его открытые задачи вернутся в бэклог. История задач сохранится.</p>' : ''}
@@ -4464,7 +4491,7 @@ function openPerson(id){
     e.preventDefault();
     const name = d.querySelector('#pf-name').value.trim();
     if (!name){ d.querySelector('#pf-err').hidden = false; d.querySelector('#pf-name').focus(); return; }
-    const next = normPerson({...p, name, role: d.querySelector('#pf-role').value.trim(), cap: d.querySelector('#pf-cap').value, hue: d.querySelector('input[name=hue]:checked')?.value, access: d.querySelector('#pf-access')?.value || p.access});
+    const next = normPerson({...p, name, role: d.querySelector('#pf-role').value.trim(), cap: d.querySelector('#pf-cap').value, hue: d.querySelector('input[name=hue]:checked')?.value, access: d.querySelector('#pf-access')?.value || p.access, dept: d.querySelector('#pf-dept')?.value ?? p.dept});
     d.close();
     if (existing) change(() => { Object.assign(existing, next); addEvent(`${actor()} изменил карточку сотрудника ${name}`); }, `${name}: сохранено`);
     else { next.id = 'u' + Date.now().toString(36); change(() => { db.people.push(next); addEvent(`${actor()} добавил сотрудника ${name}`); }, `${name} в команде`); }
@@ -4474,7 +4501,7 @@ function openPerson(id){
 }
 function renderPeople(){
   const canManage = canManagePeople(), f = ui;
-  $('#pl-new').hidden = !canManage;
+  $('#pl-new').hidden = !canManage; $('#pl-depts').hidden = !canManage;
   $('#pl-users').hidden = !(serverUser && canAssignRoles());
   const jobs = [...new Set(db.people.map(p => p.role).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ru'));
   if (f.plJob && !jobs.includes(f.plJob)) f.plJob = '';
@@ -4493,7 +4520,7 @@ function renderPeople(){
   const row = p => {
     const id = esc(p.id), open = openWork().filter(w => w.pid === p.id).length;
     return `<div class="pl-row ${p.archived ? 'arch' : ''}">${ava(p)}
-      <div><button type="button" class="p-name linkish" data-cab="${id}">${esc(p.name)}</button><div class="p-role">${esc(p.role) || 'Должность не указана'}${seenText(p.id) ? ' · ' + seenHtml(p.id) : ''}</div></div>
+      <div><button type="button" class="p-name linkish" data-cab="${id}">${esc(p.name)}</button><div class="p-role">${esc(p.role) || 'Должность не указана'}${dept(p.dept) ? ' · ' + esc(dept(p.dept).name) : ''}${absentOn(p.id, addDays(0)) ? ` · <span class="late">${ABSENT[absentOn(p.id, addDays(0)).kind][1]}</span>` : ''}${seenText(p.id) ? ' · ' + seenHtml(p.id) : ''}</div></div>
       <span class="pl-badge ${p.access}">${ACCESS[p.access]}</span>
       <span class="note pl-meta">${p.cap} ч в неделю</span>
       <span class="note pl-meta">Открытых задач: ${open}</span>
@@ -4505,6 +4532,43 @@ function renderPeople(){
   $('#pl-list').innerHTML = list.map(row).join('') || `<div class="empty">${db.people.length ? 'По фильтрам никого не найдено.' : 'Сотрудников пока нет.'}</div>`;
 }
 const plSet = (k, v) => { ui[k] = v; saveUi(); renderPeople(); };
+$('#pl-depts').onclick = () => openDepts();
+// departments: name, head, deputy and people, all saved at once
+function openDepts(){
+  const d = $('#d-depts'), list = db.depts.map(x => ({...x, members: active().filter(p => p.dept === x.id).map(p => p.id)}));
+  const opts = (v, none) => `<option value="">${none}</option>` + active().map(p => `<option value="${esc(p.id)}" ${p.id === v ? 'selected' : ''}>${esc(p.name)}</option>`).join('');
+  const draw = () => {
+    d.innerHTML = `<form id="dp-form" novalidate><div class="d-head"><h2>Отделы</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
+      <div class="d-body">${list.map((x, i) => `<fieldset class="dp-row" data-i="${i}" aria-label="Отдел ${i + 1}">
+        <div class="fields"><div class="field"><label for="dp-n${i}">Название</label><input id="dp-n${i}" data-k="name" maxlength="80" value="${esc(x.name)}"></div>
+          <div class="field"><label for="dp-h${i}">Руководитель</label><select class="sel" id="dp-h${i}" data-k="head">${opts(x.head, 'Не назначен')}</select></div>
+          <div class="field"><label for="dp-d${i}">Замещает</label><select class="sel" id="dp-d${i}" data-k="deputy">${opts(x.deputy, 'Никто')}</select></div></div>
+        <div class="field"><span class="k">Сотрудники отдела</span><div class="ev-guests">${active().map(p => `<label><input type="checkbox" value="${esc(p.id)}" ${x.members.includes(p.id) ? 'checked' : ''}> ${esc(p.name)}${p.dept && p.dept !== x.id && dept(p.dept) ? ` <small class="note">(${esc(dept(p.dept).name)})</small>` : ''}</label>`).join('')}</div></div>
+        <button type="button" class="btn small danger" data-dp-del="${i}">${x.armed ? 'Точно удалить? Его рабочий календарь тоже' : 'Удалить отдел'}</button></fieldset>`).join('') || '<p class="note">Отделов пока нет.</p>'}
+        <button type="button" class="btn small" id="dp-add">+ Отдел</button>
+        <p class="note">Рабочий календарь отдела ведут руководитель и тот, кто его замещает: события для всего отдела, отпуска, отсутствие и больничные. Видят его сотрудники отдела и руководители.</p></div>
+      <div class="d-foot"><span class="spacer"></span><button type="button" class="btn" id="dp-cancel">Отмена</button><button class="btn primary">Сохранить</button></div></form>`;
+    d.querySelector('#dp-cancel').onclick = () => d.close();
+    d.querySelector('#dp-add').onclick = () => { read(); list.push({id: 'd' + Date.now().toString(36), name: '', head: '', deputy: '', members: []}); draw(); d.querySelector(`#dp-n${list.length - 1}`).focus(); };
+    d.querySelectorAll('[data-dp-del]').forEach(b => b.onclick = () => { read(); const x = list[+b.dataset.dpDel]; if (x.armed) list.splice(+b.dataset.dpDel, 1); else x.armed = true; draw(); });
+    d.querySelector('#dp-form').onsubmit = e => {
+      e.preventDefault(); read();
+      const at = stamp(), next = list.map(x => normDept({...x, name: x.name || 'Новый отдел', at})), ids = new Set(next.map(x => x.id));
+      d.close();
+      change(() => {
+        db.depts = next;
+        db.cal = db.cal.filter(e => !e.owner.startsWith('dept:') || ids.has(e.owner.slice(5)));
+        // a person ticked in two departments stays in the last one
+        for (const p of db.people) p.dept = [...list].reverse().find(x => x.members.includes(p.id))?.id || (p.archived && ids.has(p.dept) ? p.dept : '');
+        addEvent(`${actor()} изменил отделы`);
+      }, `Отделы сохранены: ${next.length}`);
+    };
+  };
+  // what is typed survives adding or removing a row
+  const read = () => d.querySelectorAll('.dp-row').forEach(f => { const x = list[+f.dataset.i]; f.querySelectorAll('[data-k]').forEach(el => { x[el.dataset.k] = el.value.trim(); }); x.members = [...f.querySelectorAll('.ev-guests input:checked')].map(i => i.value); });
+  draw();
+  d.showModal();
+}
 $('#pl-q').oninput = e => plSet('plQ', e.target.value);
 $('#pl-access').onchange = e => plSet('plAccess', e.target.value);
 $('#pl-job').onchange = e => plSet('plJob', e.target.value);
@@ -5576,8 +5640,15 @@ const hm = s => s.slice(11, 16);
 const mins = s => +s.slice(11, 13) * 60 + +s.slice(14, 16);
 const monthStart = (d, n = 0) => { const x = new Date(d.slice(0, 8) + '01T00:00'); x.setMonth(x.getMonth() + n); return isoDay(x); };
 // what I may do with someone's calendar: own, edit, view, busy or nothing
-const calLevel = owner => owner === chatMe() ? 'own' : db.calShare.find(x => x.id === owner)?.list.find(y => y.to === chatMe())?.level || '';
-const calOwners = () => [chatMe(), ...db.calShare.filter(x => x.id !== chatMe() && x.list.some(y => y.to === chatMe())).map(x => x.id)];
+const calLevel = owner => owner.startsWith('dept:') ? (canEditDept(dept(owner.slice(5))) ? 'edit' : canSeeDept(dept(owner.slice(5))) ? 'view' : '')
+  : owner === chatMe() ? 'own' : db.calShare.find(x => x.id === owner)?.list.find(y => y.to === chatMe())?.level || '';
+const calOwners = () => [chatMe(), ...db.calShare.filter(x => x.id !== chatMe() && x.list.some(y => y.to === chatMe())).map(x => x.id), ...db.depts.filter(canSeeDept).map(d => 'dept:' + d.id)];
+const dept = id => db.depts.find(d => d.id === id);
+// a work calendar is kept by the head, the deputy and the administrator, and seen by the department and the managers
+const canEditDept = d => !!d && (myAccess() === 'admin' || [d.head, d.deputy].includes(chatMe()));
+const canSeeDept = d => !!d && (canEditDept(d) || canManagePeople() || person(chatMe())?.dept === d.id);
+const deptPeople = d => active().filter(p => p.dept === d.id || p.id === d.head || p.id === d.deputy);
+const calName = o => o === chatMe() ? 'Мой' : o.startsWith('dept:') ? `Рабочий: ${dept(o.slice(5))?.name || 'отдел'}` : chatName(o);
 const calCanEdit = e => ['own', 'edit'].includes(calLevel(e.owner));
 // every occurrence of an event that touches the days from..to
 function evOccur(e, from, to){
@@ -5617,7 +5688,7 @@ function calChip(x, d){
   const late = x.kind === 'task' && x.t.due < addDays(0), cls = x.kind === 'task' ? (late ? 'late' : 'task') : x.busy ? 'busy' : '';
   const style = x.kind === 'ev' && !x.busy ? ` style="--c:${x.e.color}"` : '';
   const time = calTimed(x) && x.start.slice(0, 10) === d ? hm(x.start) + ' ' : '';
-  return `<button type="button" class="cal-chip ${cls}${x.other ? ' other' : ''}"${style} data-cal-item="${esc(x.key)}" title="${esc((x.other ? chatName(x.kind === 'task' ? x.t.assignee : x.e.owner) + ': ' : '') + calLabel(x))}">${esc(time + calLabel(x))}</button>`;
+  return `<button type="button" class="cal-chip ${cls}${x.other ? ' other' : ''}"${style} data-cal-item="${esc(x.key)}" title="${esc((x.other ? (x.kind === 'task' ? chatName(x.t.assignee) : calName(x.e.owner)) + ': ' : '') + calLabel(x))}">${esc(time + calLabel(x))}</button>`;
 }
 let calShown = []; // the items on screen, so a click finds its event
 const calFocus = () => /^\d{4}-\d{2}-\d{2}$/.test(ui.calDate) ? ui.calDate : addDays(0);
@@ -5638,8 +5709,10 @@ function renderCal(){
     : v === 'quarter' ? `${['I', 'II', 'III', 'IV'][Math.floor((+from.slice(5, 7) - 1) / 3)]} квартал ${from.slice(0, 4)}` : from.slice(0, 4);
   // calendars: mine and those shared with me
   const me = chatMe();
-  $('#cal-side').innerHTML = `<h3>Календари</h3>${calOwners().map((o, i) => `<label><input type="checkbox" data-cal-on="${esc(o)}" ${ui.calOff.includes(o) ? '' : 'checked'}><span class="cal-sw" style="background:${person(o)?.hue || CAL_COLORS[i % 5]}"></span><span class="cal-nm">${o === me ? 'Мой' : esc(chatName(o))}${o === me ? '' : `<small title="${esc(CAL_LEVEL[calLevel(o)])}">${calLevel(o) === 'busy' ? 'только «занят»' : calLevel(o) === 'edit' ? 'просмотр и правка' : 'просмотр'}</small>`}</span></label>`).join('')}
-    <label><input type="checkbox" data-cal-tasks ${ui.calNoTasks ? '' : 'checked'}><span class="cal-sw" style="background:var(--accent)"></span>Сроки задач</label>
+  const calRow = (o, i) => `<label><input type="checkbox" data-cal-on="${esc(o)}" ${ui.calOff.includes(o) ? '' : 'checked'}><span class="cal-sw" style="background:${o.startsWith('dept:') ? 'var(--med)' : person(o)?.hue || CAL_COLORS[i % 5]}"></span><span class="cal-nm">${esc(calName(o))}${o === me ? '' : o.startsWith('dept:') ? `<small>${calLevel(o) === 'edit' ? 'вы ведёте' : 'просмотр'}</small>` : `<small title="${esc(CAL_LEVEL[calLevel(o)])}">${calLevel(o) === 'busy' ? 'только «занят»' : calLevel(o) === 'edit' ? 'просмотр и правка' : 'просмотр'}</small>`}</span></label>`;
+  const own = calOwners().filter(o => !o.startsWith('dept:')), work = calOwners().filter(o => o.startsWith('dept:'));
+  $('#cal-side').innerHTML = `<h3>Календари</h3>${own.map(calRow).join('')}
+    <label><input type="checkbox" data-cal-tasks ${ui.calNoTasks ? '' : 'checked'}><span class="cal-sw" style="background:var(--accent)"></span>Сроки задач</label>${work.length ? `<h3>Рабочие</h3>${work.map(calRow).join('')}` : ''}
     <button type="button" class="btn small" data-cal-share style="margin-top:8px">${ic('lockOpen', 15)} Доступ к моему календарю</button>
     <p class="note">Коллеги, которым вы дали доступ, увидят ваш календарь у себя в этом списке.</p>`;
   const main = $('#cal-main');
@@ -5758,23 +5831,37 @@ function openEvent(ev, day, time){
   const people = [...(me === 'boss' ? [] : ['boss']), ...active().map(p => p.id)].filter(p => p !== me);
   d.innerHTML = `<form id="ev-form" novalidate><div class="d-head"><h2>${ev ? (edit ? 'Событие' : esc(x.title)) : 'Новое событие'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
     <div class="d-body">
-      ${edit ? '' : `<p class="note">Событие из календаря: ${esc(chatName(x.owner))}. Изменить его может владелец${x.guests.includes(me) ? '; вы приглашены' : ''}.</p>`}
-      <div class="field"><label for="ev-title">Название</label><input id="ev-title" maxlength="200" value="${esc(x.title)}" placeholder="Например, совещание по закрытию месяца" ${ro}><span class="err" id="ev-title-err" hidden>Введите название</span></div>
-      <div class="ev-row"><label for="ev-date">Когда</label><input type="date" id="ev-date" value="${x.start.slice(0, 10)}" ${ro}>
+      ${edit ? '' : `<p class="note">Событие из календаря: ${esc(calName(x.owner))}. Изменить его может ${x.owner.startsWith('dept:') ? 'руководитель отдела или его заместитель' : 'владелец'}${x.guests.includes(me) ? '; вы приглашены' : ''}.</p>`}
+      ${owners.length > 1 && edit ? `<div class="ev-row"><label for="ev-owner">Календарь</label><select id="ev-owner">${owners.map(o => `<option value="${esc(o)}" ${o === x.owner ? 'selected' : ''}>${esc(calName(o))}</option>`).join('')}</select></div>` : ''}
+      <div class="ev-row" id="ev-kind-row"><label for="ev-kind">Тип</label><select id="ev-kind" ${ro}><option value="">Событие</option>${Object.entries(ABSENT).map(([k, a]) => `<option value="${k}" ${k === x.kind ? 'selected' : ''}>${a[0]}</option>`).join('')}</select></div>
+      <div class="ev-row" id="ev-who-row"><label for="ev-who">Сотрудник</label><select id="ev-who" ${ro}></select><span class="err" id="ev-who-err" hidden>Выберите сотрудника</span></div>
+      <div class="field"><label for="ev-title">Название</label><input id="ev-title" maxlength="200" value="${ev ? esc(x.title) : ''}" placeholder="Например, совещание по закрытию месяца" ${ro}><span class="err" id="ev-title-err" hidden>Введите название</span></div>
+      <div class="ev-row"><label for="ev-date">Когда</label><input type="date" id="ev-date" value="${x.start.slice(0, 10)}" ${ro}><span id="ev-to">по <input type="date" id="ev-date2" value="${x.end.slice(0, 10)}" aria-label="По какой день" ${ro}></span>
         <input type="time" id="ev-t1" value="${hm(x.start)}" ${ro} ${x.allDay ? 'hidden' : ''}><span id="ev-dash" ${x.allDay ? 'hidden' : ''}>–</span><input type="time" id="ev-t2" value="${hm(x.end)}" ${ro} ${x.allDay ? 'hidden' : ''}>
         <label class="chk" style="min-width:0"><input type="checkbox" id="ev-allday" ${x.allDay ? 'checked' : ''} ${ro}> Весь день</label></div>
       <span class="err" id="ev-time-err" hidden>Конец раньше начала</span>
+      <p class="note" id="ev-work-note" hidden>Сотрудникам, у которых в это время отпуск, отсутствие или больничный, Планёрка предупредит перед назначением задачи.</p>
       <div class="ev-row"><label for="ev-remind">Напоминание</label><select id="ev-remind" ${ro}>${Object.entries(CAL_REMIND).sort((a, b) => a[0] - b[0]).map(([k, l]) => `<option value="${k}" ${+k === x.remind ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
       <div class="ev-row"><label for="ev-repeat">Повтор</label><select id="ev-repeat" ${ro}>${Object.entries(CAL_REPEAT).map(([k, l]) => `<option value="${k}" ${k === x.repeat ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
-      ${owners.length > 1 && edit ? `<div class="ev-row"><label for="ev-owner">Календарь</label><select id="ev-owner">${owners.map(o => `<option value="${esc(o)}" ${o === x.owner ? 'selected' : ''}>${o === me ? 'Мой' : esc(chatName(o))}</option>`).join('')}</select></div>` : ''}
-      <div class="ev-row"><label>Цвет</label><div class="ev-cols" role="group" aria-label="Цвет">${CAL_COLORS.map(c => `<button type="button" data-ev-color="${c}" style="background:${c}" aria-pressed="${c === x.color}" aria-label="Цвет ${c}" ${ro}></button>`).join('')}</div></div>
-      <div class="field"><label>Пригласить коллег</label><div class="ev-guests">${people.map(p => `<label>${chatAva(p).replace('class="ava', 'class="ava sm')}<input type="checkbox" value="${esc(p)}" ${x.guests.includes(p) ? 'checked' : ''} ${ro}> ${esc(chatName(p))}</label>`).join('')}</div><span class="note">Приглашённые увидят событие в своём календаре и получат напоминание.</span></div>
+      <div class="ev-row" id="ev-color-row"><label>Цвет</label><div class="ev-cols" role="group" aria-label="Цвет">${CAL_COLORS.map(c => `<button type="button" data-ev-color="${c}" style="background:${c}" aria-pressed="${c === x.color}" aria-label="Цвет ${c}" ${ro}></button>`).join('')}</div></div>
+      <div class="field" id="ev-guests-row"><label>Пригласить коллег</label><div class="ev-guests">${people.map(p => `<label>${chatAva(p).replace('class="ava', 'class="ava sm')}<input type="checkbox" value="${esc(p)}" ${x.guests.includes(p) ? 'checked' : ''} ${ro}> ${esc(chatName(p))}</label>`).join('')}</div><span class="note">Приглашённые увидят событие в своём календаре и получат напоминание.</span></div>
       <div class="field"><label for="ev-note">Описание</label><textarea id="ev-note" rows="3" maxlength="2000" ${ro}>${esc(x.note)}</textarea></div>
     </div>
     <div class="d-foot">${ev && edit ? '<button type="button" class="btn danger" id="ev-del">Удалить</button>' : ''}<span class="spacer"></span>${edit ? '<button class="btn primary">Сохранить</button>' : '<button type="button" class="btn" id="ev-close">Закрыть</button>'}</div></form>`;
   let color = x.color;
   const q = s => d.querySelector(s);
   q('#ev-allday').onchange = e => ['#ev-t1', '#ev-t2', '#ev-dash'].forEach(s => { q(s).hidden = e.target.checked; });
+  // the work calendar has kinds of absence for a person of the department, over a range of days
+  const sync = () => {
+    const o = q('#ev-owner')?.value || x.owner, d0 = o.startsWith('dept:') ? dept(o.slice(5)) : null, kind = d0 ? q('#ev-kind').value : '';
+    q('#ev-kind-row').hidden = !d0; q('#ev-to').hidden = !d0; q('#ev-work-note').hidden = !d0;
+    q('#ev-who-row').hidden = !kind; q('#ev-color-row').hidden = q('#ev-remind').closest('.ev-row').hidden = q('#ev-repeat').closest('.ev-row').hidden = !!kind; q('#ev-guests-row').hidden = !!d0;
+    if (d0 && q('#ev-who').dataset.dept !== d0.id){ const cur = q('#ev-who').value || x.who; q('#ev-who').dataset.dept = d0.id; q('#ev-who').innerHTML = `<option value="">—</option>` + deptPeople(d0).map(p => `<option value="${esc(p.id)}" ${p.id === cur ? 'selected' : ''}>${esc(p.name)}</option>`).join(''); }
+    if (kind && !ev && !q('#ev-allday').checked){ q('#ev-allday').checked = true; q('#ev-allday').onchange({target: q('#ev-allday')}); }
+  };
+  q('#ev-owner')?.addEventListener('change', () => { q('#ev-who').dataset.dept = ''; sync(); });
+  q('#ev-kind').onchange = sync;
+  sync();
   d.querySelectorAll('[data-ev-color]').forEach(b => b.onclick = () => { color = b.dataset.evColor; d.querySelectorAll('[data-ev-color]').forEach(y => y.setAttribute('aria-pressed', y === b)); });
   q('#ev-close')?.addEventListener('click', () => d.close());
   q('#ev-del')?.addEventListener('click', e => {
@@ -5785,13 +5872,21 @@ function openEvent(ev, day, time){
   });
   q('#ev-form').onsubmit = e => {
     e.preventDefault();
-    const title = q('#ev-title').value.trim(), date = q('#ev-date').value, allDay = q('#ev-allday').checked;
+    const owner = q('#ev-owner')?.value || x.owner, work = owner.startsWith('dept:'), kind = work ? q('#ev-kind').value : '', who = kind ? q('#ev-who').value : '';
+    const date = q('#ev-date').value, date2 = work && q('#ev-date2').value > date ? q('#ev-date2').value : date, allDay = q('#ev-allday').checked;
+    const title = q('#ev-title').value.trim() || (kind && who ? `${ABSENT[kind][0]}: ${person(who)?.name}` : '');
     const t1 = allDay ? '00:00' : q('#ev-t1').value || '10:00', t2 = allDay ? '23:59' : q('#ev-t2').value || t1;
-    q('#ev-title-err').hidden = !!title; q('#ev-time-err').hidden = allDay || t2 >= t1;
-    if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(date) || (!allDay && t2 < t1)) return;
+    q('#ev-title-err').hidden = !!title || (kind && !who); q('#ev-time-err').hidden = allDay || date2 > date || t2 >= t1; q('#ev-who-err').hidden = !kind || !!who;
+    if (!title || (kind && !who) || !/^\d{4}-\d{2}-\d{2}$/.test(date) || (!allDay && date2 === date && t2 < t1)) return;
+    // a personal event over something in the person's work calendar: their department's events, their own absences
+    if (!work){
+      const a = `${date}T${t1}`, b = `${date2}T${t2}`, dp = person(owner)?.dept;
+      const hit = db.cal.filter(e => e.id !== x.id && e.owner.startsWith('dept:') && (e.kind ? e.who === owner : e.owner === 'dept:' + dp)).flatMap(e => evOccur(e, date, date2)).find(o => o.start < b && o.end > a);
+      if (hit && !confirm(`${owner === me ? 'У вас' : `У ${person(owner)?.name || 'сотрудника'}`} в это время в рабочем календаре: «${hit.e.title}» (${hit.e.kind ? absentWhen(hit.e) : calWhen(hit)}).\n\nВсё равно добавить событие?`)) return;
+    }
     const remind = +q('#ev-remind').value, at = stamp();
-    const next = normEv({...x, id: x.id || 'ev' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), title, allDay, start: `${date}T${t1}`, end: `${date}T${t2}`, remind, repeat: q('#ev-repeat').value,
-      owner: q('#ev-owner')?.value || x.owner, color, note: q('#ev-note').value.trim(), guests: [...d.querySelectorAll('.ev-guests input:checked')].map(i => i.value), createdAt: x.createdAt || at, updatedAt: at});
+    const next = normEv({...x, id: x.id || 'ev' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), title, allDay, start: `${date}T${t1}`, end: `${date2}T${t2}`, remind: kind ? -1 : remind, repeat: kind ? '' : q('#ev-repeat').value,
+      owner, kind, who, color: kind ? ABSENT[kind][2] : color, note: q('#ev-note').value.trim(), guests: work ? [] : [...d.querySelectorAll('.ev-guests input:checked')].map(i => i.value), createdAt: x.createdAt || at, updatedAt: at});
     d.close();
     change(() => { db.cal = [...db.cal.filter(y => y.id !== next.id), next]; }, ev ? 'Событие сохранено' : `Событие «${title}» добавлено`);
     // the browser asks once; reminders then also pop up outside the page while Planerka is open
@@ -6245,6 +6340,9 @@ addEventListener('storage', e => {
   const bw = normEv({...wk, repeat: 'weekdays'}), mo = normEv({...wk, repeat: 'month'}), one = normEv({...wk, repeat: '', end: '2026-11-04T09:00'});
   console.assert(evOccur(bw, '2026-11-06', '2026-11-09').length === 2 && evOccur(mo, '2026-11-01', '2027-01-31').length === 3 && evOccur(one, '2026-11-03', '2026-11-03').length === 1 && evOccur(one, '2026-11-05', '2026-11-30').length === 0, 'calendar: weekdays, months, a span of days');
   console.assert(normEv({id: 'z', start: 'bad'}).start === '' && normEv({id: 'z', start: '2026-11-02T10:00', end: '2026-11-01T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).end === '2026-11-02T10:00' && normEv({id: 'z', start: '2026-11-02T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).guests.join() === 'a', 'calendar: events are cleaned');
+  const dq = migrate({version: 14, people: [{id: 'a', name: 'A', dept: 'd1'}, {id: 'b', name: 'B', dept: 'gone'}], tasks: [], depts: [{id: 'd1', name: 'Бухгалтерия', head: 'a', deputy: 'ghost'}],
+    cal: [{id: 'v', owner: 'dept:d1', title: 'Отпуск', start: '2026-11-10T00:00', end: '2026-11-12T23:59', allDay: true, kind: 'vac', who: 'a'}, {id: 'x', owner: 'a', title: 'x', start: '2026-11-10T10:00', kind: 'vac', who: 'b'}]});
+  console.assert(dq.depts[0].deputy === '' && dq.people[0].dept === 'd1' && dq.people[1].dept === '' && dq.cal[0].kind === 'vac' && dq.cal[0].end === '2026-11-12T23:59' && evOccur(dq.cal[0], '2026-11-11', '2026-11-11').length === 1 && evOccur(dq.cal[0], '2026-11-13', '2026-11-13').length === 0, 'departments and absences');
   console.assert(perStart('quarter', '2026-11-06') === '2026-10-01' && perEnd('quarter', '2026-10-01') === '2026-12-31' && perStart('week', '2026-11-06', -1) === '2026-10-26' && perStart('year', '2026-11-06', 1) === '2027-01-01' && perStart('month', '2026-03-31', -1) === '2026-02-01' && planBuckets('year', '2026-01-01', '2026-12-31').length === 12 && workDays('2026-11-02', '2026-11-08') === 4, 'cabinet periods');
   console.assert(normCab(['cur:w', 'cur', 'x', 'heat', 'open:z', 7]).join() === 'cur:6x8,heat:6x10' && normCab(['cur:w', 'open:99x1']).join() === 'cur:12x8,open:12x2' && normCab(null) === null && normPhoto({full: 'a', thumb: 'b', z: 99, x: -1}).z === 5 && normPhoto({full: 'a b', thumb: 'b'}) === null, 'cabinet blocks and photos are cleaned');
   const sized = kbClean('<img data-blob="f2" class="kb-sel" style="width: 40%; height: 900px"><img data-blob="f3" style="width: 300px"><img data-blob="f4" style="width: 250%">');
