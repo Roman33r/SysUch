@@ -3964,6 +3964,7 @@ function askBg(data, mime, init, cat, edit){
     const fin = r => { if (done) return; done = true; if (d.open) d.close(); res(r); };
     d.innerHTML = `<form><div class="d-head"><h2>${edit ? 'Настройка фона' : cat ? 'Фон в каталог' : 'Свой фон'}</h2><button type="button" class="close" aria-label="Закрыть">✕</button></div>
       <div class="d-body"><div class="cab-who lbg look-prev bg-prev"><span class="lbg-media" id="bg-pm"></span><b style="position:relative;z-index:1">Так фон ляжет за именем</b></div>
+        <p class="err" id="bg-warn" hidden style="margin:0 0 6px"></p>
         <p class="note" style="margin:0 0 10px">Полоса профиля очень широкая и низкая, предпросмотр той же формы, что у вас в кабинете. На других экранах она бывает немного выше или ниже.</p>
         <div class="set-row"><span>Как вписать</span><div class="seg" role="group"><button type="button" data-bgfit="cover" aria-pressed="${v.fit === 'cover'}">Заполнить полосу</button><button type="button" data-bgfit="contain" aria-pressed="${v.fit === 'contain'}">Целиком</button></div></div>
         <div class="field" id="bg-yrow"><label for="bg-y">Какая часть видна: верх ← → низ</label><input type="range" id="bg-y" min="0" max="100" step="1" value="${v.y}"></div>
@@ -3971,7 +3972,11 @@ function askBg(data, mime, init, cat, edit){
         ${cat ? `<label class="chk"><input type="checkbox" id="bg-free" ${v.free ? 'checked' : ''}> Доступен всем сразу (иначе — только как награда за достижение)</label>` : ''}</div>
       <div class="d-foot"><span class="spacer"></span><button type="button" class="btn" data-ask="0">Отмена</button><button class="btn primary">Сохранить</button></div></form>`;
     const pm = d.querySelector('#bg-pm'), y = d.querySelector('#bg-y');
-    const draw = () => { pm.innerHTML = bgEls(mime, `src="${esc(data)}"`, v.y, v.fit, true) + '<span class="lbg-shade"></span>'; d.querySelector('#bg-yrow').hidden = v.fit === 'contain'; };
+    // a file far narrower than the strip is stretched and blurred: say so before it is saved
+    const size = el => { const w = el.videoWidth || el.naturalWidth, h = el.videoHeight || el.naturalHeight, warn = d.querySelector('#bg-warn'); if (!w) return;
+      warn.hidden = w >= 1200; warn.textContent = `Файл всего ${w}×${h} пикселей, а полоса профиля шириной около 1600. Растянутый фон будет размытым — нужен файл шириной от 1600 пикселей, лучше 2400.`; };
+    const draw = () => { pm.innerHTML = bgEls(mime, `src="${esc(data)}"`, v.y, v.fit, true) + '<span class="lbg-shade"></span>'; d.querySelector('#bg-yrow').hidden = v.fit === 'contain';
+      const el = [...pm.querySelectorAll('.lbg-el')].pop(); el.addEventListener(mime.startsWith('video/') ? 'loadedmetadata' : 'load', () => size(el), {once: true}); if (el.naturalWidth) size(el); };
     // moving the slider only shifts the picture: the video keeps playing
     y.oninput = () => { v.y = +y.value; pm.querySelectorAll('.lbg-el').forEach(el => { el.style.objectPosition = `50% ${v.y}%`; }); };
     d.querySelectorAll('[data-bgfit]').forEach(b => b.onclick = () => { v.fit = b.dataset.bgfit; d.querySelectorAll('[data-bgfit]').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); });
