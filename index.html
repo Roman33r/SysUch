@@ -930,6 +930,10 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .kb-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px;flex:1}
 .kb-fields input{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sunken);color:var(--fg);font:inherit}
 .kb-fields #kb-title{font-size:18px;font-weight:600}
+.kb-fields .sel{padding:9px 10px}
+.kb-links{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 0}
+.kb-links .chip{cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.kb-row .kb-link{color:var(--accent)}
 .kb-bar{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:6px;margin-bottom:8px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 .kb-bar .sel{padding:5px 8px;font-size:13px}
 .kb-bar button,.kb-color{min-width:32px;height:32px;padding:0 8px;border:1px solid transparent;border-radius:8px;background:none;color:var(--fg);font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:4px}
@@ -1172,6 +1176,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         <div class="kb-tools">
           <input type="search" id="kb-q" maxlength="80" placeholder="Поиск по статьям" aria-label="Поиск по базе знаний" autocomplete="off">
           <select class="sel" id="kb-sec" aria-label="Раздел"></select>
+          <select class="sel" id="kb-proj" aria-label="Проект"></select>
           <button type="button" class="btn small primary" id="kb-new">+ Статья</button>
         </div>
         <nav class="kb-list" id="kb-list" aria-label="Статьи"></nav>
@@ -1437,6 +1442,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <li><b>Вставка из Word и сайтов.</b> Оформление сохраняется, а скрипты и картинки со сторонних сайтов убираются: такие картинки сохраните к себе и вставьте файлом.</li>
           <li><b>Кто может менять.</b> Читают все. Изменить и удалить статью могут её автор, руководители и администраторы. Если двое правили одну статью одновременно, второй увидит предупреждение перед сохранением.</li>
           <li><b>Ссылки на задачи.</b> Номер вроде PLN-101 в тексте статьи становится ссылкой на задачу.</li>
+          <li><b>Статья к задаче или проекту.</b> В редакторе выберите проект и задачу (номер или название). В «Дереве» правая кнопка на задаче: «Написать инструкцию к задаче», на пустом месте: «Написать инструкцию к проекту»; то же в меню ⋯ окна задачи. Откроется база знаний с новой статьёй, где задача и проект уже выбраны.</li>
+          <li><b>Поиск по задаче и проекту.</b> Поиск находит статьи по номеру и названию задачи и по названию проекта; фильтр «Все проекты» оставляет статьи одного проекта, включая статьи к его задачам. Под заголовком статьи — ссылка на задачу и проект.</li>
         </ul>
       </section>
       <section id="h-people"><h3>Сотрудники и режим «Я»</h3>
@@ -1791,7 +1798,7 @@ function normEv(e){
 // who may see a person's calendar: one record per owner
 const normShare = x => ({id: String(x.id ?? '').slice(0, 40), list: (Array.isArray(x.list) ? x.list : []).filter(y => y && Object.hasOwn(CAL_LEVEL, y.level) && y.to).map(y => ({to: String(y.to).slice(0, 40), level: y.level}))});
 const normDoc = d => { const s = (v, max) => String(v ?? '').slice(0, max);
-  return {id: s(d.id, 40), title: s(d.title, 200).trim() || 'Без названия', section: s(d.section, 60).trim(), html: s(d.html, KB_HTML_MAX), author: s(d.author, 40), createdAt: s(d.createdAt, 40), updatedAt: s(d.updatedAt, 40), updatedBy: s(d.updatedBy, 40)}; };
+  return {id: s(d.id, 40), title: s(d.title, 200).trim() || 'Без названия', section: s(d.section, 60).trim(), html: s(d.html, KB_HTML_MAX), task: s(d.task, 40), project: s(d.project, 40), author: s(d.author, 40), createdAt: s(d.createdAt, 40), updatedAt: s(d.updatedAt, 40), updatedBy: s(d.updatedBy, 40)}; };
 const kbBlobIds = html => [...html.matchAll(/data-blob="([\w-]{1,40})"/g)].map(m => m[1]);
 // key -> {at, v}: each person writes only their own keys, the later write wins, so two copies merge without conflicts
 const normMarks = o => Object.fromEntries(Object.entries(o && typeof o === 'object' ? o : {}).filter(([, x]) => typeof x?.at === 'string').map(([k, x]) => [k.slice(0, 120), {at: x.at.slice(0, 40), v: typeof x.v === 'boolean' ? x.v : String(x.v ?? '').slice(0, 40)}]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
@@ -2312,10 +2319,11 @@ async function detachFile(){
   render();
 }
 
-const MERGE_LABELS = {start: 'Начало', end: 'Конец', guests: 'Участники', remind: 'Напоминание', note: 'Описание', list: 'Доступ к календарю', photo: 'Фото', cab: 'Блоки кабинета', html: 'Текст статьи', section: 'Раздел', access: 'Роль', title: 'Название', desc: 'Описание', prio: 'Приоритет', status: 'Статус', due: 'Срок', tag: 'Тег', stages: 'Исполнитель и этапы', checklist: 'Чек-лист', comments: 'Комментарии', links: 'Ссылки', files: 'Файлы', project: 'Проект', parent: 'Родительская задача', repeat: 'Повтор', name: 'Название', role: 'Должность', cap: 'Часов в неделю', hue: 'Цвет', archived: 'В архиве'};
+const MERGE_LABELS = {task: 'Задача', start: 'Начало', end: 'Конец', guests: 'Участники', remind: 'Напоминание', note: 'Описание', list: 'Доступ к календарю', photo: 'Фото', cab: 'Блоки кабинета', html: 'Текст статьи', section: 'Раздел', access: 'Роль', title: 'Название', desc: 'Описание', prio: 'Приоритет', status: 'Статус', due: 'Срок', tag: 'Тег', stages: 'Исполнитель и этапы', checklist: 'Чек-лист', comments: 'Комментарии', links: 'Ссылки', files: 'Файлы', project: 'Проект', parent: 'Родительская задача', repeat: 'Повтор', name: 'Название', role: 'Должность', cap: 'Часов в неделю', hue: 'Цвет', archived: 'В архиве'};
 function clashValue(c, vals){
   const k = c.keys[0], v = vals[0];
   if (k === 'html') return kbText(v) || 'Пусто';
+  if (k === 'task') return v ? `${v} ${byId(v)?.title || ''}` : 'Без задачи';
   if (k === 'guests') return v.map(chatName).join(', ') || 'Никого';
   if (k === 'list') return v.map(x => `${chatName(x.to)}: ${CAL_LEVEL[x.level]}`).join(', ') || 'Ни у кого';
   if (k === 'remind') return CAL_REMIND[v];
@@ -2866,6 +2874,8 @@ function taskCtx(t, x, y){
   openCtx(x, y, [
     {label: 'Открыть карточку', key: 'Enter', run: () => openTask(t.id)},
     {label: 'Добавить подзадачу', icon: '<b aria-hidden="true">+</b>', run: () => { setOpen(t.id, true); openTask(null, {parent: t.id}); }},
+    {label: 'Написать инструкцию к задаче', icon: ic('file', 15), run: () => kbNewFor({task: t.id})},
+    ...(kbCountFor(t.id) ? [{label: `Инструкции к задаче (${kbCountFor(t.id)})`, run: () => kbShowFor(t.id)}] : []),
     '-', {head: 'Статус'},
     ...Object.entries(STATUS).map(([k, v]) => ({label: v, icon: `<span class="si ${k}"></span>`, checked: t.status === k, run: () => setStatus(t.id, k)})),
     '-', {head: 'Исполнитель'},
@@ -2881,6 +2891,7 @@ function taskCtx(t, x, y){
 function emptyCtx(x, y){
   openCtx(x, y, [
     {label: 'Новая задача в проекте', icon: '<b aria-hidden="true">+</b>', run: () => openTask(null, {project: treeProj()})},
+    ...(treeProj() ? [{label: 'Написать инструкцию к проекту', icon: ic('file', 15), run: () => kbNewFor({project: treeProj()})}] : []),
     '-',
     ...(ui.treeMode === 'map' ? [{label: 'Вписать проект', key: '0', run: fitMap}] : []),
     {label: 'Раскрыть всё', run: () => $('#tr-expand').click()},
@@ -3657,6 +3668,8 @@ function openTask(id, opts = {}){
       `<span>›</span><span class="id">${esc(t.id)}</span>`;
   };
   q('#tw-more').onclick = e => openCtx(...anchor(e.currentTarget), [
+    {label: 'Написать инструкцию к задаче', run: () => { flush(); d.close(); kbNewFor({task: id}); }},
+    ...(kbCountFor(id) ? [{label: `Инструкции к задаче (${kbCountFor(id)})`, run: () => { flush(); d.close(); kbShowFor(id); }}] : []),
     {label: 'Дублировать', run: () => { flush(); const t = live(); addNewTask(normTask({...structuredClone(t), id: '', title: `${t.title} (копия)`, status: 'new', startedAt: '', doneAt: '', comments: [], files: [], log: [], checklist: t.checklist.map(c => ({text: c.text, done: false}))})); }},
     {label: 'Сохранить как шаблон', run: () => { flush(); const t = live(); const tp = normTemplate({name: t.title, title: t.title, prio: t.prio, tag: t.tag, est: t.est, project: t.project, desc: t.desc, checklist: t.checklist.map(c => c.text)});
       change(() => { db.templates.push(tp); addEvent(`${actor()} сохранил шаблон «${tp.name}»`); }, `Шаблон «${tp.name}» сохранён`); }},
@@ -4254,7 +4267,7 @@ function archivePerson(id){
 
 /* ---------- filters (per browser, not part of the data) ---------- */
 const UI_DEFAULT = {q: '', who: '', proj: '', prio: '', tag: '', overdue: false, top: false, sort: 'manual', repPeriod: '30',
-  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}, twClosed: [], twFeed: 'all', nwMore: false, plQ: '', plAccess: '', plJob: '', plStatus: 'active', kbQ: '', kbSec: '', kbOpen: '', calView: 'month', calDate: '', calDay: '', calOff: [], calNoTasks: false};
+  treeProj: '', treeMode: 'list', treeHide: false, treeClosed: [], mapViews: {}, twClosed: [], twFeed: 'all', nwMore: false, plQ: '', plAccess: '', plJob: '', plStatus: 'active', kbQ: '', kbSec: '', kbProj: '', kbOpen: '', calView: 'month', calDate: '', calDay: '', calOff: [], calNoTasks: false};
 const ui = (() => { try { return {...UI_DEFAULT, ...JSON.parse(localStorage.getItem(LS_UI) || '{}')}; } catch { return {...UI_DEFAULT}; } })();
 if (!Array.isArray(ui.treeClosed)) ui.treeClosed = [];
 if (!Array.isArray(ui.twClosed)) ui.twClosed = [];
@@ -5618,14 +5631,21 @@ function renderKb(){
   const sel = $('#kb-sec');
   if (document.activeElement !== sel){ sel.innerHTML = '<option value="">Все разделы</option>' + secs.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join(''); sel.value = f.kbSec; }
   if (document.activeElement !== $('#kb-q')) $('#kb-q').value = f.kbQ;
+  // a project filter also finds articles written for that project's tasks
+  const projOf = d => d.project || byId(d.task)?.project || '', used = new Set(db.docs.map(projOf).filter(Boolean));
+  if (f.kbProj && !used.has(f.kbProj)) f.kbProj = '';
+  const ps = $('#kb-proj');
+  ps.hidden = !used.size;
+  if (document.activeElement !== ps){ ps.innerHTML = '<option value="">Все проекты</option>' + db.projects.filter(p => used.has(p.id)).map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join(''); ps.value = f.kbProj; }
   const mark = (t, i, n) => `${esc(t.slice(0, i))}<mark>${esc(t.slice(i, i + n))}</mark>${esc(t.slice(i + n))}`;
-  const hits = db.docs.filter(d => !f.kbSec || d.section === f.kbSec).map(d => {
+  const linkText = d => [d.task, byId(d.task)?.title, project(projOf(d))?.name].filter(Boolean).join(' · ');
+  const hits = db.docs.filter(d => (!f.kbSec || d.section === f.kbSec) && (!f.kbProj || projOf(d) === f.kbProj)).map(d => {
     if (!q) return {d};
     const ti = chatNorm(d.title).indexOf(q), text = kbText(d.html), xi = chatNorm(text).indexOf(q);
-    return ti < 0 && xi < 0 && !chatNorm(d.section).includes(q) ? null : {d, ti, text, xi};
+    return ti < 0 && xi < 0 && !chatNorm(d.section).includes(q) && !chatNorm(linkText(d)).includes(q) ? null : {d, ti, text, xi};
   }).filter(Boolean);
   const row = ({d, ti, text, xi}) => `<button type="button" class="kb-row" data-kb="${esc(d.id)}" aria-current="${d.id === (kbEdit ? kbEdit.id : f.kbOpen)}">
-    <b>${ti >= 0 ? mark(d.title, ti, q.length) : esc(d.title)}</b><span>${q && d.section ? esc(d.section) + ' · ' : ''}${esc(kbWho(d.author))} · ${fmtDay(isoDay(new Date(d.updatedAt || d.createdAt)))}</span>
+    <b>${ti >= 0 ? mark(d.title, ti, q.length) : esc(d.title)}</b><span>${q && d.section ? esc(d.section) + ' · ' : ''}${esc(kbWho(d.author))} · ${fmtDay(isoDay(new Date(d.updatedAt || d.createdAt)))}</span>${linkText(d) ? `<span class="kb-link">${esc(linkText(d))}</span>` : ''}
     ${xi >= 0 && !(ti >= 0) ? `<span class="kb-hit">${xi > 30 ? '…' : ''}${mark(text.slice(Math.max(0, xi - 30), xi + q.length + 60), Math.min(xi, 30), q.length)}</span>` : ''}</button>`;
   let html;
   if (q) html = hits.sort((a, b) => (b.ti >= 0) - (a.ti >= 0) || b.d.updatedAt.localeCompare(a.d.updatedAt)).map(row).join('');
@@ -5639,6 +5659,19 @@ function renderKb(){
   $('#kb-wrap').classList.toggle('open', !!(kbEdit || kbDoc(f.kbOpen)));
   if (!kbEdit){ kbImg = null; kbHandle(); kbShow(); } // the editor is never redrawn: that would lose what is being typed
 }
+const kbLinks = d => {
+  const t = byId(d.task), p = project(d.project || t?.project);
+  return t || p ? `<p class="kb-links">${t ? `<button type="button" class="chip" data-task-link="${esc(t.id)}" title="Открыть задачу">${ic('file', 13)} ${esc(t.id)} · ${esc(t.title)}</button>` : d.task ? `<span class="chip">${esc(d.task)} · задача удалена</span>` : ''}${p ? `<button type="button" class="chip" data-kb-projf="${esc(p.id)}" title="Все статьи проекта"><span class="pdot" style="background:${p.hue}"></span>${esc(p.name)}</button>` : ''}</p>` : '';
+};
+// a new article for a task or a project: the knowledge base opens with the editor
+function kbNewFor(link){
+  setView('kb');
+  if (kbEdit) return toast('Сначала сохраните или отмените статью, которую вы правите');
+  kbStartEdit(null, link);
+}
+// articles of a task: the knowledge base with the task number in the search
+function kbShowFor(id){ ui.kbQ = id; ui.kbSec = ui.kbProj = ''; saveUi(); setView('kb'); }
+const kbCountFor = id => db.docs.filter(d => d.task === id).length;
 function kbShow(){
   const d = kbDoc(ui.kbOpen), box = $('#kb-main');
   if (!d){
@@ -5647,6 +5680,7 @@ function kbShow(){
   }
   box.innerHTML = `<div class="kb-head"><button type="button" class="btn small kb-back" data-kb-back aria-label="К списку статей">‹</button>
     <div>${d.section ? `<span class="kb-sec-chip">${esc(d.section)}</span>` : ''}<h2>${esc(d.title)}</h2>
+    ${kbLinks(d)}
     <p class="note">Автор: ${esc(kbWho(d.author))} · ${d.updatedAt && d.updatedAt !== d.createdAt ? `изменено ${esc(fmtStamp(d.updatedAt))}${d.updatedBy && d.updatedBy !== d.author ? `, ${esc(kbWho(d.updatedBy))}` : ''}` : `создано ${esc(fmtStamp(d.createdAt))}`}</p></div>
     ${kbCanEdit(d) ? `<div class="kb-acts"><button type="button" class="btn small" data-kb-edit>Изменить</button><button type="button" class="btn small" data-kb-del>Удалить</button></div>` : ''}</div>
     <article class="kb-doc" id="kb-doc">${kbClean(d.html) || '<p class="note">Статья пустая.</p>'}</article>`;
@@ -5658,17 +5692,21 @@ function kbShow(){
   for (const t of nodes){ const span = document.createElement('span'); span.innerHTML = chatText(t.data); t.replaceWith(...span.childNodes); }
 }
 const KB_FONTS = ['Arial', 'Verdana', 'Tahoma', 'Georgia', 'Times New Roman', 'Courier New'];
-function kbStartEdit(id){
+function kbStartEdit(id, link = {}){
   if (kbEdit) return toast('Сначала сохраните или отмените статью, которую вы правите');
-  const d = id ? kbDoc(id) : null;
+  const d = id ? kbDoc(id) : null, lt = byId(d ? d.task : link.task), lp = d ? d.project : link.project || lt?.project || '';
+  const taskOpt = t => `${t.id} · ${t.title}`;
+  const title0 = d ? d.title : lt ? `Инструкция: ${lt.title}` : project(lp) && link.project ? `Инструкция по проекту «${project(lp).name}»` : '';
   kbEdit = {id: d?.id || null, base: d?.updatedAt || null, force: false};
   for (const k in kbPend) delete kbPend[k];
   const secs = [...new Set(db.docs.map(x => x.section).filter(Boolean))];
   const btn = (cmd, label, title, val = '') => `<button type="button" data-cmd="${cmd}" data-val="${val}" title="${title}" aria-label="${title}">${label}</button>`;
   $('#kb-main').innerHTML = `<form id="kb-form" novalidate>
     <div class="kb-head"><button type="button" class="btn small kb-back" data-kb-cancel aria-label="Отменить и вернуться">‹</button>
-      <div class="kb-fields"><input id="kb-title" maxlength="200" placeholder="Название статьи" aria-label="Название" value="${esc(d?.title || '')}">
-      <input id="kb-section" maxlength="60" list="kb-sections" placeholder="Раздел, например «Отчёты 1С»" aria-label="Раздел" value="${esc(d?.section || '')}"><datalist id="kb-sections">${secs.map(x => `<option value="${esc(x)}">`).join('')}</datalist></div></div>
+      <div class="kb-fields"><input id="kb-title" maxlength="200" placeholder="Название статьи" aria-label="Название" value="${esc(title0)}">
+      <input id="kb-section" maxlength="60" list="kb-sections" placeholder="Раздел, например «Отчёты 1С»" aria-label="Раздел" value="${esc(d?.section || '')}"><datalist id="kb-sections">${secs.map(x => `<option value="${esc(x)}">`).join('')}</datalist>
+      <input id="kb-ltask" list="kb-tasks" placeholder="Задача: номер или название" aria-label="Задача статьи" value="${lt ? esc(taskOpt(lt)) : esc(d?.task || '')}"><datalist id="kb-tasks">${db.tasks.filter(t => t.status !== 'done' || t.id === lt?.id).map(t => `<option value="${esc(taskOpt(t))}">`).join('')}</datalist>
+      <select class="sel" id="kb-lproj" aria-label="Проект статьи"><option value="">Без проекта</option>${db.projects.filter(p => !p.archived || p.id === lp).map(p => `<option value="${esc(p.id)}" ${p.id === lp ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></div></div>
     <div class="kb-bar" role="toolbar" aria-label="Оформление текста">
       <select class="sel" data-cmd="formatBlock" aria-label="Стиль абзаца"><option value="">Стиль</option><option value="p">Обычный текст</option><option value="h2">Заголовок</option><option value="h3">Подзаголовок</option><option value="blockquote">Цитата</option><option value="pre">Код</option></select>
       <select class="sel" data-cmd="fontName" aria-label="Шрифт"><option value="">Шрифт</option>${KB_FONTS.map(x => `<option style="font-family:'${x}'">${x}</option>`).join('')}</select>
@@ -5731,7 +5769,9 @@ $('#kb-handle').onpointerdown = e => {
   h.onpointerup = h.onpointercancel = () => { h.onpointermove = h.onpointerup = h.onpointercancel = null; };
 };
 // compared as it would be saved: pictures loading in or being selected are not changes
-const kbSnap = () => kbClean($('#kb-ed').innerHTML) + '\u0000' + $('#kb-title').value + '\u0000' + $('#kb-section').value;
+const kbSnap = () => [kbClean($('#kb-ed').innerHTML), $('#kb-title').value, $('#kb-section').value, $('#kb-lproj').value, $('#kb-ltask').value].join('\u0000');
+// «PLN-7 · Название» or a bare number: the task it names, if it exists
+const kbTaskOf = v => { const m = String(v).match(/PLN-\d+/); return m && byId(m[0]) ? m[0] : ''; };
 const kbDirty = () => kbEdit && kbSnap() !== kbEdit.start;
 function kbExec(cmd, val){
   const ed = $('#kb-ed'); if (!ed) return;
@@ -5765,6 +5805,8 @@ async function kbInsertFiles(files, asImages){
 }
 async function kbSave(){
   const ed = $('#kb-ed'), title = $('#kb-title').value.trim(), section = $('#kb-section').value.trim(), save = $('#kb-save');
+  const task = kbTaskOf($('#kb-ltask').value), projectId = $('#kb-lproj').value || byId(task)?.project || '';
+  if ($('#kb-ltask').value.trim() && !task){ $('#kb-ltask').focus(); return toast('Такой задачи нет: выберите её из списка или очистите поле'); }
   if (!title){ $('#kb-title').focus(); return toast('Введите название статьи'); }
   const cur = kbEdit.id && kbDoc(kbEdit.id);
   if (kbEdit.id && !cur) kbEdit.id = null; // deleted meanwhile: it is saved as a new one
@@ -5796,8 +5838,8 @@ async function kbSave(){
   const id = kbEdit.id || 'kb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), at = stamp();
   change(() => {
     const d = kbDoc(id);
-    if (d) Object.assign(d, {title, section, html, updatedAt: at, updatedBy: chatMe()});
-    else db.docs.push(normDoc({id, title, section, html, author: chatMe(), createdAt: at, updatedAt: at, updatedBy: chatMe()}));
+    if (d) Object.assign(d, {title, section, html, task, project: projectId, updatedAt: at, updatedBy: chatMe()});
+    else db.docs.push(normDoc({id, title, section, html, task, project: projectId, author: chatMe(), createdAt: at, updatedAt: at, updatedBy: chatMe()}));
     addEvent(`${actor()} ${d ? 'изменил' : 'написал'} статью «${title}» в базе знаний`);
   });
   kbEdit = null; ui.kbOpen = id; saveUi();
@@ -5816,6 +5858,7 @@ function kbDelete(id){
 const kbSet = (k, v) => { ui[k] = v; saveUi(); renderKb(); };
 $('#kb-q').oninput = e => kbSet('kbQ', e.target.value);
 $('#kb-sec').onchange = e => kbSet('kbSec', e.target.value);
+$('#kb-proj').onchange = e => kbSet('kbProj', e.target.value);
 $('#kb-new').onclick = () => kbStartEdit(null);
 $('#kb-list').onclick = e => {
   const b = e.target.closest('[data-kb]'); if (!b) return;
@@ -5825,6 +5868,7 @@ $('#kb-list').onclick = e => {
 $('#kb-main').addEventListener('click', async e => {
   let b;
   if (e.target.closest('[data-kb-new]')) return kbStartEdit(null);
+  const pf = e.target.closest('[data-kb-projf]'); if (pf){ ui.kbProj = pf.dataset.kbProjf; ui.kbQ = ''; saveUi(); return renderKb(); }
   if (e.target.closest('[data-kb-back]')){ ui.kbOpen = ''; saveUi(); return renderKb(); }
   if (e.target.closest('[data-kb-edit]')) return kbStartEdit(ui.kbOpen);
   if (e.target.closest('[data-kb-cancel]')) return kbCancel();
@@ -5931,6 +5975,7 @@ addEventListener('storage', e => {
   console.assert(normCab(['cur:w', 'cur', 'x', 'heat', 'open:z', 7]).join() === 'cur,heat' && normCab(null) === null && normPhoto({full: 'a', thumb: 'b', z: 99, x: -1}).z === 5 && normPhoto({full: 'a b', thumb: 'b'}) === null, 'cabinet blocks and photos are cleaned');
   const sized = kbClean('<img data-blob="f2" class="kb-sel" style="width: 40%; height: 900px"><img data-blob="f3" style="width: 300px"><img data-blob="f4" style="width: 250%">');
   console.assert(sized.includes('style="width: 40%"') && !sized.includes('class') && !sized.includes('900px') && !sized.includes('300px') && sized.includes('width: 100%'), 'kb: picture width kept in percent only: ' + sized);
+  console.assert(normDoc({id: 'k', task: 'PLN-1', project: 'p'}).task === 'PLN-1' && normDoc({id: 'k'}).project === '', 'kb: links to a task and a project kept');
   const c11 = migrate({version: 11, people: [], tasks: [], docs: [{id: 'd', title: '', html: '<img data-blob="k1">'}, {id: 'd', title: 'dup'}, null], blobs: {k1: {data: 'data:x'}, k2: {data: 'data:y'}}});
   console.assert(c11.docs.length === 1 && c11.docs[0].title === 'Без названия' && Object.keys(c11.blobs).join() === 'k1', 'v11 -> v12: docs, duplicates dropped, their pictures kept');
   const c10 = migrate({version: 10, people: [{id: 'p', name: 'P'}], tasks: [{id: 'PLN-1', title: 'x', assignee: 'p', createdAt: 'c', log: [{at: 'l1', text: 'Р назначил: P'}]}, {id: 'PLN-2', title: 'y', assignee: 'p', createdAt: 'c'}], chat: [{id: 'f', from: 'p', to: 'all', at: '1', text: '', files: [{id: 'b1', name: 'a.png'}]}], blobs: {b1: {data: 'data:x'}, b2: {data: 'data:y'}}});
