@@ -1766,7 +1766,7 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
 <div class="ctx" id="ctx" role="menu" aria-label="Действия с задачей" hidden></div>
 
 <script>
-const SCHEMA = 16;
+const SCHEMA = 17;
 const CHAT_MAX = 2000, CHAT_TEXT_MAX = 2000; // localStorage holds about 5 MB per site, so old messages drop off
 const ARCHIVE_DAYS = 14;          // «Готово» shows tasks closed within this many days, older ones live in the archive
 const FILE_MAX = 5 * 1024 * 1024; // per attachment; files are stored inside the JSON file as base64
@@ -1961,6 +1961,8 @@ const ABSENT = {vac: ['Отпуск', 'в отпуске', '#0F8A6A'], away: ['�
 const normShare = x => ({id: String(x.id ?? '').slice(0, 40), list: (Array.isArray(x.list) ? x.list : []).filter(y => y && Object.hasOwn(CAL_LEVEL, y.level) && y.to).map(y => ({to: String(y.to).slice(0, 40), level: y.level}))});
 const normDoc = d => { const s = (v, max) => String(v ?? '').slice(0, max);
   return {id: s(d.id, 40), title: s(d.title, 200).trim() || 'Без названия', section: s(d.section, 60).trim(), folder: !!d.folder, parent: s(d.parent, 40), html: d.folder ? '' : s(d.html, KB_HTML_MAX), task: s(d.task, 40), project: s(d.project, 40), author: s(d.author, 40), createdAt: s(d.createdAt, 40), updatedAt: s(d.updatedAt, 40), updatedBy: s(d.updatedBy, 40)}; };
+const KB_START_AT = '2026-11-06T00:00:00.000Z';
+const KB_HOWTO = `<p>Здесь собраны инструкции команды: как сделать отчёт, где лежат документы, что проверить перед закрытием месяца. Писать может любой сотрудник, изменить статью — автор и руководители.</p><h2>1. Выберите или создайте папку</h2><p>Слева — дерево папок. Кнопка с папкой рядом с «+ Статья» создаёт папку на верхнем уровне. У каждой папки есть меню «⋯» (или правая кнопка мыши): новая статья в папке, папка внутри, переименовать, вынести, удалить. Вложенность любая.</p><div class="kb-call kb-c-tip"><p>Статьи и папки можно перетаскивать мышью на другую папку. На пустое место списка — чтобы вынести на верхний уровень.</p></div><h2>2. Напишите статью</h2><ol><li>Нажмите «+ Статья» или «Новая статья в папке» в меню папки.</li><li>Введите название — по нему статью будут искать.</li><li>Выберите папку, а если инструкция к задаче или проекту — укажите их: статья появится в меню задачи («Инструкции к задаче»).</li><li>Напишите текст и нажмите «Сохранить» или Ctrl+S.</li></ol><h2>3. Оформление</h2><table><thead><tr><th style="width: 30%">Что нужно</th><th style="width: 70%">Как сделать</th></tr></thead><tbody><tr><td>Заголовок, цитата, код</td><td>Список «Стиль» на панели</td></tr><tr><td>Жирный, наклонный, подчёркнутый</td><td>Кнопки Ж, К, Ч или Ctrl+B, Ctrl+I, Ctrl+U</td></tr><tr><td>Списки</td><td>Кнопки маркированного и нумерованного списка</td></tr><tr><td>Картинка</td><td>Кнопка с картинкой, перетаскивание или Ctrl+V. Нажмите на картинку, чтобы изменить её ширину</td></tr><tr><td>Файл</td><td>Кнопка со скрепкой: файл можно будет скачать из статьи</td></tr><tr><td>Таблица</td><td>Кнопка с таблицей или Ctrl+V из Excel. Ширину столбца и высоту строки меняйте, перетаскивая границу ячейки</td></tr><tr><td>Ссылка на задачу</td><td>Просто напишите номер, например PLN-1: он станет ссылкой</td></tr></tbody></table><h2>4. Блоки: заметки, подсказки, предупреждения</h2><p>Список «Блок» на панели вставляет цветную рамку с заголовком. Блок можно вставить внутрь другого — например, предупреждение в заметку.</p><div class="kb-call kb-c-info"><p>Заметка — пояснение или контекст.</p><div class="kb-call kb-c-warn"><p>Предупреждение — то, что легко сделать неправильно.</p></div></div><div class="kb-call kb-c-tip"><p>Подсказка — способ сделать быстрее или удобнее.</p></div><div class="kb-call kb-c-danger"><p>Важно — то, что нельзя пропустить: иначе потеряются данные или деньги.</p></div><h2>5. Как найти статью</h2><p>Поиск сверху ищет по названию, тексту, номеру и названию задачи, проекту и папке. Фильтры «Все задачи» и «Все проекты» оставляют статьи одной задачи или проекта.</p><div class="kb-call kb-c-tip"><p>Эту статью и папку «Планёрка» можно менять и удалять, как любые другие.</p></div>`;
 const kbBlobIds = html => [...html.matchAll(/data-blob="([\w-]{1,40})"/g)].map(m => m[1]);
 // key -> {at, v}: each person writes only their own keys, the later write wins, so two copies merge without conflicts
 const normMarks = o => Object.fromEntries(Object.entries(o && typeof o === 'object' ? o : {}).filter(([, x]) => typeof x?.at === 'string').map(([k, x]) => [k.slice(0, 120), {at: x.at.slice(0, 40), v: typeof x.v === 'boolean' ? x.v : String(x.v ?? '').slice(0, 40)}]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
@@ -2115,6 +2117,11 @@ function migrate(raw){
     const id = 'ks' + [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7).toString(36);
     if (!docIds.has(id)){ docIds.add(id); docs.push(normDoc({id, folder: true, title: name, createdAt: '', updatedAt: ''})); }
     docs.forEach(d => { if (!d.folder && d.section === name){ d.parent = id; d.section = ''; } });
+  }
+  // v16 -> v17: a starter folder with an article on writing articles; fixed ids, so two computers upgrading apart add the same ones
+  if (v < 17 && !docIds.has('kb-planerka')){
+    docIds.add('kb-planerka'); docs.push(normDoc({id: 'kb-planerka', folder: true, title: 'Планёрка', author: 'boss', createdAt: KB_START_AT, updatedAt: KB_START_AT}));
+    if (!docIds.has('kb-howto')){ docIds.add('kb-howto'); docs.push(normDoc({id: 'kb-howto', parent: 'kb-planerka', title: 'Как создавать инструкции', html: KB_HOWTO, author: 'boss', createdAt: KB_START_AT, updatedAt: KB_START_AT})); }
   }
   // a parent must be an existing folder and never the doc itself or one inside it
   const folderIds = new Set(docs.filter(d => d.folder).map(d => d.id)), byDocId = new Map(docs.map(d => [d.id, d]));
@@ -6583,6 +6590,8 @@ addEventListener('storage', e => {
   console.assert(normEv({id: 'z', start: 'bad'}).start === '' && normEv({id: 'z', start: '2026-11-02T10:00', end: '2026-11-01T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).end === '2026-11-02T10:00' && normEv({id: 'z', start: '2026-11-02T10:00', remind: 7, guests: ['a', 'a', 'o'], owner: 'o'}).guests.join() === 'a', 'calendar: events are cleaned');
   const kq = migrate({version: 15, people: [], tasks: [], docs: [{id: 'a', title: 'A', section: 'Отчёты'}, {id: 'b', title: 'B', section: 'Отчёты'}, {id: 'f', folder: true, title: 'F', parent: 'g'}, {id: 'g', folder: true, title: 'G', parent: 'f'}, {id: 'c', title: 'C', parent: 'a'}]});
   const kf = kq.docs.find(d => d.folder && d.title === 'Отчёты');
+  const k17 = migrate({version: 16, people: [], tasks: [], docs: []}), k17b = migrate({version: 17, people: [], tasks: [], docs: []});
+  console.assert(k17.docs.find(d => d.id === 'kb-howto')?.parent === 'kb-planerka' && kbClean(KB_HOWTO) === KB_HOWTO && k17b.docs.length === 0, 'knowledge base: the starter article comes once, on the upgrade, and survives cleaning');
   console.assert(kf && kq.docs.find(d => d.id === 'a').parent === kf.id && kq.docs.find(d => d.id === 'b').parent === kf.id && kq.docs.find(d => d.id === 'c').parent === '' && ['f', 'g'].some(id => kq.docs.find(d => d.id === id).parent === '')
     && migrate({version: 15, people: [], tasks: [], docs: [{id: 'a', title: 'A', section: 'Отчёты'}]}).docs.find(d => d.folder).id === kf.id, 'knowledge base: sections become folders, loops and article parents are cut');
   console.assert(kbClean('<table><tr><td style="width: 25%; height: 40px; color: red" class="xl65">a</td><td style="width: 48pt; height: 15pt">b</td></tr></table>') === '<table><tbody><tr><td style="color: red; width: 25%; height: 40px">a</td><td>b</td></tr></tbody></table>'
