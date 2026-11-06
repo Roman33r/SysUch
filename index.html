@@ -1571,7 +1571,9 @@ body.prio-bar .task.pr-low{box-shadow:inset 3px 0 0 var(--line),var(--shadow)}
           <li><b>С разных компьютеров.</b> Сервера у Планёрки нет, поэтому сообщения передаются через общий JSON-файл: все подключают один файл из сетевой или облачной папки (Chrome, Edge). Планёрка проверяет его каждые 5 секунд. Без такого файла чат работает только внутри одного браузера.</li>
           <li><b>Уведомления.</b> Колокольчик в шапке показывает назначенные вам задачи со временем назначения, комментарии к задачам, где вы исполнитель, новые сообщения и приглашения в чаты. Отключить уведомления конкретного чата можно значком колокольчика над перепиской, в меню диалога или в списке участников. Сообщения такого чата остаются в нём, но не попадают в колокольчик и в число на вкладке.</li>
           <li><b>Не секретно.</b> Входа по паролю нет: любой может выбрать чужое имя в «Я: …», а файл с данными могут прочитать все, у кого к нему есть доступ. Не пишите в чат пароли и личные данные.</li>
-          <li><b>Хранение.</b> Хранятся последние 2000 сообщений. Удаления и правки сообщений нет. Файлы старых сообщений уходят вместе с ними.</li>
+          <li><b>Хранение.</b> Хранятся последние 2000 сообщений. Правки сообщений нет. Файлы старых сообщений уходят вместе с ними.</li>
+          <li><b>Удаление.</b> Правая кнопка (на телефоне — долгое нажатие) на сообщении: «Удалить у себя» прячет его только у вас, отменить можно сразу во всплывающей подсказке. «Удалить для всех» есть у своих сообщений (и у администратора Планёрки) и убирает сообщение у всех участников, вместе с файлами; отменить нельзя.</li>
+          <li><b>Реакция</b> на сообщение у каждого одна: новая заменяет прежнюю, повторное нажатие снимает.</li>
         </ul>
       </section>
 
@@ -1888,11 +1890,11 @@ function mergeMarks(a, b){
   return normMarks(out);
 }
 const normMsg = m => ({id: String(m?.id ?? '').slice(0, 40), from: String(m?.from ?? '').slice(0, 40), to: String(m?.to ?? '').slice(0, 40) || 'all', text: String(m?.text ?? '').slice(0, CHAT_TEXT_MAX), at: String(m?.at ?? '').slice(0, 40),
-  files: (Array.isArray(m?.files) ? m.files : []).map(f => ({id: String(f?.id ?? '').slice(0, 40), name: String(f?.name ?? '').slice(0, 200), type: String(f?.type ?? '').slice(0, 100), size: Number(f?.size) || 0})).filter(f => f.id), reacts: normMarks(m?.reacts)});
+  files: (Array.isArray(m?.files) ? m.files : []).map(f => ({id: String(f?.id ?? '').slice(0, 40), name: String(f?.name ?? '').slice(0, 200), type: String(f?.type ?? '').slice(0, 100), size: Number(f?.size) || 0})).filter(f => f.id), reacts: normMarks(m?.reacts), ...(m?.deleted ? {deleted: true, text: '', files: [], reacts: {}} : {})});
 // messages are only ever added and reactions merge per person, so two copies of the chat merge by id without conflicts
 function mergeChat(a, b){
   const byId = new Map();
-  for (const m of [...a, ...b]){ const o = byId.get(m.id); byId.set(m.id, o ? {...m, reacts: mergeMarks(o.reacts, m.reacts)} : m); }
+  for (const m of [...a, ...b]){ const o = byId.get(m.id); byId.set(m.id, o?.deleted || m.deleted ? {...m, deleted: true, text: '', files: [], reacts: {}} : o ? {...m, reacts: mergeMarks(o.reacts, m.reacts)} : m); }
   return [...byId.values()].sort((x, y) => x.at.localeCompare(y.at) || x.id.localeCompare(y.id)).slice(-CHAT_MAX);
 }
 /* group chats: messages go to = room id; members hold person ids and 'boss' */
@@ -2017,7 +2019,7 @@ function migrate(raw){
   // v10 -> v11: when a task was assigned, for the notifications
   if (v < 11) tasks.forEach(t => { if (t.assignee) t.assignedAt = t.log.findLast(l => l.text.includes('назначил:'))?.at || t.createdAt; });
   // v7 -> v8: chat
-  const chat = mergeChat((Array.isArray(raw.chat) ? raw.chat : []).map(normMsg).filter(m => m.id && (m.text || m.files.length)), []);
+  const chat = mergeChat((Array.isArray(raw.chat) ? raw.chat : []).map(normMsg).filter(m => m.id && (m.text || m.files.length || m.deleted)), []);
   // v3 -> v4: links/files on tasks, file contents in blobs; blobs nobody refers to are dropped
   // v11 -> v12: knowledge base
   // v12 -> v13: calendar
@@ -4750,7 +4752,8 @@ const chatMe = () => meId || 'boss';
 const chatDraftKey = () => chatMe() + ':' + chatWith;
 const chatRoom = id => db.rooms.find(r => r.id === id);
 const inRoom = r => r.members.includes(chatMe());
-const chatPeer = m => { const r = chatRoom(m.to); return m.to === 'all' ? 'all' : r ? (inRoom(r) ? r.id : null) : m.from === chatMe() ? m.to : m.to === chatMe() ? m.from : null; };
+const chatHidden = m => m.deleted || db.marks[`hide|${chatMe()}|${m.id}`]?.v === true;
+const chatPeer = m => { if (chatHidden(m)) return null; const r = chatRoom(m.to); return m.to === 'all' ? 'all' : r ? (inRoom(r) ? r.id : null) : m.from === chatMe() ? m.to : m.to === chatMe() ? m.from : null; };
 // a chat with yourself, as in Telegram: notes, links and files for later
 const chatLabel = c => c === chatMe() ? 'Избранное' : chatName(c);
 const chatIcon = c => c === chatMe() ? `<span class="ava ch-fav" aria-hidden="true">${ic('bookmark', 18)}</span>` : chatAva(c);
@@ -5053,7 +5056,8 @@ async function sendChat(){
 }
 function toggleReact(id, emoji){
   const m = db.chat.find(x => x.id === id), k = `${emoji}|${chatMe()}`; if (!m) return;
-  m.reacts = mergeMarks(m.reacts, {[k]: {at: stamp(), v: !m.reacts[k]?.v}});
+  const at = stamp(), mine = `|${chatMe()}`, off = Object.fromEntries(Object.keys(m.reacts).filter(x => x.endsWith(mine) && x !== k && m.reacts[x].v).map(x => [x, {at, v: false}]));
+  m.reacts = mergeMarks(m.reacts, {...off, [k]: {at, v: !m.reacts[k]?.v}});
   commit();
 }
 /* emoji are drawn from Twemoji pictures (graphics © Twitter and contributors, CC-BY 4.0), so they look the same in every browser and system,
@@ -5392,6 +5396,16 @@ function chatMenu(c){
     ...(chatRoom(c) ? ['-', {label: 'Изменить чат и состав', run: () => openRoomEditor(c)}, {label: 'Выйти из чата', danger: true, run: () => leaveRoom(c)}] : []),
   ];
 }
+function hideMsg(m){
+  setMark(`hide|${chatMe()}|${m.id}`, true); commit();
+  toast('Сообщение удалено у вас', () => { setMark(`hide|${chatMe()}|${m.id}`, false); commit(); });
+}
+// for everyone: only the author (or an administrator); asked once more, because it can't be undone
+function deleteMsg(m, el){
+  openCtx(...anchor(el), [{head: 'Удалить сообщение для всех?'}, {label: 'Удалить для всех', danger: true, run: () => {
+    db.chat = mergeChat(db.chat, [{...m, deleted: true}]); commit(); toast('Сообщение удалено для всех');
+  }}, {label: 'Отмена', run: () => {}}]);
+}
 function msgMenu(m){
   const tasks = [...new Set(m.text.match(/\bPLN-\d+\b/g) || [])].filter(id => db.tasks.some(t => t.id === id));
   return [
@@ -5399,6 +5413,8 @@ function msgMenu(m){
     ...m.files.map(f => ({label: `Скачать ${f.name.slice(0, 40)}`, run: async () => { const b = await chatBlob(f.id); if (b) download(f.name, await (await fetch(b.data)).blob()); else toast(`Файл ${f.name} сейчас недоступен`); }})),
     ...(!m.text ? [] : [{label: 'Копировать текст', run: () => navigator.clipboard.writeText(m.text).then(() => toast('Текст скопирован'), () => toast('Браузер не дал скопировать текст'))}]),
     ...tasks.map(id => ({label: `Открыть ${id}`, run: () => openTask(id)})),
+    '-', {label: 'Удалить у себя', run: () => hideMsg(m)},
+    ...(m.from === chatMe() || canAssignRoles() ? [{label: 'Удалить для всех', danger: true, run: () => deleteMsg(m, $('#ch-msgs').querySelector(`[data-mid="${CSS.escape(m.id)}"]`) || $('#ch-msgs'))}] : []),
     ...(m.from !== chatMe() ? ['-', ...(person(m.from) ? [{label: `Профиль: ${chatName(m.from)}`, run: () => openCab(m.from)}] : []), ...(m.to === 'all' || chatRoom(m.to) ? [{label: 'Написать лично', run: () => openChat(m.from)}] : [])] : []),
   ];
 }
@@ -6126,6 +6142,8 @@ addEventListener('storage', e => {
   const msg = (id, at) => ({id, from: 'a', to: 'all', text: 't', at});
   console.assert(migrate({version: 8, people: [], tasks: [], chat: [msg('x', '2'), null, {id: 'y', text: ''}]}).chat.map(m => m.id).join() === 'x', 'chat: bad messages dropped');
   console.assert(mergeChat([msg('b', '2'), msg('a', '1')], [msg('b', '2'), msg('c', '3')]).map(m => m.id).join() === 'a,b,c', 'chat: merge by id, in time order');
+  const dm = mergeChat([{...normMsg(msg('d', '1')), reacts: {}}], [normMsg({...msg('d', '1'), deleted: true})])[0], dm2 = mergeChat([normMsg({...msg('d', '1'), deleted: true})], [normMsg(msg('d', '1'))])[0];
+  console.assert(dm.deleted && dm2.deleted && dm.text === '' && migrate({version: 13, people: [], tasks: [], chat: [{...msg('d', '1'), deleted: true}]}).chat.length === 1, 'chat: a message deleted for everyone stays deleted in any merge order');
   const rx = (r, at, v) => ({...normMsg(msg('r', '1')), reacts: {[r]: {at, v}}});
   let rm = mergeChat([rx('👍|a', '2', true)], [rx('🔥|b', '3', true)])[0].reacts;
   console.assert(rm['👍|a'].v && rm['🔥|b'].v, 'chat: reactions of two people both survive a merge');
