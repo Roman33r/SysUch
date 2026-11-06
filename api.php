@@ -22,6 +22,7 @@ $pdo = new PDO("mysql:host={$cfg['db_host']};dbname={$cfg['db_name']};charset=ut
 $pdo->exec('CREATE TABLE IF NOT EXISTS planerka_doc (id TINYINT PRIMARY KEY, version BIGINT NOT NULL, data LONGTEXT NOT NULL, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 $pdo->exec('CREATE TABLE IF NOT EXISTS planerka_blobs (id VARCHAR(40) PRIMARY KEY, data LONGTEXT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 $pdo->exec('CREATE TABLE IF NOT EXISTS planerka_logins (ip VARCHAR(45) PRIMARY KEY, fails INT NOT NULL, at INT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+$pdo->exec('CREATE TABLE IF NOT EXISTS planerka_seen (who VARCHAR(40) PRIMARY KEY, at INT NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 $pdo->exec('CREATE TABLE IF NOT EXISTS planerka_users (login VARCHAR(40) PRIMARY KEY, person VARCHAR(40) NOT NULL UNIQUE, hash VARCHAR(255) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 $pdo->exec("INSERT IGNORE INTO planerka_doc (id, version, data) VALUES (1, 0, '')");
 
@@ -136,7 +137,12 @@ if (in_array($action, ['users', 'user_save', 'user_del'], true)) {
   reply(['ok' => true]);
 }
 
-if ($action === 'ver') reply(['version' => (int) $pdo->query('SELECT version FROM planerka_doc WHERE id = 1')->fetchColumn()]);
+// браузер спрашивает версию каждые 5 секунд; here=1 значит, что Планёрка открыта на экране, так сервер узнаёт, кто в сети
+if ($action === 'ver') {
+  if (!empty($_GET['here'])) $pdo->prepare('REPLACE INTO planerka_seen (who, at) VALUES (?, ?)')->execute([$me['admin'] ? 'boss' : (string) $me['person'], time()]);
+  $seen = array_map('intval', $pdo->query('SELECT who, at FROM planerka_seen')->fetchAll(PDO::FETCH_KEY_PAIR));
+  reply(['version' => (int) $pdo->query('SELECT version FROM planerka_doc WHERE id = 1')->fetchColumn(), 'seen' => (object) $seen, 'now' => time()]);
+}
 
 if ($action === 'load') {
   $row = $pdo->query('SELECT version, data FROM planerka_doc WHERE id = 1')->fetch(PDO::FETCH_ASSOC);

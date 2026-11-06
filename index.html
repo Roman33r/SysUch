@@ -48,6 +48,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 [hidden]{display:none!important}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .wrap{max-width:1280px;margin:0 auto;display:grid;gap:20px}
+body.full .wrap{max-width:none}
 
 header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
 .logo{font:700 22px/1 var(--f-display);letter-spacing:-.02em;margin-right:8px;color:inherit;text-decoration:none;border-radius:6px}
@@ -108,8 +109,13 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
 .p-row>div:nth-child(2){min-width:0}
 .ava{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:600 14px var(--f-display);color:#fff;flex:none}
 .ava.sm{width:22px;height:22px;font-size:9px}
-.ava,.me-ava{overflow:hidden}
-.ava > img,.me-ava > img{width:100%;height:100%;object-fit:cover;display:block}
+.ava > img,.me-ava > img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.ava{position:relative}
+.ava.on::after{content:"";position:absolute;right:-1px;bottom:-1px;width:28%;height:28%;min-width:7px;min-height:7px;border-radius:50%;background:var(--low);box-shadow:0 0 0 2px var(--surface)}
+.seen-on{color:var(--low)}
+.chm-row{display:flex;gap:8px;align-items:center}
+.chm-row > .ch-row{flex:1;min-width:0}
+.chm-row > .btn{flex:none}
 .p-name{font-weight:600}
 .p-role{font-size:12px;color:var(--muted)}
 .p-actions{margin-left:auto;display:flex;gap:6px}
@@ -136,7 +142,7 @@ details.archive summary{cursor:pointer;padding:4px 0}
 @media (max-width:560px){.board{grid-template-columns:minmax(0,1fr)}}
 .col{background:var(--sunken);border-radius:14px;padding:10px;display:grid;gap:10px;align-content:start;min-height:160px}
 /* a light tint and a coloured top edge per status, so the columns are easy to tell apart */
-.col[data-status]{--st:var(--muted);background:color-mix(in srgb,var(--st) 7%,var(--sunken));border-top:3px solid color-mix(in srgb,var(--st) 55%,transparent)}
+.col[data-status]{--st:var(--muted);background:color-mix(in srgb,var(--st) 7%,var(--sunken));border-top:3px solid color-mix(in srgb,var(--st) 55%,transparent);border-bottom:3px solid color-mix(in srgb,var(--st) 55%,transparent)}
 .col[data-status="progress"]{--st:var(--accent)} .col[data-status="review"]{--st:var(--med)} .col[data-status="done"]{--st:var(--low)}
 .col[data-status] h2::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--st);align-self:center}
 .col h2{font:500 12px/1 var(--f-display);text-transform:uppercase;letter-spacing:.06em;margin:4px 4px 2px;display:flex;gap:8px}
@@ -628,6 +634,8 @@ input.proj-name:focus{outline:none;border-color:var(--line);background:var(--sun
 /* menu on the side: the header becomes a fixed column on the left (wide screens only) */
 @media (min-width:761px){
   body.nav-side{padding-left:calc(236px + max(16px, env(safe-area-inset-left,0px)))}
+  body.nav-side .ch-wrap{height:max(440px,calc(100vh - 60px))}
+  body.nav-side #ch-note:not([hidden]) + .ch-wrap{height:max(400px,calc(100vh - 140px))}
   body.nav-side header{position:fixed;left:0;top:0;bottom:0;width:220px;z-index:6;padding:18px 14px 16px;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:10px;
     background:var(--surface);border-right:1px solid var(--line);overflow-y:auto}
   body.nav-side header .logo{margin:4px 0 10px;padding-right:44px}
@@ -826,6 +834,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .ch-tool{flex:none;width:36px;height:36px;padding:0;border:1px solid transparent;border-radius:10px;background:none;color:var(--fg);font-size:17px;cursor:pointer;display:inline-grid;place-items:center}
 .ch-tool:hover{background:var(--sunken)}
 .ch-mute{margin-left:auto}
+#ch-title{display:flex;gap:10px;align-items:center;min-width:0}
 .ch-empty{display:none;margin:auto;color:var(--muted);font-size:14px}
 .ch-main.empty > :not(.ch-empty){display:none}
 .ch-main.empty > .ch-empty{display:block}
@@ -1360,7 +1369,8 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
           <li><b>Чат с несколькими участниками.</b> «+ Новый чат» в списке диалогов: название и участники. Поиск находит сотрудника по имени или роли, Enter в поиске отмечает первого найденного. Чат видят только те, кто в него добавлен.</li>
           <li><b>Избранное.</b> Чат с самим собой, как в Telegram: заметки, ссылки и файлы для себя. Он всегда в списке под «Общим чатом».</li>
           <li><b>Закрыть чат.</b> Крестик справа над перепиской закрывает текущий чат; черновик сообщения сохраняется.</li>
-          <li><b>Администратор чата.</b> Создатель группового чата отмечен в списке участников надписью «администратор».</li>
+          <li><b>Администратор чата.</b> Создатель группового чата отмечен в списке участников надписью «администратор». Он может передать эту роль кнопкой «Сделать администратором». В чатах, созданных раньше, администратор не известен: его назначает любой участник или администратор Планёрки.</li>
+          <li><b>В сети.</b> Зелёная точка на аватаре значит, что у сотрудника сейчас открыта Планёрка. Над личной перепиской, в списке участников, в «Сотрудниках» и в кабинете написано «в сети» или когда человек был в сети последний раз. Работает только с базой данных.</li>
           <li><b>Фото чата.</b> Администратор чата добавляет его в списке участников кнопкой «Добавить фото чата»: загрузка и выбор области для кружка. Нажатие на кружок чата над перепиской открывает фото целиком.</li>
           <li><b>Состав.</b> Нажмите на название чата над перепиской: откроется список участников, из него можно перейти в профиль сотрудника. Там же «Изменить чат и состав»: новое название, добавить или убрать людей, выйти из чата.</li>
           <li><b>Аватар.</b> Нажатие на аватар сотрудника в переписке, в списке диалогов или над чатом открывает его профиль.</li>
@@ -1974,8 +1984,8 @@ async function api(action, body){
 const serverHandle = {
   name: 'База данных', seen: 0, known: new Set(), // known = attachments the server already has
   async getFile(){
-    const {version} = await api('ver');
-    this.seen = version;
+    const {version, seen, now} = await api('ver' + (document.hidden ? '' : '&here=1'));
+    this.seen = version; presenceUpdate(seen, now);
     let text;
     return {lastModified: version, text: () => text ??= this.load()};
   },
@@ -2007,8 +2017,8 @@ async function serverConnect(user){
   serverUser = user; meId = user.admin ? null : user.person; savePref(LS_ME, meId || ''); loadPrefs();
   file.handle = serverHandle; file.name = serverHandle.name; file.error = '';
   try {
-    const {version} = await api('ver');
-    serverHandle.seen = version;
+    const {version, seen, now} = await api('ver&here=1');
+    serverHandle.seen = version; presenceUpdate(seen, now);
     if (version) await loadFromHandle(); else await writeFile(true); // the first person fills an empty database
   } catch (e) { if (e.status !== 401) file.error = 'Сервер недоступен: ' + e.message; }
   render();
@@ -2455,7 +2465,25 @@ function avaImg(ph){
     chatBlob(ph.thumb).then(x => { if (!x) avaFailed.add(ph.thumb); else if (!avaRedraw){ avaRedraw = true; requestAnimationFrame(() => { avaRedraw = false; render(); }); } });
   return '';
 }
-const ava = (p, sm) => p ? `<span class="ava${sm ? ' sm' : ''}" style="background:${p.hue}" title="${esc(p.name)}">${avaImg(p.photo) || esc(initials(p.name))}</span>` : '';
+/* who is online: the server remembers when each person's Planerka was last on screen (only with the database) */
+let presence = {seen: {}, skew: 0}, presenceKey = '';
+const seenAt = id => presence.seen[id] ? presence.seen[id] * 1000 - presence.skew : 0; // in this computer's time
+const isOnline = id => onServer() && Date.now() - seenAt(id) < 90e3;
+function seenText(id){
+  if (!onServer() || !seenAt(id)) return '';
+  if (isOnline(id)) return 'в сети';
+  const t = new Date(seenAt(id)), min = Math.round((Date.now() - t) / 6e4), day = isoDay(t);
+  return 'был(а) в сети ' + (min < 60 ? `${min} мин. назад` : day === addDays(0) ? `сегодня в ${chatTime(t)}` : day === addDays(-1) ? `вчера в ${chatTime(t)}` : `${fmtDay(day)} в ${chatTime(t)}`);
+}
+const seenHtml = id => { const t = seenText(id); return t ? `<span class="${isOnline(id) ? 'seen-on' : ''}">${t}</span>` : ''; };
+// a new answer from the server: redraw only if somebody came or went, or a minute passed for the «N мин. назад»
+function presenceUpdate(seen, now){
+  if (!seen || !now) return;
+  presence = {seen, skew: now * 1000 - Date.now()};
+  const key = Object.keys(seen).filter(isOnline).sort().join() + '|' + Math.floor(Date.now() / 6e4);
+  if (key !== presenceKey){ presenceKey = key; if (db) render(); }
+}
+const ava = (p, sm) => p ? `<span class="ava${sm ? ' sm' : ''}${isOnline(p.id) ? ' on' : ''}" style="background:${p.hue}" title="${esc(p.name)}">${avaImg(p.photo) || esc(initials(p.name))}</span>` : '';
 const checkProgress = t => t.checklist.length ? `<span>☑ ${t.checklist.filter(c => c.done).length}/${t.checklist.length}</span>` : '';
 
 function card(t, kind){
@@ -3013,7 +3041,7 @@ function renderCab(){
 
   const big = `<span class="ava cab-ava" style="background:${p.hue}">${avaImg(p.photo) || esc(initials(p.name))}</span>`;
   $('#cab-who').innerHTML = `${p.photo ? `<button type="button" class="cab-ava-btn" data-photo-view title="Открыть фото" aria-label="Открыть фото: ${esc(p.name)}">${big}</button>` : big}
-    <div class="cab-id"><div class="cab-name">${esc(p.name)}${me ? ' <span class="chip">это вы</span>' : ''}</div><div class="muted">${esc(p.role || 'Без роли')} · ${p.cap} ч в неделю</div></div>
+    <div class="cab-id"><div class="cab-name">${esc(p.name)}${me ? ' <span class="chip">это вы</span>' : ''}</div><div class="muted">${esc(p.role || 'Без роли')} · ${p.cap} ч в неделю${seenText(p.id) ? ' · ' + seenHtml(p.id) : ''}</div></div>
     <span class="spacer"></span>
     <div class="cab-week"><button type="button" class="ibtn" data-cweek="-1" aria-label="Прошлая неделя">‹</button><span>Неделя <b class="num">${fmtDay(ws)} – ${fmtDay(shiftDay(ws, 6))}</b></span><button type="button" class="ibtn" data-cweek="1" aria-label="Следующая неделя">›</button>${cabWeek ? '<button type="button" class="btn small" data-cweek="0">К этой неделе</button>' : ''}</div>
     ${me || canManagePeople() ? `<button type="button" class="btn small" data-photo-menu>${ic('camera', 15)} Фото</button>` : ''}
@@ -3921,7 +3949,7 @@ function openTplEditor(id){
 }
 
 /* ---------- personal settings: kept in this browser, separately for each person chosen in «Я: …» ---------- */
-const PREF_DEFAULT = {theme: 'system', accent: 'blue', density: 'normal', nav: 'top', hidden: [], start: 'last'};
+const PREF_DEFAULT = {theme: 'system', accent: 'blue', density: 'normal', width: 'normal', nav: 'top', hidden: [], start: 'last'};
 const VIEW_NAMES = {team: 'Распределение', board: 'Канбан', tree: 'Дерево', proj: 'Проекты', tpl: 'Шаблоны', load: 'Загрузка', log: 'Журнал', report: 'Отчёты', chat: 'Чат', kb: 'База знаний', people: 'Сотрудники'};
 const ACCENTS = {blue: ['Синий', '#2B54E0'], green: ['Зелёный', '#0F7A55'], violet: ['Фиолетовый', '#6A4BC4'], orange: ['Оранжевый', '#C2570C'], graphite: ['Графит', '#3D4451']};
 const prefKey = () => 'planerka.prefs.' + (meId || 'boss');
@@ -3943,6 +3971,7 @@ function applyPrefs(){
   r.dataset.accent = prefs.accent;
   document.body.classList.toggle('nav-side', prefs.nav === 'side');
   document.body.classList.toggle('compact', prefs.density === 'compact');
+  document.body.classList.toggle('full', prefs.width === 'full');
   document.querySelectorAll('header [data-view]').forEach(b => b.hidden = prefs.hidden.includes(b.dataset.view));
 }
 sysDark.addEventListener?.('change', () => { if (prefs.theme === 'system') applyPrefs(); });
@@ -3958,6 +3987,7 @@ function drawSettings(){
       <div class="set-row"><span>Тема</span>${seg('theme', {light: 'Светлая', dark: 'Тёмная', system: 'Как в системе'})}</div>
       <div class="set-row"><span>Цвет акцента</span><div class="set-acc">${Object.entries(ACCENTS).map(([k, [l, c]]) => `<button type="button" data-pref="accent" data-val="${k}" aria-pressed="${prefs.accent === k}" title="${l}" aria-label="${l}" style="background:${c}"></button>`).join('')}</div></div>
       <div class="set-row"><span>Плотность</span>${seg('density', {normal: 'Обычная', compact: 'Компактная'})}</div>
+      <div class="set-row"><span>Ширина страницы</span>${seg('width', {normal: 'Обычная', full: 'Вся ширина окна'})}</div>
     </section>
     <section><h4 class="sec-t">Меню</h4>
       <div class="set-row"><span>Расположение</span>${seg('nav', {top: 'Сверху', side: 'Сбоку'})}</div>
@@ -4045,7 +4075,7 @@ function renderPeople(){
   const row = p => {
     const id = esc(p.id), open = openWork().filter(w => w.pid === p.id).length;
     return `<div class="pl-row ${p.archived ? 'arch' : ''}">${ava(p)}
-      <div><button type="button" class="p-name linkish" data-cab="${id}">${esc(p.name)}</button><div class="p-role">${esc(p.role) || 'Должность не указана'}</div></div>
+      <div><button type="button" class="p-name linkish" data-cab="${id}">${esc(p.name)}</button><div class="p-role">${esc(p.role) || 'Должность не указана'}${seenText(p.id) ? ' · ' + seenHtml(p.id) : ''}</div></div>
       <span class="pl-badge ${p.access}">${ACCESS[p.access]}</span>
       <span class="note pl-meta">${p.cap} ч в неделю</span>
       <span class="note pl-meta">Открытых задач: ${open}</span>
@@ -4398,7 +4428,7 @@ function roomOwner(r){
 }
 const roomAdmin = r => roomOwner(r) ? roomOwner(r) === chatMe() : inRoom(r); // nobody known: any member
 const chatName = id => id === 'all' ? 'Общий чат' : chatRoom(id)?.name || (id === 'boss' ? ME : person(id)?.name || 'Бывший сотрудник');
-const chatAva = id => id === 'all' ? '<span class="ava ch-all" aria-hidden="true">#</span>' : chatRoom(id) ? `<span class="ava ch-all" aria-hidden="true">${avaImg(chatRoom(id).photo) || esc(initials(chatRoom(id).name))}</span>` : person(id) ? ava(person(id)) : `<span class="ava ch-all" aria-hidden="true">${id === 'boss' ? 'Р' : '?'}</span>`;
+const chatAva = id => id === 'all' ? '<span class="ava ch-all" aria-hidden="true">#</span>' : chatRoom(id) ? `<span class="ava ch-all" aria-hidden="true">${avaImg(chatRoom(id).photo) || esc(initials(chatRoom(id).name))}</span>` : person(id) ? ava(person(id)) : `<span class="ava ch-all${isOnline(id) ? ' on' : ''}" aria-hidden="true">${id === 'boss' ? 'Р' : '?'}</span>`;
 const chatReadKey = () => 'planerka.chatread.' + chatMe();
 // group chats keep reading marks per person and per browser, so reading there doesn't write to the shared data; private dialogs also share theirs (see shareRead)
 function chatRead(){
@@ -4500,8 +4530,8 @@ function renderChat(read, toBottom){
   mb.innerHTML = bellIcon(off); mb.setAttribute('aria-pressed', off); mb.title = off ? 'Уведомления из этого чата выключены. Включить' : 'Уведомления из этого чата включены. Выключить'; mb.setAttribute('aria-label', mb.title);
   $('#ch-title').innerHTML = group ? `${room?.photo ? `<button type="button" class="ch-ava-btn" data-room-photo title="Открыть фото чата" aria-label="Открыть фото чата">${chatAva(chatWith)}</button>` : ''}<button type="button" class="ch-members" data-members aria-label="Участники: ${esc(chatName(chatWith))}">${room?.photo ? '' : chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">Участников: ${chatMembers(chatWith).length}</span></span></button>`
     : chatWith === me ? `<div class="ch-members">${chatIcon(me)}<span><b>Избранное</b><span class="ch-sub">Заметки, ссылки и файлы для себя</span></span></div>`
-    : person(chatWith) ? `<button type="button" class="ch-members" data-cab="${esc(chatWith)}" aria-label="Профиль: ${esc(chatName(chatWith))}">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">${esc(person(chatWith).role || 'Открыть профиль')}</span></span></button>`
-    : `<div class="ch-members">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">${chatWith === 'boss' ? '' : 'Нет в команде'}</span></span></div>`;
+    : person(chatWith) ? `<button type="button" class="ch-members" data-cab="${esc(chatWith)}" aria-label="Профиль: ${esc(chatName(chatWith))}">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">${seenHtml(chatWith) || esc(person(chatWith).role || 'Открыть профиль')}${seenText(chatWith) && person(chatWith).role ? ' · ' + esc(person(chatWith).role) : ''}</span></span></button>`
+    : `<div class="ch-members">${chatAva(chatWith)}<span><b>${esc(chatName(chatWith))}</b><span class="ch-sub">${chatWith === 'boss' ? seenHtml('boss') : 'Нет в команде'}</span></span></div>`;
   const box = $('#ch-msgs'), bottom = toBottom || box.scrollHeight - box.scrollTop - box.clientHeight < 60, top = box.scrollTop;
   let day = '';
   const readUpTo = group ? '' : db.marks[`read|${chatWith}|${me}`]?.v || '';
@@ -4521,15 +4551,22 @@ const chatMembers = id => chatRoom(id)?.members || ['boss', ...active().map(p =>
 function openMembers(id = chatWith){
   const room = chatRoom(id), d = $('#d-chatm');
   d.innerHTML = `<div class="d-head"><h2>${esc(chatName(id))}</h2><button class="close" aria-label="Закрыть">✕</button></div>
-    <div class="d-body">${room ? `<div class="chm-photo">${room.photo ? `<button type="button" class="cab-ava-btn" id="chm-photo-view" aria-label="Открыть фото чата">${chatAva(id)}</button>` : chatAva(id)}${!roomAdmin(room) ? '' : `<button type="button" class="btn small" id="chm-photo">${ic('camera', 15)} ${room.photo ? 'Фото чата' : 'Добавить фото чата'}</button>`}</div>` : ''}<div class="ch-list">${chatMembers(id).map(m => {
-      const p = person(m), inner = `${chatAva(m)}<span class="ch-who">${esc(chatName(m))}${m === chatMe() ? ' (вы)' : ''}${room && m === roomOwner(room) ? '<span class="ch-admin">администратор</span>' : ''}</span><span class="ch-prev">${esc(p ? p.role || 'Открыть профиль' : '')}</span>`;
-      return p ? `<button type="button" class="ch-row" data-cab="${esc(m)}">${inner}</button>` : `<div class="ch-row ch-row-static">${inner}</div>`;
+    <div class="d-body">${room && !roomOwner(room) ? '<p class="note">Администратор чата не назначен: чат создан до того, как Планёрка стала это запоминать. Назначьте его кнопкой «Сделать администратором».</p>' : ''}${room ? `<div class="chm-photo">${room.photo ? `<button type="button" class="cab-ava-btn" id="chm-photo-view" aria-label="Открыть фото чата">${chatAva(id)}</button>` : chatAva(id)}${!roomAdmin(room) ? '' : `<button type="button" class="btn small" id="chm-photo">${ic('camera', 15)} ${room.photo ? 'Фото чата' : 'Добавить фото чата'}</button>`}</div>` : ''}<div class="ch-list">${chatMembers(id).map(m => {
+      const p = person(m), inner = `${chatAva(m)}<span class="ch-who">${esc(chatName(m))}${m === chatMe() ? ' (вы)' : ''}${room && m === roomOwner(room) ? '<span class="ch-admin">администратор</span>' : ''}</span><span class="ch-prev">${[esc(p?.role || ''), seenHtml(m)].filter(Boolean).join(' · ')}</span>`;
+      const row = p ? `<button type="button" class="ch-row" data-cab="${esc(m)}">${inner}</button>` : `<div class="ch-row ch-row-static">${inner}</div>`;
+      return room && m !== roomOwner(room) && (roomAdmin(room) || canAssignRoles()) ? `<div class="chm-row">${row}<button type="button" class="btn small" data-make-admin="${esc(m)}">Сделать администратором</button></div>` : row;
     }).join('')}</div><label class="ch-mute-opt"><input type="checkbox" id="chm-mute" ${chatMuted(id) ? '' : 'checked'}> Уведомления из этого чата</label></div>
     ${room ? '<div class="d-foot"><span class="spacer"></span><button type="button" class="btn" id="chm-edit">Изменить чат и состав</button></div>' : ''}`;
   d.onclick = e => {
     if (e.target.closest('[data-cab]')) d.close(); // the page-wide handler opens the profile
     if (e.target.closest('#chm-edit')){ d.close(); openRoomEditor(id); }
     if (e.target.closest('#chm-photo-view')) return openPhoto(room.photo, `Фото чата «${room.name}»`);
+    const mk = e.target.closest('[data-make-admin]');
+    if (mk){
+      db.rooms = mergeRooms(db.rooms, [{...room, owner: mk.dataset.makeAdmin, at: stamp()}]);
+      commit(); toast(`Администратор чата «${room.name}»: ${chatName(mk.dataset.makeAdmin)}`);
+      return openMembers(id);
+    }
     if (e.target.closest('#chm-photo')) return photoMenu(e.target.closest('#chm-photo'), room.photo, `Фото чата «${room.name}»`, setRoomPhoto(id), d);
   };
   d.onchange = e => { if (e.target.id === 'chm-mute') toggleMute(id); };
