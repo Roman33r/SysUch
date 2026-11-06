@@ -1030,13 +1030,15 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
 .cal-dn{display:inline-grid;place-items:center;min-width:24px;height:24px;border-radius:12px;font-size:13px;margin-bottom:2px}
 .today > .cal-dn,.cal-dh.today b,.cal-cell.today .cal-dn{background:var(--accent);color:var(--on-accent)}
 .cal-more{font-size:12px;color:var(--muted);padding:0 6px}
-.cal-tg{display:grid;grid-template-columns:54px repeat(var(--days),minmax(0,1fr))}
+.cal-tg{display:grid;grid-template-columns:60px repeat(var(--days),minmax(0,1fr))}
+/* the day headers scroll with the hours, so a scrollbar can't shift them out of line */
+.cal-sticky{position:sticky;top:0;z-index:3;background:var(--surface)}
 .cal-tg-wrap{overflow-x:auto}
-.cal-tg-wrap > *{min-width:calc(54px + var(--days) * 80px)}
+.cal-tg-wrap .cal-tg{min-width:calc(60px + var(--days) * 80px)}
 .cal-dh{padding:8px 4px;border:0;border-bottom:1px solid var(--line);border-left:1px solid var(--line);background:none;color:var(--muted);font-size:12px;cursor:pointer;text-align:center}
 .cal-dh b{display:inline-grid;place-items:center;min-width:26px;height:26px;border-radius:13px;margin-left:4px;color:var(--fg);font-size:15px}
 .cal-ad{border-left:1px solid var(--line);border-bottom:1px solid var(--line);padding:3px;min-height:28px;min-width:0}
-.cal-hl{font:11px var(--f-mono);color:var(--muted);text-align:right;padding:4px 6px 0 0;border-bottom:1px solid var(--line)}
+.cal-hl{font:10px var(--f-mono);color:var(--muted);text-align:right;padding:6px 6px 0 0;border-bottom:1px solid var(--line);white-space:nowrap}
 .cal-scroll{max-height:max(420px,calc(100vh - 300px));overflow-y:auto;position:relative}
 .cal-hrs{position:relative}
 .cal-hr{font:11px var(--f-mono);color:var(--muted);text-align:right;padding-right:6px;transform:translateY(-7px)}
@@ -1410,6 +1412,7 @@ dialog.sheet{width:min(460px,calc(100vw - 16px))}
         <p>Статусы: <b>Новая → В работе → На проверке → Готово</b>. На канбане статус меняется перетаскиванием между колонками, в карточке задачи — через поле «Статус».</p>
         <p>Выполненные задачи пропадают из бэклога и списков сотрудников. Дата выполнения запоминается для отчётов.</p>
         <p><b>Архив выполненных.</b> В колонке «Готово» видны задачи, закрытые за последние 14 дней. Более старые уходят в архив: кнопка «Архив выполненных» внизу колонки, команда в палитре. В архиве есть поиск. Архивные задачи учитываются в журнале и отчётах. Чтобы вернуть задачу в работу, откройте её и смените статус.</p>
+        <p><b>Контекстное меню.</b> Правая кнопка на карточке в «Распределении» и «Канбане»: открыть, подзадача, инструкция к задаче, статус, приоритет, исполнитель, удалить. На пустом месте колонки, бэклога или сотрудника — новая задача сразу в этот статус или этому человеку.</p>
       </section>
 
       <section id="h-attach"><h3>Вложения</h3>
@@ -2907,6 +2910,39 @@ function taskCtx(t, x, y){
     {label: has ? 'Удалить (подзадачи останутся)' : 'Удалить задачу', danger: true, run: () => deleteTask(t.id)},
   ]);
 }
+// the same right-click menu for a card in «Распределение» and «Канбан»
+function cardCtx(t, x, y){
+  const who = person(t.assignee);
+  openCtx(x, y, [
+    {label: 'Открыть карточку', run: () => openTask(t.id, {asEmployee: t.assignee === meId})},
+    {label: 'Добавить подзадачу', icon: '<b aria-hidden="true">+</b>', run: () => openTask(null, {parent: t.id})},
+    {label: 'Написать инструкцию к задаче', icon: ic('file', 15), run: () => kbNewFor({task: t.id})},
+    ...(kbCountFor(t.id) ? [{label: `Инструкции к задаче (${kbCountFor(t.id)})`, run: () => kbShowFor(t.id)}] : []),
+    '-', {head: 'Статус'},
+    ...Object.entries(STATUS).map(([k, v]) => ({label: v, icon: `<span class="si ${k}"></span>`, checked: t.status === k, run: () => setStatus(t.id, k)})),
+    '-', {head: 'Приоритет'},
+    ...Object.entries(PRIO).map(([k, v]) => ({label: v, icon: `<span class="chip p-${k}"><span class="dot"></span></span>`, checked: t.prio === k, run: () => change(() => { t.prio = k; addLog(t, `${actor()} поменял приоритет: ${v}`); })})),
+    '-', {head: 'Исполнитель'},
+    {label: 'Без исполнителя', checked: !t.assignee, run: () => assign(t.id, null)},
+    ...active().map(p => ({label: p.name, icon: ava(p, true), checked: t.assignee === p.id, run: () => assign(t.id, p.id)})),
+    ...(who?.archived ? [{label: `${who.name} (архив)`, checked: true, run: () => {}}] : []),
+    '-', {label: kids(t.id).length ? 'Удалить (подзадачи останутся)' : 'Удалить задачу', danger: true, run: () => deleteTask(t.id)},
+  ]);
+}
+// a card opens its menu; an empty column, the backlog or a person's area offers a new task placed right there
+for (const v of ['#v-team', '#v-board']) $(v).addEventListener('contextmenu', e => {
+  if (e.target.closest('input,textarea,select,a')) return;
+  const c = e.target.closest('.task[data-id]'), z = e.target.closest('[data-status],[data-assign]');
+  if (c){ const t = byId(c.dataset.id); if (!t) return; e.preventDefault(); return cardCtx(t, ...ctxAt(e, c)); }
+  if (!z) return;
+  e.preventDefault();
+  const st = z.dataset.status, pid = z.dataset.assign, p = pid && person(pid);
+  openCtx(...ctxAt(e, z), [
+    st ? {label: `Новая задача в «${STATUS[st]}»`, icon: '<b aria-hidden="true">+</b>', run: () => openTask(null, {status: st})}
+      : {label: p ? `Новая задача для ${p.name}` : 'Новая задача в бэклог', icon: '<b aria-hidden="true">+</b>', run: () => openTask(null, {assignee: p ? p.id : null})},
+    ...(p ? [{label: `Кабинет: ${p.name}`, run: () => openCab(p.id)}, ...(p.id === meId ? [] : [{label: 'Написать сообщение', run: () => chatTo(p.id)}])] : []),
+  ]);
+});
 function emptyCtx(x, y){
   openCtx(x, y, [
     {label: 'Новая задача в проекте', icon: '<b aria-hidden="true">+</b>', run: () => openTask(null, {project: treeProj()})},
@@ -5410,15 +5446,15 @@ function renderCal(){
       return out;
     };
     const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
-    main.innerHTML = `<div class="cal-tg-wrap" style="--days:${days.length}"><div class="cal-tg">
+    main.innerHTML = `<div class="cal-tg-wrap" style="--days:${days.length}"><div class="cal-scroll"><div class="cal-tg cal-sticky">
       <span class="cal-hl" style="border-bottom:1px solid var(--line)"></span>${days.map(x => `<button type="button" class="cal-dh${calRest(x)}${x === today ? ' today' : ''}" data-cal-goday="${x}" title="${calHoliday(x) || 'Открыть день'}">${new Date(x + 'T00:00').toLocaleDateString('ru-RU', {weekday: 'short'})}<b>${+x.slice(8)}</b></button>`).join('')}
       <span class="cal-hl">весь день</span>${days.map(x => `<div class="cal-ad${calRest(x)}" data-cal-ad="${x}">${calOnDay(items, x).filter(i => !calTimed(i)).map(i => calChip(i, x)).join('')}</div>`).join('')}
-    </div><div class="cal-scroll"><div class="cal-tg cal-hrs" style="--h:${CAL_H}px;height:${CAL_H * 24}px">
+    </div><div class="cal-tg cal-hrs" style="--h:${CAL_H}px;height:${CAL_H * 24}px">
       <div>${Array.from({length: 24}, (_, h) => `<div class="cal-hr" style="height:${CAL_H}px">${h ? String(h).padStart(2, '0') + ':00' : ''}</div>`).join('')}</div>
       ${days.map(x => `<div class="cal-col${calRest(x)}${x === today ? ' today' : ''}" data-cal-col="${x}">${lanes(x).map(g => `<button type="button" class="cal-ev${g.x.busy ? ' busy' : ''}" data-cal-item="${esc(g.x.key)}" style="top:${g.a / 60 * CAL_H}px;height:${Math.max(20, (g.b - g.a) / 60 * CAL_H - 2)}px;left:calc(${g.l / g.n * 100}% + 2px);width:calc(${100 / g.n}% - 4px);${g.x.busy ? '' : `--c:${g.x.e.color}`}"><b>${esc(calLabel(g.x))}</b>${hm(g.x.start)}–${hm(g.x.end)}${g.x.other ? ' · ' + esc(chatName(g.x.e.owner)) : ''}</button>`).join('')}${x === today ? `<span class="cal-now" style="top:${nowMin / 60 * CAL_H}px"></span>` : ''}</div>`).join('')}
     </div></div></div>`;
     const sc = main.querySelector('.cal-scroll');
-    sc.scrollTop = keep ?? CAL_H * 8 - 10; // the working day in view
+    sc.scrollTop = keep ?? sc.querySelector('.cal-sticky').offsetHeight + CAL_H * 8 - 10; // the working day in view
   } else {
     const n = v === 'year' ? 12 : 3, sel = ui.calDay;
     main.innerHTML = `<div class="cal-months" style="--cols:${v === 'year' ? 'var(--ycols,4)' : 3}">${Array.from({length: n}, (_, i) => {
